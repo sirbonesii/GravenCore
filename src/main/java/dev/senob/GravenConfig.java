@@ -90,7 +90,6 @@ public class GravenConfig {
         if (DRACULA_LORE.isEmpty()) {
             DRACULA_LORE = List.of(
                     "<gold>ABILITY</gold><gray>:</gray> <dark_red><bold>VAMPIRE'S FLIGHT</bold></dark_red>",
-                    "<dark_gray>• <gray>Sneak + Jump to take</gray> <dark_red>Bat Form</dark_red>",
                     "<dark_gray>• <blue>Duration</blue><gray>:</gray> <yellow><duration>s 🦇</yellow>",
                     "<dark_gray>• <yellow>Cooldown</yellow><gray>:</gray> <gold><cooldown>s ⏳</gold>"
             );
@@ -99,7 +98,7 @@ public class GravenConfig {
         DRACULA_EFFECTS = config.getStringList("weapons.dracula.effects");
         if (DRACULA_EFFECTS.isEmpty()) {
             DRACULA_EFFECTS = List.of(
-                    "<dark_gray>• <green>Passive</green><gray>:</gray> <color:#F8F858>Regeneration I</color> <gray>(Bat Form)</gray>",
+                    "<dark_gray>• <green>Passive</green><gray>:</gray> <color:#F8F858>Regeneration I</color>",
                     "<dark_gray>• <dark_red>Lifesteal</dark_red><gray>:</gray> <red><lifesteal>%</red> <gray>of damage dealt</gray>"
             );
         }

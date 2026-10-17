@@ -36,11 +36,20 @@ public final class TooltipBuilder {
     }
 
     /**
-     * A single attribute row, e.g. "• ⚔ Attack Damage: +2.0".
+     * A single attribute row, e.g. "• ⚔ Atk Damage: +2.0".
      * The "+" prefix is added automatically; pass the plain value.
+     * labelColor is a MiniMessage color (e.g. "green" or "#ADD8E6").
      */
-    public static Component attribute(String icon, String label, String value) {
-        return GravenTheme.parse("<dark_gray>• " + icon + " " + label + ":</dark_gray> <green>+" + value + "</green>");
+    public static Component attribute(String icon, String label, String labelColor, String value) {
+        return GravenTheme.parse("<dark_gray>•</dark_gray> <" + labelColor + ">" + icon + " " + label + ":</" + labelColor + "> <green>+" + value + "</green>");
+    }
+
+    /**
+     * A "Durability: ..." line, placed under the tier line.
+     * Pass the value pre-colored, e.g. "<blue>Unbreakable</blue>".
+     */
+    public static Component durabilityLine(String value) {
+        return GravenTheme.parse("<gray>Durability:</gray> " + value);
     }
 
     /**

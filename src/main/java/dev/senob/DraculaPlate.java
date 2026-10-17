@@ -115,10 +115,11 @@ public class DraculaPlate implements Listener, CustomItem {
 
         List<Component> lore = new ArrayList<>();
         lore.add(TooltipBuilder.tierLine(tier));
+        lore.add(TooltipBuilder.durabilityLine("<blue>Unbreakable</blue>"));
         lore.add(TooltipBuilder.divider());
         lore.add(TooltipBuilder.section("ATTRIBUTES"));
-        lore.add(TooltipBuilder.attribute("⚔", "Attack Damage", formatStat(attackDamage)));
-        lore.add(TooltipBuilder.attribute("🛡", "Defense", formatStat(GravenConfig.DRACULA_ARMOR)));
+        lore.add(TooltipBuilder.attribute("⚔", "Atk Damage", "green", formatStat(attackDamage)));
+        lore.add(TooltipBuilder.attribute("🛡", "Defense", "#ADD8E6", formatStat(GravenConfig.DRACULA_ARMOR)));
         lore.add(TooltipBuilder.divider());
         for (String line : GravenConfig.DRACULA_LORE) {
             String parsed = line

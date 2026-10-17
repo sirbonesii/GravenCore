@@ -35,3 +35,7 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - **DraculaPlate lore layout (2026-10-17):** `weapons.dracula.lore` is now content-only (ability
   body); section chrome moved into `TooltipBuilder`. Added a "Sneak + Jump" hint line; the
   old `PASSIVE: Regeneration` line moved to the new EFFECTS section.
+- **DraculaPlate tooltip polish (2026-10-17):** ATTRIBUTES labels restyled — "Atk Damage" in
+  green, "Defense" in light-blue (`TooltipBuilder.attribute` now takes a label color). Added a
+  "Durability: Unbreakable" line under the tier line. Removed the "Sneak + Jump" hint from the
+  ability lore and "(Bat Form)" from the EFFECTS passive line.

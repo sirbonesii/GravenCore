@@ -1,50 +1,85 @@
 # ==========================================
-#          TheRedline Configuration
+#          GravenCore Configuration
 # ==========================================
+# Migrated 2026-10-17 from the old flat "TheRedline" format to the
+# nested structure GravenConfig actually reads (settings.*, weapons.*).
+# Original file preserved as config.yml.backup.
+#
+# NOTE: the old file's values were never live (the code only read
+# nested paths), so the server was running on code defaults. Migrating
+# these values in WILL change behavior - see notes below.
 
-# Creator name shown at the bottom of the spear's tooltip
-creator: "Senob"
+settings:
+  # Creator name shown at the bottom of item tooltips (<creator> placeholder)
+  creator: "Senob"
 
-# First-person right-click animation
-use-animation: "spear"
+weapons:
+  redline:
+    # Normal left-click melee damage (shown in lore as "X Attack Damage")
+    melee-damage:
+      base: 5.0
+      upgraded: 6.5
 
-# Whether the ability beam passes straight through solid blocks/walls
-pierce-blocks: true
+    # Damage of the Sneak + Hold Right-Click flame beam ability.
+    # NOTE: the 22.0 code default was a testing placeholder; the intended
+    # upgraded value is 200.0.
+    ability-damage:
+      base: 16.0
+      upgraded: 200.0
 
-# Normal left-click melee damage (Displayed in green as "X Attack Damage" on the spear)
-melee-damage:
-  upgraded: 6.5
-  base: 5.0
+    # Range (in blocks) of the flame beam ability
+    ability-range:
+      base: 30.0
+      upgraded: 30.0
 
-# Base attack speed (Displayed in green as "0.87 Attack Speed" on the spear)
-attack-speed: 0.87
+    # Ability cooldown in seconds (old key was "ability-cooldown").
+    # NOTE: old file had base: 30 which was dormant; the server was
+    # actually running on the code default of 20.
+    cooldown:
+      base: 30
+      upgraded: 16
 
-# Damage dealt by the Sneak + Hold Right-Click flame beam ability
-ability-damage:
-  upgraded: 200.0
-  base: 16.0
+    # Base attack speed (shown in lore as "X Attack Speed")
+    attack-speed: 0.87
 
-# Range (in blocks) of the flame beam ability (Can also be changed with /redline setrange <blocks>)
-ability-range:
-  upgraded: 30.0
-  base: 30.0
+    # Launch speed multiplier when firing the upgraded spear.
+    # Negative = launches the player backwards (recoil dash) - intentional.
+    launch-velocity: -2.85
 
-# Ability cooldown in seconds (Can also be changed in-game with /redline setcooldown <seconds>)
-ability-cooldown:
-  upgraded: 16
-  base: 30
+    # Whether the ability beam passes straight through solid blocks/walls
+    pierce-blocks: true
 
-# Launch speed multiplier when firing the Upgraded spear
-launch-velocity: -2.85
+    # Spear lore / item description.
+    # Placeholders: <ability_damage>, <range>, <cooldown>, <creator>
+    lore:
+      - "<gray>Lunge IV</gray>"
+      - "<gray>—————————————————</gray>"
+      - "<gold><bold>ABILITY</gold><gray>:</gray> <gold><bold>CRIMSON PIERCER</bold></gold>"
+      - "<gray>—————————————————</gray>"
+      - "<dark_gray>• <green>Ability Damage</green><gray>:</gray> <red><ability_damage> ❤</red>"
+      - "<dark_gray>• <blue>Ability Range</blue><gray>:</gray> <yellow><range> Blocks</yellow>"
+      - "<dark_gray>• <yellow>Cooldown</yellow><gray>:</gray> <gold><cooldown>s :fire:</gold>"
+      - "<gray>—————————————————</gray>"
+      - "<dark_red>✦</dark_red> <gray>Created by</gray> <gradient:#FF3B1F:#FF9E2C><italic><creator></italic></gradient>"
 
-# Spear Lore / Item Description (Placeholders: <ability_damage>, <range>, <cooldown>, <creator>)
-lore:
-    - "<gray>Lunge IV</gray>"
-    - "<gray>—————————————————</gray>"
-    - "<gold><bold>ABILITY</gold><gray>:</gray> <gold><bold>CRIMSON PIERCER</bold></gold>"
-    - "<gray>—————————————————</gray>"
-    - "<dark_gray>• <green>Ability Damage</green><gray>:</gray> <red><ability_damage> ❤</red>"
-    - "<dark_gray>• <blue>Ability Range</blue><gray>:</gray> <yellow><range> Blocks</yellow>"
-    - "<dark_gray>• <yellow>Cooldown</yellow><gray>:</gray> <gold><cooldown>s :fire:</gold>"
-    - "<gray>—————————————————</gray>"
-    - "<dark_red>✦</dark_red> <gray>Created by</gray> <gradient:#FF3B1F:#FF9E2C><italic><creator></italic></gradient>"
+  dracula:
+    # No dracula section existed in the old file - these are the values
+    # the server was already running on (code defaults).
+    cooldown: 30
+    duration: 10
+    armor: 8.0
+    toughness: 3.0
+
+    # Placeholders: <duration>, <cooldown>, <creator>
+    lore:
+      - "<gray>—————————————————</gray>"
+      - "<gold>ABILITY</gold><gray>:</gray> <dark_red><bold>VAMPIRE'S FLIGHT</bold></dark_red>"
+      - "<gray>—————————————————</gray>"
+      - "<dark_gray>• <green>PASSIVE</green><gray>:</gray> <color:#F8F858>Regeneration</color>"
+      - "<dark_gray>• <blue>Duration</blue><gray>:</gray> <yellow><duration>s 🦇</yellow>"
+      - "<dark_gray>• <yellow>Cooldown</yellow><gray>:</gray> <gold><cooldown>s ⏳</gold>"
+      - "<gray>—————————————————</gray>"
+      - "<dark_red>✦</dark_red> <gray>Created by</gray> <gradient:#AA0000:#FF5555><italic><creator></italic></gradient>"
+
+# --- Retired keys (kept for reference, not read by the code) ---
+# use-animation: "spear"   # old first-person right-click animation key

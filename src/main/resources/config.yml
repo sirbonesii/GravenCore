@@ -95,5 +95,31 @@ weapons:
       - "<dark_gray>• <green>Passive</green><gray>:</gray> <color:#F8F858>Regeneration I</color>"
       - "<dark_gray>• <dark_red>Lifesteal</dark_red><gray>:</gray> <red><lifesteal>%</red> <gray>of damage dealt</gray>"
 
+# --- Mythical Armor Set (prototype) ---
+# The default Mythical netherite set. Per-piece defensive stats;
+# knockback-resistance uses vanilla scale (0.1 = 10% per piece).
+armor:
+  mythical:
+    # Item tier (full tier system coming later; only "mythical" for now)
+    tier: "mythical"
+
+    pieces:
+      helmet:
+        defense: 3.0
+        toughness: 3.0
+        knockback-resistance: 0.1
+      chestplate:
+        defense: 8.0
+        toughness: 3.0
+        knockback-resistance: 0.1
+      leggings:
+        defense: 6.0
+        toughness: 3.0
+        knockback-resistance: 0.1
+      boots:
+        defense: 3.0
+        toughness: 3.0
+        knockback-resistance: 0.1
+
 # --- Retired keys (kept for reference, not read by the code) ---
 # use-animation: "spear"   # old first-person right-click animation key

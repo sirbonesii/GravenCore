@@ -24,11 +24,13 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
     private final GravenCore plugin;
     private final RedlineSpear redlineSpear;
     private final DraculaPlate draculaPlate;
+    private final MythicalArmorSet mythicalArmorSet;
 
-    public GravenCoreCommand(GravenCore plugin, RedlineSpear redlineSpear, DraculaPlate draculaPlate) {
+    public GravenCoreCommand(GravenCore plugin, RedlineSpear redlineSpear, DraculaPlate draculaPlate, MythicalArmorSet mythicalArmorSet) {
         this.plugin = plugin;
         this.redlineSpear = redlineSpear;
         this.draculaPlate = draculaPlate;
+        this.mythicalArmorSet = mythicalArmorSet;
     }
 
     @Override
@@ -50,6 +52,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
 
             NamespacedKey redlineKey = new NamespacedKey(plugin, "redline_tier");
             NamespacedKey draculaKey = new NamespacedKey(plugin, "dracula_plate");
+            NamespacedKey mythicalKey = new NamespacedKey(plugin, "mythical_armor");
 
             // Loop through all online players to instantly update their held weapons
             for (Player online : Bukkit.getOnlinePlayers()) {
@@ -61,6 +64,8 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                         redlineSpear.syncSpearStatsAndLore(item, pdc.getOrDefault(redlineKey, PersistentDataType.INTEGER, 1));
                     } else if (pdc.has(draculaKey, PersistentDataType.INTEGER)) {
                         draculaPlate.syncPlateStatsAndLore(item);
+                    } else if (pdc.has(mythicalKey, PersistentDataType.STRING)) {
+                        mythicalArmorSet.syncPieceStatsAndLore(item, pdc.get(mythicalKey, PersistentDataType.STRING));
                     }
                 }
             }
@@ -88,8 +93,31 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                     player.sendMessage(GravenTheme.parse("<gray>Received </gray><color:#AA0000><italic>Dracula's Plate</italic></color><gray>!</gray>"));
                     return true;
                 }
+                else if (args[1].equalsIgnoreCase("armor")) {
+                    // Armor tiers: more coming with the full tier system (only "mythical" for now)
+                    if (args.length < 3 || !args[2].equalsIgnoreCase("mythical")) {
+                        player.sendMessage(GravenTheme.parse("<red>Usage: /gravencore give armor <tier></red>"));
+                        return true;
+                    }
+                    String pieceArg = (args.length > 3) ? args[3].toLowerCase(Locale.ROOT) : "set";
+                    if (pieceArg.equals("set")) {
+                        for (MythicalArmorSet.Piece piece : MythicalArmorSet.Piece.values()) {
+                            player.getInventory().addItem(mythicalArmorSet.createPiece(piece));
+                        }
+                        player.sendMessage(GravenTheme.parse("<gray>Received the full </gray><color:#F8F8A0><italic>Mythical</italic></color><gray> armor set!</gray>"));
+                    } else {
+                        MythicalArmorSet.Piece piece = MythicalArmorSet.Piece.fromId(pieceArg);
+                        if (piece == null) {
+                            player.sendMessage(GravenTheme.parse("<red>Usage: /gravencore give armor mythical <helmet|chestplate|leggings|boots|set></red>"));
+                            return true;
+                        }
+                        player.getInventory().addItem(mythicalArmorSet.createPiece(piece));
+                        player.sendMessage(GravenTheme.parse("<gray>Received </gray><color:#F8F8A0><italic>Mythical " + pieceArg + "</italic></color><gray>!</gray>"));
+                    }
+                    return true;
+                }
             }
-            sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore give <redline|dracula></red>"));
+            sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore give <redline|dracula|armor></red>"));
             return true;
         }
 
@@ -165,8 +193,34 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                         return true;
                     }
                 }
+                else if (args[1].equalsIgnoreCase("mythical")) {
+                    NamespacedKey mythicalKey = new NamespacedKey(plugin, "mythical_armor");
+                    if (!pdc.has(mythicalKey, PersistentDataType.STRING)) {
+                        player.sendMessage(GravenTheme.parse("<red>You must be holding a Mythical armor piece!</red>"));
+                        return true;
+                    }
+
+                    try {
+                        switch (setting) {
+                            case "defense" -> pdc.set(new NamespacedKey(plugin, "mythical_defense"), PersistentDataType.DOUBLE, Double.parseDouble(valueStr));
+                            case "toughness" -> pdc.set(new NamespacedKey(plugin, "mythical_toughness"), PersistentDataType.DOUBLE, Double.parseDouble(valueStr));
+                            case "kbresist" -> pdc.set(new NamespacedKey(plugin, "mythical_kbresist"), PersistentDataType.DOUBLE, Double.parseDouble(valueStr));
+                            default -> {
+                                player.sendMessage(GravenTheme.parse("<red>Valid Mythical settings: defense, toughness, kbresist</red>"));
+                                return true;
+                            }
+                        }
+                        heldItem.setItemMeta(meta);
+                        mythicalArmorSet.syncPieceStatsAndLore(heldItem, pdc.get(mythicalKey, PersistentDataType.STRING));
+                        player.sendMessage(GravenTheme.parse("<green>Updated Mythical " + setting + " to " + valueStr + "!</green>"));
+                        return true;
+                    } catch (NumberFormatException e) {
+                        player.sendMessage(GravenTheme.parse("<red>Invalid number format.</red>"));
+                        return true;
+                    }
+                }
             }
-            sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore config <redline|dracula> <setting> <value></red>"));
+            sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore config <redline|dracula|mythical> <setting> <value></red>"));
             return true;
         }
 
@@ -180,7 +234,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 2) {
             if (args[0].equalsIgnoreCase("give") || args[0].equalsIgnoreCase("config")) {
-                return List.of("redline", "dracula");
+                return List.of("redline", "dracula", "armor");
             }
         }
 
@@ -188,9 +242,20 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
             if (args[0].equalsIgnoreCase("give") && args[1].equalsIgnoreCase("redline")) {
                 return List.of("base", "upgraded");
             }
+            if (args[0].equalsIgnoreCase("give") && args[1].equalsIgnoreCase("armor")) {
+                return List.of("mythical");
+            }
             if (args[0].equalsIgnoreCase("config")) {
                 if (args[1].equalsIgnoreCase("redline")) return List.of("cooldown", "range", "basedamage", "abilitydamage");
                 if (args[1].equalsIgnoreCase("dracula")) return List.of("cooldown", "duration");
+                if (args[1].equalsIgnoreCase("mythical")) return List.of("defense", "toughness", "kbresist");
+            }
+        }
+
+        if (args.length == 4) {
+            if (args[0].equalsIgnoreCase("give") && args[1].equalsIgnoreCase("armor")
+                    && args[2].equalsIgnoreCase("mythical")) {
+                return List.of("helmet", "chestplate", "leggings", "boots", "set");
             }
         }
         return Collections.emptyList();

@@ -3,7 +3,9 @@ package dev.senob;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GravenConfig {
 
@@ -33,6 +35,11 @@ public class GravenConfig {
     public static String DRACULA_TIER;
     public static List<String> DRACULA_LORE;
     public static List<String> DRACULA_EFFECTS;
+
+    // --- MYTHICAL ARMOR SET ---
+    public static String MYTHICAL_TIER;
+    /** Piece id -> [defense, toughness, knockback-resistance]. */
+    public static Map<String, double[]> MYTHICAL_PIECES;
 
     public static void init(JavaPlugin instance) {
         plugin = instance;
@@ -104,5 +111,22 @@ public class GravenConfig {
                     "<dark_gray>• <dark_red>Lifesteal</dark_red><gray>:</gray> <red><lifesteal>%</red> <gray>of damage dealt</gray>"
             );
         }
+
+        // 4. MYTHICAL ARMOR SET
+        MYTHICAL_TIER = config.getString("armor.mythical.tier", "mythical");
+        MYTHICAL_PIECES = new LinkedHashMap<>();
+        loadMythicalPiece(config, "helmet", 3.0);
+        loadMythicalPiece(config, "chestplate", 8.0);
+        loadMythicalPiece(config, "leggings", 6.0);
+        loadMythicalPiece(config, "boots", 3.0);
+    }
+
+    private static void loadMythicalPiece(FileConfiguration config, String id, double defaultDefense) {
+        String base = "armor.mythical.pieces." + id;
+        MYTHICAL_PIECES.put(id, new double[]{
+                config.getDouble(base + ".defense", defaultDefense),
+                config.getDouble(base + ".toughness", 3.0),
+                config.getDouble(base + ".knockback-resistance", 0.1)
+        });
     }
 }

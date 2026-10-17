@@ -8,6 +8,16 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
+- **Mythical armor set prototype (2026-10-17):** new `MythicalArmorSet` module — a full
+  netherite armor set (helmet/chestplate/leggings/boots) sharing the Mythical tier tooltip
+  chrome (tier line, indented Durability: Unbreakable, ATTRIBUTES — no "Created by" footer). ATTRIBUTES
+  shows Defense (🛡 light-blue), Armor Toughness (💎 sky blue) and Knockback Resistance
+  (⚓ soft blue) as real attribute modifiers with per-item PDC overrides, synced from the new
+  `armor.mythical.pieces.*` config keys (netherite defaults: 3/8/6/3 defense, 3.0 toughness,
+  0.1 knockback resistance). Piece names use the `#F8F8A0` aurora tier color.
+  `/gravencore give armor mythical <helmet|chestplate|leggings|boots|set>` (category + tier
+  structure, ready for more tiers later), `/gravencore config
+  mythical <defense|toughness|kbresist> <value>`, and `/gravencore reload` all cover the set.
 - **Tooltip system prototype (2026-10-17):** new `TooltipBuilder` utility that composes sectioned
   item tooltips (tier line, dividers, `ATTRIBUTES` / `EFFECTS` headers, creator footer) so item
   classes only declare content. New `ItemTier` enum (currently only `MYTHICAL`; more tiers later).

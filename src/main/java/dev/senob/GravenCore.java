@@ -31,15 +31,17 @@ public class GravenCore extends JavaPlugin {
         // 3. Initialize Custom Items (Passing in the Cooldown Manager)
         RedlineSpear redlineSpear = new RedlineSpear(this, cooldownManager);
         DraculaPlate draculaPlate = new DraculaPlate(this, cooldownManager);
+        MythicalArmorSet mythicalArmorSet = new MythicalArmorSet(this);
 
         itemManager.registerItem(redlineSpear);
         itemManager.registerItem(draculaPlate);
+        itemManager.registerItem(mythicalArmorSet);
 
         // Internal standard listeners for items
         Bukkit.getPluginManager().registerEvents(redlineSpear, this);
 
         // 4. Register Command Router
-        GravenCoreCommand gravencoreCmd = new GravenCoreCommand(this, redlineSpear, draculaPlate);
+        GravenCoreCommand gravencoreCmd = new GravenCoreCommand(this, redlineSpear, draculaPlate, mythicalArmorSet);
         Objects.requireNonNull(getCommand("gravencore")).setExecutor(gravencoreCmd);
         Objects.requireNonNull(getCommand("gravencore")).setTabCompleter(gravencoreCmd);
 

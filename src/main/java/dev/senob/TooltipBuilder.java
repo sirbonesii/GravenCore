@@ -40,7 +40,7 @@ public final class TooltipBuilder {
      * The "+" prefix is added automatically; pass the plain value.
      */
     public static Component attribute(String icon, String label, String value) {
-        return GravenTheme.parse("<dark_gray>• " + icon + " " + label + ":</gray> <green>+" + value + "</green>");
+        return GravenTheme.parse("<dark_gray>• " + icon + " " + label + ":</dark_gray> <green>+" + value + "</green>");
     }
 
     /**

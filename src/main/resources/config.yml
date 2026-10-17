@@ -76,6 +76,9 @@ weapons:
     # Percent of damage dealt returned as health while wearing the plate
     lifesteal-percent: 20.0
 
+    # Chance (%) for lifesteal to trigger on a hit
+    lifesteal-chance: 85.0
+
     # Item tier (full tier system coming later; only "mythical" for now)
     tier: "mythical"
 
@@ -87,10 +90,10 @@ weapons:
       - "<dark_gray>• <blue>Duration</blue><gray>:</gray> <yellow><duration>s 🦇</yellow>"
       - "<dark_gray>• <yellow>Cooldown</yellow><gray>:</gray> <gold><cooldown>s ⏳</gold>"
 
-    # EFFECTS section of the tooltip. Placeholders: <lifesteal>
+    # EFFECTS section of the tooltip. Placeholders: <lifesteal>, <lifesteal_chance>
     effects:
       - "<dark_gray>• <green>Passive</green><gray>:</gray> <color:#F8F858>Regeneration I</color>"
-      - "<dark_gray>• <dark_red>Lifesteal</dark_red><gray>:</gray> <red><lifesteal>%</red> <gray>of damage dealt</gray>"
+      - "<dark_gray>• <dark_red>Lifesteal</dark_red><gray>:</gray> <red><lifesteal_chance>% chance</red> <gray>to heal</gray> <red><lifesteal>%</red> <gray>of damage dealt</gray>"
 
 # --- Retired keys (kept for reference, not read by the code) ---
 # use-animation: "spear"   # old first-person right-click animation key

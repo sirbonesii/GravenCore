@@ -29,6 +29,7 @@ public class GravenConfig {
     public static double DRACULA_TOUGHNESS;
     public static double DRACULA_ATTACK_DAMAGE;
     public static double DRACULA_LIFESTEAL_PERCENT;
+    public static double DRACULA_LIFESTEAL_CHANCE;
     public static String DRACULA_TIER;
     public static List<String> DRACULA_LORE;
     public static List<String> DRACULA_EFFECTS;
@@ -82,6 +83,7 @@ public class GravenConfig {
 
         DRACULA_ATTACK_DAMAGE = config.getDouble("weapons.dracula.attack-damage", 2.0);
         DRACULA_LIFESTEAL_PERCENT = config.getDouble("weapons.dracula.lifesteal-percent", 20.0);
+        DRACULA_LIFESTEAL_CHANCE = config.getDouble("weapons.dracula.lifesteal-chance", 85.0);
         DRACULA_TIER = config.getString("weapons.dracula.tier", "mythical");
 
         // Ability body lines. Section chrome (dividers, headers, footer)
@@ -99,7 +101,7 @@ public class GravenConfig {
         if (DRACULA_EFFECTS.isEmpty()) {
             DRACULA_EFFECTS = List.of(
                     "<dark_gray>• <green>Passive</green><gray>:</gray> <color:#F8F858>Regeneration I</color>",
-                    "<dark_gray>• <dark_red>Lifesteal</dark_red><gray>:</gray> <red><lifesteal>%</red> <gray>of damage dealt</gray>"
+                    "<dark_gray>• <dark_red>Lifesteal</dark_red><gray>:</gray> <red><lifesteal_chance>% chance</red> <gray>to heal</gray> <red><lifesteal>%</red> <gray>of damage dealt</gray>"
             );
         }
     }

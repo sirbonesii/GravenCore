@@ -131,7 +131,9 @@ public class DraculaPlate implements Listener, CustomItem {
         lore.add(TooltipBuilder.divider());
         lore.add(TooltipBuilder.section("EFFECTS"));
         for (String line : GravenConfig.DRACULA_EFFECTS) {
-            String parsed = line.replace("<lifesteal>", formatStat(GravenConfig.DRACULA_LIFESTEAL_PERCENT));
+            String parsed = line
+                    .replace("<lifesteal>", formatStat(GravenConfig.DRACULA_LIFESTEAL_PERCENT))
+                    .replace("<lifesteal_chance>", formatStat(GravenConfig.DRACULA_LIFESTEAL_CHANCE));
             lore.add(GravenTheme.parse(parsed));
         }
         lore.add(TooltipBuilder.divider());
@@ -159,6 +161,8 @@ public class DraculaPlate implements Listener, CustomItem {
 
         double percent = GravenConfig.DRACULA_LIFESTEAL_PERCENT;
         if (percent <= 0) return;
+
+        if (Math.random() * 100.0 > GravenConfig.DRACULA_LIFESTEAL_CHANCE) return;
 
         double heal = event.getFinalDamage() * (percent / 100.0);
         if (heal <= 0) return;

@@ -39,3 +39,7 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   green, "Defense" in light-blue (`TooltipBuilder.attribute` now takes a label color). Added a
   "Durability: Unbreakable" line under the tier line. Removed the "Sneak + Jump" hint from the
   ability lore and "(Bat Form)" from the EFFECTS passive line.
+- **DraculaPlate tooltip polish 2 (2026-10-17):** attribute ":" separators now gray (labels keep
+  their colors); Durability line slightly indented. Lifesteal is now chance-based — new
+  `weapons.dracula.lifesteal-chance` key (default 85%), shown in the EFFECTS line via the
+  `<lifesteal_chance>` placeholder ("85% chance to heal 20.0% of damage dealt").

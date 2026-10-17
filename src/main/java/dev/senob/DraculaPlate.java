@@ -1,0 +1,298 @@
+package dev.senob;
+
+import com.destroystokyo.paper.event.player.PlayerJumpEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.entity.Bat;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Mob;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.EquipmentSlotGroup;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
+
+import java.util.*;
+
+@SuppressWarnings({"UnstableApiUsage", "SpellCheckingInspection", "BooleanMethodIsAlwaysInverted", "unused"})
+public class DraculaPlate implements Listener, CustomItem {
+
+    private final GravenCore plugin;
+    private final CooldownManager cooldownManager;
+
+    public static final CooldownManager.CooldownType COOLDOWN_TYPE =
+            new CooldownManager.CooldownType("dracula", "🦇", TextColor.color(0xAA0000));
+
+    private final NamespacedKey draculaKey;
+    private final NamespacedKey cooldownKey;
+    private final NamespacedKey durationKey;
+
+    private static final Set<UUID> activeVampires = new HashSet<>();
+    private static final Map<UUID, ItemStack[]> hiddenArmor = new HashMap<>();
+    private static boolean isRegistered = false;
+
+    public DraculaPlate(GravenCore plugin, CooldownManager cooldownManager) {
+        this.plugin = plugin;
+        this.cooldownManager = cooldownManager;
+        this.cooldownManager.registerType(COOLDOWN_TYPE);
+
+        this.draculaKey = new NamespacedKey(plugin, "dracula_plate");
+        this.cooldownKey = new NamespacedKey(plugin, "dracula_cooldown");
+        this.durationKey = new NamespacedKey(plugin, "dracula_duration");
+
+        if (!isRegistered) {
+            plugin.getServer().getPluginManager().registerEvents(this, plugin);
+            plugin.getLogger().info("Dracula Plate module initialized!");
+            isRegistered = true;
+        }
+    }
+
+    @Override
+    public boolean isItem(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return false;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return false;
+        return meta.getPersistentDataContainer().has(draculaKey, PersistentDataType.INTEGER);
+    }
+
+    public boolean isWearingDraculaPlate(Player player) {
+        return isItem(player.getInventory().getChestplate());
+    }
+
+    public ItemStack createDraculaPlate() {
+        ItemStack item = new ItemStack(Material.NETHERITE_CHESTPLATE);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.getPersistentDataContainer().set(draculaKey, PersistentDataType.INTEGER, 1);
+            item.setItemMeta(meta);
+        }
+        syncPlateStatsAndLore(item);
+        return item;
+    }
+
+    public void syncPlateStatsAndLore(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return;
+
+        PersistentDataContainer pdc = meta.getPersistentDataContainer();
+
+        meta.displayName(GravenTheme.parse("<color:#F8F854><italic>Dracula's Plate</italic></color>"));
+        meta.itemName(GravenTheme.parse("<color:#AA0000>Dracula's Plate</color>"));
+        meta.setUnbreakable(true);
+
+        if (!pdc.has(cooldownKey, PersistentDataType.LONG)) pdc.set(cooldownKey, PersistentDataType.LONG, GravenConfig.DRACULA_COOLDOWN);
+        if (!pdc.has(durationKey, PersistentDataType.LONG)) pdc.set(durationKey, PersistentDataType.LONG, GravenConfig.DRACULA_DURATION);
+
+        long cooldownSec = pdc.getOrDefault(cooldownKey, PersistentDataType.LONG, GravenConfig.DRACULA_COOLDOWN);
+        long durationSec = pdc.getOrDefault(durationKey, PersistentDataType.LONG, GravenConfig.DRACULA_DURATION);
+
+        meta.removeAttributeModifier(Attribute.ARMOR);
+        meta.removeAttributeModifier(Attribute.ARMOR_TOUGHNESS);
+        meta.addAttributeModifier(Attribute.ARMOR, new AttributeModifier(new NamespacedKey(plugin, "dracula_armor"), GravenConfig.DRACULA_ARMOR, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.CHEST));
+        meta.addAttributeModifier(Attribute.ARMOR_TOUGHNESS, new AttributeModifier(new NamespacedKey(plugin, "dracula_toughness"), GravenConfig.DRACULA_TOUGHNESS, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.CHEST));
+
+        List<Component> finalLore = new ArrayList<>();
+        for (String line : GravenConfig.DRACULA_LORE) {
+            String parsed = line
+                    .replace("<duration>", String.valueOf(durationSec))
+                    .replace("<cooldown>", String.valueOf(cooldownSec))
+                    .replace("<creator>", GravenConfig.CREATOR);
+            finalLore.add(GravenTheme.parse(parsed));
+        }
+
+        meta.lore(finalLore);
+        item.setItemMeta(meta);
+
+        AttributeHider.hideAllFlags(item);
+        EnderChestEx.restrictFromEnderChest(item);
+    }
+
+    @EventHandler
+    public void onPlayerJump(PlayerJumpEvent event) {
+        Player player = event.getPlayer();
+        if (!player.isSneaking() || !isWearingDraculaPlate(player)) return;
+
+        UUID uuid = player.getUniqueId();
+        if (activeVampires.contains(uuid)) return;
+
+        if (cooldownManager.isOnCooldown(player, COOLDOWN_TYPE)) return;
+
+        ItemStack chest = player.getInventory().getChestplate();
+        if (chest == null || !chest.hasItemMeta()) return;
+        ItemMeta meta = chest.getItemMeta();
+        if (meta == null) return;
+
+        PersistentDataContainer pdc = meta.getPersistentDataContainer();
+        long cdSec = pdc.getOrDefault(cooldownKey, PersistentDataType.LONG, GravenConfig.DRACULA_COOLDOWN);
+        long durSec = pdc.getOrDefault(durationKey, PersistentDataType.LONG, GravenConfig.DRACULA_DURATION);
+
+        activeVampires.add(uuid);
+
+        hiddenArmor.put(uuid, player.getInventory().getArmorContents().clone());
+        player.getInventory().setArmorContents(new ItemStack[4]);
+
+        boolean wasAllowFlight = player.getAllowFlight();
+        boolean wasFlying = player.isFlying();
+
+        player.setAllowFlight(true);
+        player.setFlying(true);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, (int) (durSec * 20), 0, false, false, false));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, (int) (durSec * 20), 0, false, false, false));
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BAT_TAKEOFF, 1.0f, 0.8f);
+
+        for (Entity entity : player.getNearbyEntities(48, 48, 48)) {
+            if (entity instanceof Mob mob) {
+                if (player.equals(mob.getTarget())) {
+                    mob.setTarget(null);
+                }
+            }
+        }
+
+        List<Bat> bats = new ArrayList<>();
+        for (int i = 0; i < 15; i++) {
+            Bat bat = player.getWorld().spawn(player.getLocation(), Bat.class, b -> {
+                b.setAware(false);
+                b.setAwake(true);
+                b.setInvulnerable(true);
+                b.setSilent(true);
+            });
+            bats.add(bat);
+        }
+
+        new BukkitRunnable() {
+            int ticks = 0;
+            final int maxTicks = (int) (durSec * 20);
+
+            @Override
+            public void run() {
+                if (!player.isOnline() || player.isDead() || ticks >= maxTicks || !hiddenArmor.containsKey(uuid)) {
+                    endAbility();
+                    return;
+                }
+
+                player.getWorld().spawnParticle(Particle.DUST, player.getLocation().add(0, 1, 0), 2, 0.4, 0.4, 0.4, 0, new Particle.DustOptions(Color.fromRGB(150, 0, 0), 1.2f));
+
+                Location pLoc = player.getLocation().add(0, 1, 0);
+                float pYaw = player.getLocation().getYaw();
+                float pPitch = player.getLocation().getPitch();
+
+                for (Bat bat : bats) {
+                    if (bat.isValid()) {
+                        bat.setAwake(true);
+                        bat.setRotation(pYaw, pPitch);
+
+                        if (bat.getLocation().distanceSquared(pLoc) > 100) {
+                            bat.teleport(pLoc);
+                        } else {
+                            Vector randomOffset = new Vector((Math.random() - 0.5) * 8.0, (Math.random() - 0.5) * 5.0, (Math.random() - 0.5) * 8.0);
+                            Location target = pLoc.clone().add(randomOffset);
+                            Vector dir = target.toVector().subtract(bat.getLocation().toVector());
+                            bat.setVelocity(dir.normalize().multiply(0.75));
+                        }
+                    }
+                }
+                ticks++;
+            }
+
+            private void endAbility() {
+                restoreArmor(player);
+
+                if (player.isOnline() && !player.isDead()) {
+                    if (player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR) {
+                        player.setAllowFlight(wasAllowFlight);
+                        player.setFlying(wasFlying);
+                        player.setFallDistance(0);
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 1200, 0, false, false, false));
+                        monitorLanding(player, cdSec);
+                    } else {
+                        activeVampires.remove(uuid);
+                        cooldownManager.setCooldown(player, COOLDOWN_TYPE, cdSec);
+                    }
+                    player.removePotionEffect(PotionEffectType.INVISIBILITY);
+                    player.removePotionEffect(PotionEffectType.REGENERATION);
+                    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BAT_AMBIENT, 1.0f, 0.7f);
+                } else {
+                    activeVampires.remove(uuid);
+                    cooldownManager.setCooldown(player, COOLDOWN_TYPE, cdSec);
+                }
+                for (Bat bat : bats) {
+                    if (bat.isValid()) bat.remove();
+                }
+                cancel();
+            }
+        }.runTaskTimer(plugin, 0L, 1L);
+    }
+
+    private void monitorLanding(Player player, long cdSec) {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!player.isOnline() || player.isDead() || !player.hasPotionEffect(PotionEffectType.SLOW_FALLING)) {
+                    activeVampires.remove(player.getUniqueId());
+                    cooldownManager.setCooldown(player, COOLDOWN_TYPE, cdSec);
+                    cancel();
+                    return;
+                }
+
+                if (((Entity) player).isOnGround()) {
+                    player.removePotionEffect(PotionEffectType.SLOW_FALLING);
+                    activeVampires.remove(player.getUniqueId());
+                    cooldownManager.setCooldown(player, COOLDOWN_TYPE, cdSec);
+                    cancel();
+                }
+            }
+        }.runTaskTimer(plugin, 5L, 1L);
+    }
+
+    private void restoreArmor(Player player) {
+        UUID uuid = player.getUniqueId();
+        ItemStack[] stored = hiddenArmor.remove(uuid);
+        if (stored != null) {
+            ItemStack[] current = player.getInventory().getArmorContents();
+            for (int i = 0; i < stored.length; i++) {
+                if (stored[i] != null && stored[i].getType() != Material.AIR) {
+                    if (current[i] == null || current[i].getType() == Material.AIR) {
+                        current[i] = stored[i];
+                    } else {
+                        player.getWorld().dropItem(player.getLocation(), stored[i]);
+                    }
+                }
+            }
+            player.getInventory().setArmorContents(current);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        UUID uuid = event.getEntity().getUniqueId();
+        if (hiddenArmor.containsKey(uuid)) {
+            ItemStack[] stored = hiddenArmor.remove(uuid);
+            for (ItemStack item : stored) {
+                if (item != null && item.getType() != Material.AIR) {
+                    event.getDrops().add(item);
+                }
+            }
+            activeVampires.remove(uuid);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        restoreArmor(player);
+        activeVampires.remove(player.getUniqueId());
+    }
+}

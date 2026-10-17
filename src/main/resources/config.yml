@@ -1,0 +1,50 @@
+# ==========================================
+#          TheRedline Configuration
+# ==========================================
+
+# Creator name shown at the bottom of the spear's tooltip
+creator: "Senob"
+
+# First-person right-click animation
+use-animation: "spear"
+
+# Whether the ability beam passes straight through solid blocks/walls
+pierce-blocks: true
+
+# Normal left-click melee damage (Displayed in green as "X Attack Damage" on the spear)
+melee-damage:
+  upgraded: 6.5
+  base: 5.0
+
+# Base attack speed (Displayed in green as "0.87 Attack Speed" on the spear)
+attack-speed: 0.87
+
+# Damage dealt by the Sneak + Hold Right-Click flame beam ability
+ability-damage:
+  upgraded: 200.0
+  base: 16.0
+
+# Range (in blocks) of the flame beam ability (Can also be changed with /redline setrange <blocks>)
+ability-range:
+  upgraded: 30.0
+  base: 30.0
+
+# Ability cooldown in seconds (Can also be changed in-game with /redline setcooldown <seconds>)
+ability-cooldown:
+  upgraded: 16
+  base: 30
+
+# Launch speed multiplier when firing the Upgraded spear
+launch-velocity: -2.85
+
+# Spear Lore / Item Description (Placeholders: <ability_damage>, <range>, <cooldown>, <creator>)
+lore:
+    - "<gray>Lunge IV</gray>"
+    - "<gray>—————————————————</gray>"
+    - "<gold><bold>ABILITY</gold><gray>:</gray> <gold><bold>CRIMSON PIERCER</bold></gold>"
+    - "<gray>—————————————————</gray>"
+    - "<dark_gray>• <green>Ability Damage</green><gray>:</gray> <red><ability_damage> ❤</red>"
+    - "<dark_gray>• <blue>Ability Range</blue><gray>:</gray> <yellow><range> Blocks</yellow>"
+    - "<dark_gray>• <yellow>Cooldown</yellow><gray>:</gray> <gold><cooldown>s :fire:</gold>"
+    - "<gray>—————————————————</gray>"
+    - "<dark_red>✦</dark_red> <gray>Created by</gray> <gradient:#FF3B1F:#FF9E2C><italic><creator></italic></gradient>"

@@ -1,0 +1,37 @@
+name: GravenCore
+version: 1.2.8
+main: dev.senob.GravenCore
+api-version: '1.21'
+description: Core server plugin including the Modules.
+commands:
+  homes:
+    description: Open your homes GUI menu
+  home:
+    description: Teleport to a specific home
+    usage: /home <name>
+    permission: gravehomes.member
+    aliases: [h]
+  sethome:
+    description: Set a new home at your location
+    usage: /sethome <name>
+    permission: gravehomes.member
+    aliases: [sh]
+  delhome:
+    description: Delete a saved home
+    usage: /delhome <name>
+    aliases: [dh]
+    permission: gravehomes.member
+  checkhomes:
+    description: Inspect another player's homes
+    usage: /checkhomes <player>
+    permission: gravehomes.admin
+    aliases: [ch]
+  bounty:
+    description: Create a bounty for a targeted player
+    usage: /bounty add <username> <reason>
+    permission: gravehomes.member
+  gravencore:
+    description: Main administrative command for GravenCore modules.
+    usage: /gravencore <give|config|reload> ...
+    permission: gravencore.admin
+    aliases: [gc]

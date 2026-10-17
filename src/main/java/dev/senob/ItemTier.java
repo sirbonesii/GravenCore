@@ -9,7 +9,7 @@ import net.kyori.adventure.text.format.TextColor;
  */
 public enum ItemTier {
 
-    MYTHICAL("mythical", "Mythical", TextColor.color(0xAA00AA));
+    MYTHICAL("mythical", "Mythical", TextColor.color(0xF8F8A0));
 
     private final String id;
     private final String displayName;

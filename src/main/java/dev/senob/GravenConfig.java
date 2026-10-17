@@ -101,7 +101,7 @@ public class GravenConfig {
         if (DRACULA_EFFECTS.isEmpty()) {
             DRACULA_EFFECTS = List.of(
                     "<dark_gray>• <green>Passive</green><gray>:</gray> <color:#F8F858>Regeneration I</color>",
-                    "<dark_gray>• <dark_red>Lifesteal</dark_red><gray>:</gray> <red><lifesteal_chance>% chance</red> <gray>to heal</gray> <red><lifesteal>%</red> <gray>of damage dealt</gray>"
+                    "<dark_gray>• <dark_red>Lifesteal</dark_red><gray>:</gray> <red><lifesteal>%</red> <gray>of damage dealt</gray>"
             );
         }
     }

@@ -43,3 +43,12 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   their colors); Durability line slightly indented. Lifesteal is now chance-based — new
   `weapons.dracula.lifesteal-chance` key (default 85%), shown in the EFFECTS line via the
   `<lifesteal_chance>` placeholder ("85% chance to heal 20.0% of damage dealt").
+- **DraculaPlate tooltip polish 3 (2026-10-17):** Lifesteal EFFECTS line shortened back to
+  "20.0% of damage dealt" so it fits within the dividers (the 85% proc chance stays in the
+  code, just no longer shown in the tooltip).
+- **Redline Spear tooltip fix (2026-10-17):** the Cooldown lore line used the literal text
+  `:fire:`, which nothing renders as a flame — swapped to the real 🔥 emoji, matching the
+  code fallback (the original config had the `:fire:` text; it was carried over verbatim in
+  the migration).
+- **Mythical tier color (2026-10-17):** tier name now renders in `#F8F8A0` (was purple
+  `0xAA00AA`).

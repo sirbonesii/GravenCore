@@ -70,16 +70,28 @@ weapons:
     armor: 8.0
     toughness: 3.0
 
+    # Bonus attack damage granted while wearing the plate
+    attack-damage: 2.0
+
+    # Percent of damage dealt returned as health while wearing the plate
+    lifesteal-percent: 20.0
+
+    # Item tier (full tier system coming later; only "mythical" for now)
+    tier: "mythical"
+
+    # ABILITY section of the tooltip. Section chrome (dividers, headers,
+    # footer) is added by TooltipBuilder - keep this to content only.
     # Placeholders: <duration>, <cooldown>, <creator>
     lore:
-      - "<gray>—————————————————</gray>"
       - "<gold>ABILITY</gold><gray>:</gray> <dark_red><bold>VAMPIRE'S FLIGHT</bold></dark_red>"
-      - "<gray>—————————————————</gray>"
-      - "<dark_gray>• <green>PASSIVE</green><gray>:</gray> <color:#F8F858>Regeneration</color>"
+      - "<dark_gray>• <gray>Sneak + Jump to take</gray> <dark_red>Bat Form</dark_red>"
       - "<dark_gray>• <blue>Duration</blue><gray>:</gray> <yellow><duration>s 🦇</yellow>"
       - "<dark_gray>• <yellow>Cooldown</yellow><gray>:</gray> <gold><cooldown>s ⏳</gold>"
-      - "<gray>—————————————————</gray>"
-      - "<dark_red>✦</dark_red> <gray>Created by</gray> <gradient:#AA0000:#FF5555><italic><creator></italic></gradient>"
+
+    # EFFECTS section of the tooltip. Placeholders: <lifesteal>
+    effects:
+      - "<dark_gray>• <green>Passive</green><gray>:</gray> <color:#F8F858>Regeneration I</color> <gray>(Bat Form)</gray>"
+      - "<dark_gray>• <dark_red>Lifesteal</dark_red><gray>:</gray> <red><lifesteal>%</red> <gray>of damage dealt</gray>"
 
 # --- Retired keys (kept for reference, not read by the code) ---
 # use-animation: "spear"   # old first-person right-click animation key

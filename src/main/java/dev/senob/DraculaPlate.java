@@ -12,6 +12,7 @@ import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlotGroup;
@@ -38,6 +39,7 @@ public class DraculaPlate implements Listener, CustomItem {
     private final NamespacedKey draculaKey;
     private final NamespacedKey cooldownKey;
     private final NamespacedKey durationKey;
+    private final NamespacedKey attackKey;
 
     private static final Set<UUID> activeVampires = new HashSet<>();
     private static final Map<UUID, ItemStack[]> hiddenArmor = new HashMap<>();
@@ -51,6 +53,7 @@ public class DraculaPlate implements Listener, CustomItem {
         this.draculaKey = new NamespacedKey(plugin, "dracula_plate");
         this.cooldownKey = new NamespacedKey(plugin, "dracula_cooldown");
         this.durationKey = new NamespacedKey(plugin, "dracula_duration");
+        this.attackKey = new NamespacedKey(plugin, "dracula_attack");
 
         if (!isRegistered) {
             plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -95,29 +98,79 @@ public class DraculaPlate implements Listener, CustomItem {
 
         if (!pdc.has(cooldownKey, PersistentDataType.LONG)) pdc.set(cooldownKey, PersistentDataType.LONG, GravenConfig.DRACULA_COOLDOWN);
         if (!pdc.has(durationKey, PersistentDataType.LONG)) pdc.set(durationKey, PersistentDataType.LONG, GravenConfig.DRACULA_DURATION);
+        if (!pdc.has(attackKey, PersistentDataType.DOUBLE)) pdc.set(attackKey, PersistentDataType.DOUBLE, GravenConfig.DRACULA_ATTACK_DAMAGE);
 
         long cooldownSec = pdc.getOrDefault(cooldownKey, PersistentDataType.LONG, GravenConfig.DRACULA_COOLDOWN);
         long durationSec = pdc.getOrDefault(durationKey, PersistentDataType.LONG, GravenConfig.DRACULA_DURATION);
+        double attackDamage = pdc.getOrDefault(attackKey, PersistentDataType.DOUBLE, GravenConfig.DRACULA_ATTACK_DAMAGE);
 
         meta.removeAttributeModifier(Attribute.ARMOR);
         meta.removeAttributeModifier(Attribute.ARMOR_TOUGHNESS);
+        meta.removeAttributeModifier(Attribute.ATTACK_DAMAGE);
         meta.addAttributeModifier(Attribute.ARMOR, new AttributeModifier(new NamespacedKey(plugin, "dracula_armor"), GravenConfig.DRACULA_ARMOR, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.CHEST));
         meta.addAttributeModifier(Attribute.ARMOR_TOUGHNESS, new AttributeModifier(new NamespacedKey(plugin, "dracula_toughness"), GravenConfig.DRACULA_TOUGHNESS, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.CHEST));
+        meta.addAttributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(new NamespacedKey(plugin, "dracula_attack"), attackDamage, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.CHEST));
 
-        List<Component> finalLore = new ArrayList<>();
+        ItemTier tier = ItemTier.fromId(GravenConfig.DRACULA_TIER);
+
+        List<Component> lore = new ArrayList<>();
+        lore.add(TooltipBuilder.tierLine(tier));
+        lore.add(TooltipBuilder.divider());
+        lore.add(TooltipBuilder.section("ATTRIBUTES"));
+        lore.add(TooltipBuilder.attribute("⚔", "Attack Damage", formatStat(attackDamage)));
+        lore.add(TooltipBuilder.attribute("🛡", "Defense", formatStat(GravenConfig.DRACULA_ARMOR)));
+        lore.add(TooltipBuilder.divider());
         for (String line : GravenConfig.DRACULA_LORE) {
             String parsed = line
                     .replace("<duration>", String.valueOf(durationSec))
                     .replace("<cooldown>", String.valueOf(cooldownSec))
                     .replace("<creator>", GravenConfig.CREATOR);
-            finalLore.add(GravenTheme.parse(parsed));
+            lore.add(GravenTheme.parse(parsed));
         }
+        lore.add(TooltipBuilder.divider());
+        lore.add(TooltipBuilder.section("EFFECTS"));
+        for (String line : GravenConfig.DRACULA_EFFECTS) {
+            String parsed = line.replace("<lifesteal>", formatStat(GravenConfig.DRACULA_LIFESTEAL_PERCENT));
+            lore.add(GravenTheme.parse(parsed));
+        }
+        lore.add(TooltipBuilder.divider());
+        lore.add(TooltipBuilder.creatorFooter());
 
-        meta.lore(finalLore);
+        meta.lore(lore);
         item.setItemMeta(meta);
 
         AttributeHider.hideAllFlags(item);
         EnderChestEx.restrictFromEnderChest(item);
+    }
+
+    private static String formatStat(double value) {
+        return String.format("%.1f", value);
+    }
+
+    /**
+     * Lifesteal: heals a percentage of damage dealt while wearing the plate.
+     */
+    @EventHandler
+    public void onLifesteal(EntityDamageByEntityEvent event) {
+        if (event.isCancelled()) return;
+        if (!(event.getDamager() instanceof Player player)) return;
+        if (player.isDead() || !isWearingDraculaPlate(player)) return;
+
+        double percent = GravenConfig.DRACULA_LIFESTEAL_PERCENT;
+        if (percent <= 0) return;
+
+        double heal = event.getFinalDamage() * (percent / 100.0);
+        if (heal <= 0) return;
+
+        double maxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
+        double newHealth = Math.min(maxHealth, player.getHealth() + heal);
+        if (newHealth > player.getHealth()) {
+            player.setHealth(newHealth);
+            player.getWorld().spawnParticle(Particle.DUST,
+                    event.getEntity().getLocation().add(0, 1.0, 0),
+                    6, 0.3, 0.3, 0.3, 0,
+                    new Particle.DustOptions(Color.fromRGB(170, 0, 0), 1.0f));
+        }
     }
 
     @EventHandler

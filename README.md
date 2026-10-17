@@ -7,6 +7,20 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 
 ### [Unreleased]
 
+#### Added
+- **Tooltip system prototype (2026-10-17):** new `TooltipBuilder` utility that composes sectioned
+  item tooltips (tier line, dividers, `ATTRIBUTES` / `EFFECTS` headers, creator footer) so item
+  classes only declare content. New `ItemTier` enum (currently only `MYTHICAL`; more tiers later).
+- **DraculaPlate ATTRIBUTES section:** Defense (+8.0 armor) and Attack Damage (+2.0 while worn,
+  stored per-item in PDC like other overrides, new `weapons.dracula.attack-damage` key).
+- **DraculaPlate lifesteal:** heals `weapons.dracula.lifesteal-percent` (default 20%) of damage
+  dealt while wearing the plate, with a small red particle burst on proc.
+- **DraculaPlate EFFECTS section:** Passive Regeneration I (Bat Form) and Lifesteal lines
+  (new `weapons.dracula.effects` key, `<lifesteal>` placeholder).
+- **DraculaPlate tier line:** shows `Tier: Mythical` (new `weapons.dracula.tier` key, read via
+  `ItemTier.fromId`, ready for the full tier system later).
+- `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
+
 #### Changed
 - **Config migration (2026-10-17):** `src/main/resources/config.yml` migrated from the old flat
   "TheRedline" format to the nested `settings.*` / `weapons.*` structure that `GravenConfig`
@@ -18,6 +32,6 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
     activates them: melee-damage.upgraded 6.5, ability-cooldown.base 30s,
     ability-damage.upgraded 200.0 (intended value; the 22.0 code default was a testing placeholder),
     launch-velocity -2.85 (intentional backwards recoil dash).
-
-#### Added
-- `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
+- **DraculaPlate lore layout (2026-10-17):** `weapons.dracula.lore` is now content-only (ability
+  body); section chrome moved into `TooltipBuilder`. Added a "Sneak + Jump" hint line; the
+  old `PASSIVE: Regeneration` line moved to the new EFFECTS section.

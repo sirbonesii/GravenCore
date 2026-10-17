@@ -27,7 +27,11 @@ public class GravenConfig {
     public static long DRACULA_DURATION;
     public static double DRACULA_ARMOR;
     public static double DRACULA_TOUGHNESS;
+    public static double DRACULA_ATTACK_DAMAGE;
+    public static double DRACULA_LIFESTEAL_PERCENT;
+    public static String DRACULA_TIER;
     public static List<String> DRACULA_LORE;
+    public static List<String> DRACULA_EFFECTS;
 
     public static void init(JavaPlugin instance) {
         plugin = instance;
@@ -76,17 +80,27 @@ public class GravenConfig {
         DRACULA_ARMOR = config.getDouble("weapons.dracula.armor", 8.0);
         DRACULA_TOUGHNESS = config.getDouble("weapons.dracula.toughness", 3.0);
 
+        DRACULA_ATTACK_DAMAGE = config.getDouble("weapons.dracula.attack-damage", 2.0);
+        DRACULA_LIFESTEAL_PERCENT = config.getDouble("weapons.dracula.lifesteal-percent", 20.0);
+        DRACULA_TIER = config.getString("weapons.dracula.tier", "mythical");
+
+        // Ability body lines. Section chrome (dividers, headers, footer)
+        // is added by TooltipBuilder; keep this to content only.
         DRACULA_LORE = config.getStringList("weapons.dracula.lore");
         if (DRACULA_LORE.isEmpty()) {
             DRACULA_LORE = List.of(
-                    "<gray>—————————————————</gray>",
                     "<gold>ABILITY</gold><gray>:</gray> <dark_red><bold>VAMPIRE'S FLIGHT</bold></dark_red>",
-                    "<gray>—————————————————</gray>",
-                    "<dark_gray>• <green>PASSIVE</green><gray>:</gray> <color:#F8F858>Regeneration</color>",
+                    "<dark_gray>• <gray>Sneak + Jump to take</gray> <dark_red>Bat Form</dark_red>",
                     "<dark_gray>• <blue>Duration</blue><gray>:</gray> <yellow><duration>s 🦇</yellow>",
-                    "<dark_gray>• <yellow>Cooldown</yellow><gray>:</gray> <gold><cooldown>s ⏳</gold>",
-                    "<gray>—————————————————</gray>",
-                    "<dark_red>✦</dark_red> <gray>Created by</gray> <gradient:#AA0000:#FF5555><italic><creator></italic></gradient>"
+                    "<dark_gray>• <yellow>Cooldown</yellow><gray>:</gray> <gold><cooldown>s ⏳</gold>"
+            );
+        }
+
+        DRACULA_EFFECTS = config.getStringList("weapons.dracula.effects");
+        if (DRACULA_EFFECTS.isEmpty()) {
+            DRACULA_EFFECTS = List.of(
+                    "<dark_gray>• <green>Passive</green><gray>:</gray> <color:#F8F858>Regeneration I</color> <gray>(Bat Form)</gray>",
+                    "<dark_gray>• <dark_red>Lifesteal</dark_red><gray>:</gray> <red><lifesteal>%</red> <gray>of damage dealt</gray>"
             );
         }
     }

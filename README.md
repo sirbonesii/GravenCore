@@ -17,7 +17,7 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   0.1 knockback resistance). Piece names use the `#F8F8A0` aurora tier color.
   `/gravencore give armor mythical <helmet|chestplate|leggings|boots|set>` (category + tier
   structure, ready for more tiers later), `/gravencore config
-  mythical <defense|toughness|kbresist> <value>`, and `/gravencore reload` all cover the set.
+  mythical <defense|toughness|kbresist|blockrate|blockpower> <value>`, and `/gravencore reload` all cover the set.
 - **Mythical armor set tweaks (2026-10-17):** piece names are now the vanilla item name in
   gray (e.g. "Netherite Chestplate") instead of the aurora "Mythical ..." names; the set is
   no longer unbreakable — each piece has `armor.mythical.durability` max durability
@@ -39,7 +39,14 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - **Mythical block system (2026-10-18):** while wearing at least one set piece, incoming attacks
   have an `armor.mythical.block-rate`% chance (default 25.0) to trigger a block that subtracts
   `armor.mythical.block-power` flat damage (default 4.0), with a shield-clang sound and crit
-  particles on proc. `MythicalArmorSet` is now also a Listener, registered in `onEnable`.
+  particles on proc. `MythicalArmorSet` is now also a Listener, registered in `onEnable`. Block
+  Rate (✦ teal, shown as %) and Block Power (🔥 amber, +flat) now appear in the ATTRIBUTES section;
+  `TooltipBuilder.attribute()` gained a no-plus-prefix overload for percent stats.
+- **Block stats per-item tunable (2026-10-18):** block rate/power are now per-piece PDC values
+  (defaulting from `armor.mythical.block-rate`/`block-power`), editable in-game via
+  `/gravencore config mythical <blockrate|blockpower> <value>` while holding the piece (tab-completed).
+  When hit, the worn piece with the highest block rate does the blocking; the tooltip shows each
+  piece's own values.
 - **Lore hardcoded (2026-10-18):** item lore text is no longer read from the config — the
   Redline spear lore, Dracula ABILITY lines and Dracula EFFECTS lines now live as constants in
   `RedlineSpear`/`DraculaPlate`. Stat numbers still come from config (placeholders keep working),

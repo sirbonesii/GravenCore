@@ -42,6 +42,8 @@ public class MythicalArmorSet implements CustomItem, Listener {
     private final NamespacedKey defenseKey;
     private final NamespacedKey toughnessKey;
     private final NamespacedKey kbResistKey;
+    private final NamespacedKey blockRateKey;
+    private final NamespacedKey blockPowerKey;
 
     /** The four set pieces. */
     public enum Piece {
@@ -91,6 +93,8 @@ public class MythicalArmorSet implements CustomItem, Listener {
         this.defenseKey = new NamespacedKey(plugin, "mythical_defense");
         this.toughnessKey = new NamespacedKey(plugin, "mythical_toughness");
         this.kbResistKey = new NamespacedKey(plugin, "mythical_kbresist");
+        this.blockRateKey = new NamespacedKey(plugin, "mythical_blockrate");
+        this.blockPowerKey = new NamespacedKey(plugin, "mythical_blockpower");
         plugin.getLogger().info("Mythical Armor Set module initialized!");
     }
 
@@ -158,6 +162,11 @@ public class MythicalArmorSet implements CustomItem, Listener {
         double toughness = pdc.getOrDefault(toughnessKey, PersistentDataType.DOUBLE, defaults[1]);
         double kbResist = pdc.getOrDefault(kbResistKey, PersistentDataType.DOUBLE, defaults[2]);
 
+        if (!pdc.has(blockRateKey, PersistentDataType.DOUBLE)) pdc.set(blockRateKey, PersistentDataType.DOUBLE, GravenConfig.MYTHICAL_BLOCK_RATE);
+        if (!pdc.has(blockPowerKey, PersistentDataType.DOUBLE)) pdc.set(blockPowerKey, PersistentDataType.DOUBLE, GravenConfig.MYTHICAL_BLOCK_POWER);
+        double blockRate = pdc.getOrDefault(blockRateKey, PersistentDataType.DOUBLE, GravenConfig.MYTHICAL_BLOCK_RATE);
+        double blockPower = pdc.getOrDefault(blockPowerKey, PersistentDataType.DOUBLE, GravenConfig.MYTHICAL_BLOCK_POWER);
+
         meta.removeAttributeModifier(Attribute.ARMOR);
         meta.removeAttributeModifier(Attribute.ARMOR_TOUGHNESS);
         meta.removeAttributeModifier(Attribute.KNOCKBACK_RESISTANCE);
@@ -180,6 +189,8 @@ public class MythicalArmorSet implements CustomItem, Listener {
         lore.add(TooltipBuilder.attribute("🛡", "Defense", "#ADD8E6", formatStat(defense)));
         lore.add(TooltipBuilder.attribute("💎", "ArT", "#7DD3FC", formatStat(toughness)));
         lore.add(TooltipBuilder.attribute("⚓", "KbR", "#93C5FD", formatStat(kbResist)));
+        lore.add(TooltipBuilder.attribute("✦", "Block Rate", "#5EEAD4", formatStat(blockRate) + "%", false));
+        lore.add(TooltipBuilder.attribute("🔥", "Block Power", "#FCD34D", formatStat(blockPower)));
         lore.add(TooltipBuilder.divider());
 
         meta.lore(lore);
@@ -193,32 +204,36 @@ public class MythicalArmorSet implements CustomItem, Listener {
     }
 
     /**
-     * Block system: while wearing at least one set piece, incoming attacks have
-     * a {@code block-rate}% chance to be partially blocked, reducing the damage
-     * by {@code block-power} (flat). A shield-clang sound and impact particles
-     * play when the block triggers.
+     * Block system: while wearing set pieces, incoming attacks have a chance to be
+     * partially blocked. Each worn piece carries its own block rate/power (tunable
+     * per piece via /gravencore config); the piece with the highest block rate
+     * does the blocking. A shield-clang sound and impact particles play on trigger.
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     public void onAttackBlocked(EntityDamageByEntityEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
-        if (!isWearingMythical(player)) return;
 
-        double rate = Math.min(100.0, Math.max(0.0, GravenConfig.MYTHICAL_BLOCK_RATE));
-        if (rate <= 0.0) return;
+        double bestRate = 0.0;
+        double bestPower = 0.0;
+        for (ItemStack armor : player.getInventory().getArmorContents()) {
+            if (!isItem(armor) || !armor.hasItemMeta()) continue;
+            PersistentDataContainer pdc = armor.getItemMeta().getPersistentDataContainer();
+            double rate = pdc.getOrDefault(blockRateKey, PersistentDataType.DOUBLE, GravenConfig.MYTHICAL_BLOCK_RATE);
+            if (rate > bestRate) {
+                bestRate = rate;
+                bestPower = pdc.getOrDefault(blockPowerKey, PersistentDataType.DOUBLE, GravenConfig.MYTHICAL_BLOCK_POWER);
+            }
+        }
+        if (bestRate <= 0.0) return;
+
+        double rate = Math.min(100.0, bestRate);
         if (ThreadLocalRandom.current().nextDouble(100.0) >= rate) return;
 
-        double power = Math.max(0.0, GravenConfig.MYTHICAL_BLOCK_POWER);
+        double power = Math.max(0.0, bestPower);
         event.setDamage(Math.max(0.0, event.getDamage() - power));
 
         player.getWorld().playSound(player.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1.0f, 1.0f);
         player.getWorld().spawnParticle(Particle.CRIT,
                 player.getLocation().add(0.0, 1.2, 0.0), 10, 0.3, 0.3, 0.3, 0.1);
-    }
-
-    private boolean isWearingMythical(Player player) {
-        for (ItemStack armor : player.getInventory().getArmorContents()) {
-            if (isItem(armor)) return true;
-        }
-        return false;
     }
 }

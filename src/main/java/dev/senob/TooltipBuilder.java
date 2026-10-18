@@ -55,7 +55,16 @@ public final class TooltipBuilder {
      * The ":" separator is always gray.
      */
     public static Component attribute(String icon, String label, String labelColor, String value) {
-        return GravenTheme.parse("<dark_gray>•</dark_gray> <" + labelColor + ">" + icon + " " + label + "</" + labelColor + "><gray>:</gray> <green>+" + value + "</green>");
+        return attribute(icon, label, labelColor, value, true);
+    }
+
+    /**
+     * Same as {@link #attribute(String, String, String, String)}, but with control
+     * over the "+" prefix (e.g. pass false for percent stats like "25.0%").
+     */
+    public static Component attribute(String icon, String label, String labelColor, String value, boolean plusPrefix) {
+        String prefix = plusPrefix ? "+" : "";
+        return GravenTheme.parse("<dark_gray>•</dark_gray> <" + labelColor + ">" + icon + " " + label + "</" + labelColor + "><gray>:</gray> <green>" + prefix + value + "</green>");
     }
 
     /**

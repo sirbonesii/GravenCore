@@ -205,8 +205,10 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                             case "defense" -> pdc.set(new NamespacedKey(plugin, "mythical_defense"), PersistentDataType.DOUBLE, Double.parseDouble(valueStr));
                             case "toughness" -> pdc.set(new NamespacedKey(plugin, "mythical_toughness"), PersistentDataType.DOUBLE, Double.parseDouble(valueStr));
                             case "kbresist" -> pdc.set(new NamespacedKey(plugin, "mythical_kbresist"), PersistentDataType.DOUBLE, Double.parseDouble(valueStr));
+                            case "blockrate" -> pdc.set(new NamespacedKey(plugin, "mythical_blockrate"), PersistentDataType.DOUBLE, Double.parseDouble(valueStr));
+                            case "blockpower" -> pdc.set(new NamespacedKey(plugin, "mythical_blockpower"), PersistentDataType.DOUBLE, Double.parseDouble(valueStr));
                             default -> {
-                                player.sendMessage(GravenTheme.parse("<red>Valid Mythical settings: defense, toughness, kbresist</red>"));
+                                player.sendMessage(GravenTheme.parse("<red>Valid Mythical settings: defense, toughness, kbresist, blockrate, blockpower</red>"));
                                 return true;
                             }
                         }
@@ -251,7 +253,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
             if (args[0].equalsIgnoreCase("config")) {
                 if (args[1].equalsIgnoreCase("redline")) return List.of("cooldown", "range", "basedamage", "abilitydamage");
                 if (args[1].equalsIgnoreCase("dracula")) return List.of("cooldown", "duration");
-                if (args[1].equalsIgnoreCase("mythical")) return List.of("defense", "toughness", "kbresist");
+                if (args[1].equalsIgnoreCase("mythical")) return List.of("defense", "toughness", "kbresist", "blockrate", "blockpower");
             }
         }
 

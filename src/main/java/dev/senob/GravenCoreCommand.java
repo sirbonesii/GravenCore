@@ -233,8 +233,11 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
         if (args.length == 1) return List.of("give", "config", "reload");
 
         if (args.length == 2) {
-            if (args[0].equalsIgnoreCase("give") || args[0].equalsIgnoreCase("config")) {
+            if (args[0].equalsIgnoreCase("give")) {
                 return List.of("redline", "dracula", "armor");
+            }
+            if (args[0].equalsIgnoreCase("config")) {
+                return List.of("redline", "dracula", "mythical");
             }
         }
 

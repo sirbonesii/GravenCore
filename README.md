@@ -33,6 +33,9 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   `Durability: <actual>/<max>` line on `PlayerItemDamageEvent` as pieces take damage. Item sets
   register their PDC id key (`track(...)`); the max is read from the item's own Damageable meta,
   so future armor sets get it for free. `TooltipBuilder.isDurabilityLine()` locates the line.
+- **Tab completion fix (2026-10-17):** `/gravencore config` was suggesting `armor` as the second
+  word, but the command expects `mythical` — now completes `redline|dracula|mythical` (give keeps
+  `redline|dracula|armor` → `mythical` → `helmet|chestplate|leggings|boots|set`).
 - **Tooltip system prototype (2026-10-17):** new `TooltipBuilder` utility that composes sectioned
   item tooltips (tier line, dividers, `ATTRIBUTES` / `EFFECTS` headers, creator footer) so item
   classes only declare content. New `ItemTier` enum (currently only `MYTHICAL`; more tiers later).

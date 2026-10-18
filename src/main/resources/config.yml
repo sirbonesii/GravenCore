@@ -49,6 +49,19 @@ weapons:
     # Whether the ability beam passes straight through solid blocks/walls
     pierce-blocks: true
 
+    # Spear lore / item description.
+    # Placeholders: <ability_damage>, <range>, <cooldown>, <creator>
+    lore:
+      - "<gray>Lunge IV</gray>"
+      - "<gray>—————————————————</gray>"
+      - "<gold><bold>ABILITY</gold><gray>:</gray> <gold><bold>CRIMSON PIERCER</bold></gold>"
+      - "<gray>—————————————————</gray>"
+      - "<dark_gray>• <green>Ability Damage</green><gray>:</gray> <red><ability_damage> ❤</red>"
+      - "<dark_gray>• <blue>Ability Range</blue><gray>:</gray> <yellow><range> Blocks</yellow>"
+      - "<dark_gray>• <yellow>Cooldown</yellow><gray>:</gray> <gold><cooldown>s 🔥</gold>"
+      - "<gray>—————————————————</gray>"
+      - "<dark_red>✦</dark_red> <gray>Created by</gray> <gradient:#FF3B1F:#FF9E2C><italic><creator></italic></gradient>"
+
   dracula:
     # No dracula section existed in the old file - these are the values
     # the server was already running on (code defaults).

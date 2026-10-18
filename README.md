@@ -47,6 +47,9 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   `/gravencore config mythical <blockrate|blockpower> <value>` while holding the piece (tab-completed).
   When hit, the worn piece with the highest block rate does the blocking; the tooltip shows each
   piece's own values.
+- **Reload message fix (2026-10-18):** `/gravencore reload` printed raw `TextComponentImpl{...}`
+  garbage — `GravenTheme.prefix()` returns a Component and was being string-concatenated, which
+  called `toString()` on it. Now properly appended as a component.
 - **Lore hardcoded (2026-10-18):** item lore text is no longer read from the config — the
   Redline spear lore, Dracula ABILITY lines and Dracula EFFECTS lines now live as constants in
   `RedlineSpear`/`DraculaPlate`. Stat numbers still come from config (placeholders keep working),

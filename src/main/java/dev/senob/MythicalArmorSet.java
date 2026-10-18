@@ -84,6 +84,14 @@ public class MythicalArmorSet implements CustomItem {
         plugin.getLogger().info("Mythical Armor Set module initialized!");
     }
 
+    /**
+     * The PDC key marking set pieces. Registered with DurabilityLoreListener
+     * so the durability lore line stays live as pieces take damage.
+     */
+    public NamespacedKey idKey() {
+        return pieceKey;
+    }
+
     @Override
     public boolean isItem(ItemStack item) {
         if (item == null || !item.hasItemMeta()) return false;
@@ -123,9 +131,11 @@ public class MythicalArmorSet implements CustomItem {
         meta.itemName(GravenTheme.parse("<gray>" + vanillaName + "</gray>"));
         meta.setUnbreakable(false);
 
-        int durability = GravenConfig.MYTHICAL_DURABILITY;
+        int maxDurability = GravenConfig.MYTHICAL_DURABILITY;
+        int remainingDurability = maxDurability;
         if (meta instanceof Damageable damageable) {
-            damageable.setMaxDamage(durability);
+            damageable.setMaxDamage(maxDurability);
+            remainingDurability = Math.max(0, maxDurability - damageable.getDamage());
         }
 
         double[] defaults = GravenConfig.MYTHICAL_PIECES.getOrDefault(piece.id,
@@ -155,11 +165,11 @@ public class MythicalArmorSet implements CustomItem {
 
         List<Component> lore = new ArrayList<>();
         lore.add(TooltipBuilder.tierLine(tier));
-        lore.add(TooltipBuilder.durabilityLine("<green>" + durability + "</green>"));
+        lore.add(TooltipBuilder.durabilityLine("<green>" + remainingDurability + "/" + maxDurability + "</green>"));
         lore.add(TooltipBuilder.section("ATTRIBUTES"));
         lore.add(TooltipBuilder.attribute("🛡", "Defense", "#ADD8E6", formatStat(defense)));
-        lore.add(TooltipBuilder.attribute("💎", "Armor Toughness", "#7DD3FC", formatStat(toughness)));
-        lore.add(TooltipBuilder.attribute("⚓", "Knockback Resistance", "#93C5FD", formatStat(kbResist)));
+        lore.add(TooltipBuilder.attribute("💎", "ArT", "#7DD3FC", formatStat(toughness)));
+        lore.add(TooltipBuilder.attribute("⚓", "KbR", "#93C5FD", formatStat(kbResist)));
         lore.add(TooltipBuilder.divider());
 
         meta.lore(lore);

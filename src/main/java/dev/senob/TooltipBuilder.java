@@ -1,6 +1,7 @@
 package dev.senob;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 /**
  * Builds the sectioned item tooltips (Tier / ATTRIBUTES / ABILITY / EFFECTS)
@@ -29,12 +30,12 @@ public final class TooltipBuilder {
 
     /**
      * A section header embedded in the middle of the divider,
-     * e.g. ——————ATTRIBUTES——————. The dashes are sized so the whole
-     * line matches divider() width (roughly: one em-dash ≈ two title
-     * characters wide).
+     * e.g. —————ATTRIBUTES—————. The dashes are sized so the whole
+     * line matches divider() width. Width estimate (tuned from
+     * in-game screenshots): one bold title character ≈ 0.7 em-dashes.
      */
     public static Component section(String title) {
-        int titleDashes = Math.max(1, (int) Math.ceil(title.length() / 2.0));
+        int titleDashes = Math.max(1, (int) Math.ceil(title.length() * 0.7));
         int side = Math.max(2, (DIVIDER_WIDTH - titleDashes) / 2);
         String dashes = "—".repeat(side);
         return GravenTheme.parse("<gray>" + dashes + "</gray><gold><bold>" + title + "</bold></gold><gray>" + dashes + "</gray>");
@@ -63,6 +64,16 @@ public final class TooltipBuilder {
      */
     public static Component durabilityLine(String value) {
         return GravenTheme.parse("  <gray>Durability:</gray> " + value);
+    }
+
+    /**
+     * True if this lore line is a durability line (e.g. "Durability: 2096/2096").
+     * Used by DurabilityLoreListener to find the line and refresh it as the
+     * item takes damage.
+     */
+    public static boolean isDurabilityLine(Component line) {
+        String plain = PlainTextComponentSerializer.plainText().serialize(line).trim();
+        return plain.startsWith("Durability:");
     }
 
     /**

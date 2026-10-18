@@ -11,8 +11,8 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - **Mythical armor set prototype (2026-10-17):** new `MythicalArmorSet` module — a full
   netherite armor set (helmet/chestplate/leggings/boots) sharing the Mythical tier tooltip
   chrome (tier line, indented Durability: Unbreakable, ATTRIBUTES — no "Created by" footer). ATTRIBUTES
-  shows Defense (🛡 light-blue), Armor Toughness (💎 sky blue) and Knockback Resistance
-  (⚓ soft blue) as real attribute modifiers with per-item PDC overrides, synced from the new
+  shows Defense (🛡 light-blue), ArT (💎 sky blue, armor toughness) and KbR
+  (⚓ soft blue, knockback resistance) as real attribute modifiers with per-item PDC overrides, synced from the new
   `armor.mythical.pieces.*` config keys (netherite defaults: 3/8/6/3 defense, 3.0 toughness,
   0.1 knockback resistance). Piece names use the `#F8F8A0` aurora tier color.
   `/gravencore give armor mythical <helmet|chestplate|leggings|boots|set>` (category + tier
@@ -21,11 +21,18 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - **Mythical armor set tweaks (2026-10-17):** piece names are now the vanilla item name in
   gray (e.g. "Netherite Chestplate") instead of the aurora "Mythical ..." names; the set is
   no longer unbreakable — each piece has `armor.mythical.durability` max durability
-  (default 2096), shown in the tooltip's Durability line.
+  (default 2096); the tooltip's Durability line shows actual/max (e.g. `2096/2096`).
 - **Section headers embedded in dividers (2026-10-17):** `TooltipBuilder.section()` now
   renders the title centered inside the divider line (e.g. `——————ATTRIBUTES——————`, dashes
   sized to match the plain divider width) instead of a separate header line; the plain
   dividers that used to sit right before each header were removed.
+- **Embedded header sizing fix (2026-10-17):** the embedded section headers were overflowing the
+  tooltip's right edge — bold capitals run wider than first estimated, so the dash budget was
+  retuned (one bold title char ≈ 0.7 em-dashes; ATTRIBUTES now gets 5 dashes per side).
+- **Live durability lore (2026-10-17):** new `DurabilityLoreListener` refreshes the
+  `Durability: <actual>/<max>` line on `PlayerItemDamageEvent` as pieces take damage. Item sets
+  register their PDC id key (`track(...)`); the max is read from the item's own Damageable meta,
+  so future armor sets get it for free. `TooltipBuilder.isDurabilityLine()` locates the line.
 - **Tooltip system prototype (2026-10-17):** new `TooltipBuilder` utility that composes sectioned
   item tooltips (tier line, dividers, `ATTRIBUTES` / `EFFECTS` headers, creator footer) so item
   classes only declare content. New `ItemTier` enum (currently only `MYTHICAL`; more tiers later).

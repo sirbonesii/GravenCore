@@ -216,7 +216,7 @@ public class MythicalArmorSet implements CustomItem, Listener {
         double bestRate = 0.0;
         double bestPower = 0.0;
         for (ItemStack armor : player.getInventory().getArmorContents()) {
-            if (!isItem(armor) || !armor.hasItemMeta()) continue;
+            if (armor == null || !isItem(armor)) continue;
             PersistentDataContainer pdc = armor.getItemMeta().getPersistentDataContainer();
             double rate = pdc.getOrDefault(blockRateKey, PersistentDataType.DOUBLE, GravenConfig.MYTHICAL_BLOCK_RATE);
             if (rate > bestRate) {

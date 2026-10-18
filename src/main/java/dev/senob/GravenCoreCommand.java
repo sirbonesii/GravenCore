@@ -69,7 +69,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                     }
                 }
             }
-            sender.sendMessage(GravenTheme.parse(GravenTheme.prefix() + "<green>Config reloaded and all active items updated!</green>"));
+            sender.sendMessage(GravenTheme.prefix().append(GravenTheme.parse("<green>Config reloaded and all active items updated!</green>")));
             return true;
         }
 

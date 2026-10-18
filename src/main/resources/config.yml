@@ -15,14 +15,12 @@ settings:
 
 weapons:
   redline:
-    # Normal left-click melee damage (shown in lore as "X Attack Damage")
+    # Normal Base Melee Damage
     melee-damage:
       base: 5.0
       upgraded: 6.5
 
-    # Damage of the Sneak + Hold Right-Click flame beam ability.
-    # NOTE: the 22.0 code default was a testing placeholder; the intended
-    # upgraded value is 200.0.
+    # Spear Ability Damage
     ability-damage:
       base: 16.0
       upgraded: 200.0
@@ -53,13 +51,13 @@ weapons:
     # Placeholders: <ability_damage>, <range>, <cooldown>, <creator>
     lore:
       - "<gray>Lunge IV</gray>"
-      - "<gray>—————————————————</gray>"
+      - "<gray>--------------------</gray>"
       - "<gold><bold>ABILITY</gold><gray>:</gray> <gold><bold>CRIMSON PIERCER</bold></gold>"
-      - "<gray>—————————————————</gray>"
+      - "<gray>--------------------</gray>"
       - "<dark_gray>• <green>Ability Damage</green><gray>:</gray> <red><ability_damage> ❤</red>"
       - "<dark_gray>• <blue>Ability Range</blue><gray>:</gray> <yellow><range> Blocks</yellow>"
       - "<dark_gray>• <yellow>Cooldown</yellow><gray>:</gray> <gold><cooldown>s 🔥</gold>"
-      - "<gray>—————————————————</gray>"
+      - "<gray>--------------------</gray>"
       - "<dark_red>✦</dark_red> <gray>Created by</gray> <gradient:#FF3B1F:#FF9E2C><italic><creator></italic></gradient>"
 
   dracula:
@@ -108,7 +106,7 @@ armor:
 
     # Block system: chance (percent, 0-100) for a worn piece to trigger a block
     # on an incoming attack, and flat damage subtracted when it triggers
-    block-rate: 25.0
+    block-rate: 45.0
     block-power: 4.0
 
     pieces:

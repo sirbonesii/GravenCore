@@ -1,4 +1,4 @@
-package dev.senob;
+package dev.senob.items;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

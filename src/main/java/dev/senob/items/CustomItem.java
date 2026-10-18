@@ -1,4 +1,4 @@
-package dev.senob;
+package dev.senob.items;
 
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;

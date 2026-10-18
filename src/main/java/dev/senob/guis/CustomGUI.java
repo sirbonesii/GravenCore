@@ -1,4 +1,4 @@
-package dev.senob;
+package dev.senob.guis;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;

@@ -1,12 +1,13 @@
-package dev.senob;
+package dev.senob.items;
 
+import dev.senob.core.GravenConfig;
+import dev.senob.core.GravenTheme;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 /**
  * Builds the sectioned item tooltips (Tier / ATTRIBUTES / ABILITY / EFFECTS)
  * shared by GravenCore custom items.
- *
  * Layout chrome (dividers, headers, footers) lives here so item classes
  * only declare their content.
  */
@@ -25,7 +26,7 @@ public final class TooltipBuilder {
      * The standard divider line placed between tooltip sections.
      */
     public static Component divider() {
-        return GravenTheme.parse("<gray>" + "—".repeat(DIVIDER_WIDTH) + "</gray>");
+        return GravenTheme.parse("<gray>" + "-".repeat(DIVIDER_WIDTH) + "</gray>");
     }
 
     /**
@@ -37,7 +38,7 @@ public final class TooltipBuilder {
     public static Component section(String title) {
         int titleDashes = Math.max(1, (int) Math.ceil(title.length() * 0.7));
         int side = Math.max(2, (DIVIDER_WIDTH - titleDashes) / 2);
-        String dashes = "—".repeat(side);
+        String dashes = "-".repeat(side);
         return GravenTheme.parse("<gray>" + dashes + "</gray><gold><bold>" + title + "</bold></gold><gray>" + dashes + "</gray>");
     }
 

@@ -1,4 +1,4 @@
-package dev.senob;
+package dev.senob.listeners;
 
 import com.google.common.collect.Multimap;
 import io.papermc.paper.datacomponent.DataComponentTypes;

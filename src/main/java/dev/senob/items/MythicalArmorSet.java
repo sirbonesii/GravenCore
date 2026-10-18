@@ -1,5 +1,9 @@
-package dev.senob;
+package dev.senob.items;
 
+import dev.senob.listeners.AttributeHider;
+import dev.senob.GravenCore;
+import dev.senob.core.GravenConfig;
+import dev.senob.core.GravenTheme;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -187,8 +191,8 @@ public class MythicalArmorSet implements CustomItem, Listener {
         lore.add(TooltipBuilder.durabilityLine("<green>" + remainingDurability + "/" + maxDurability + "</green>"));
         lore.add(TooltipBuilder.section("ATTRIBUTES"));
         lore.add(TooltipBuilder.attribute("🛡", "Defense", "#ADD8E6", formatStat(defense)));
-        lore.add(TooltipBuilder.attribute("💎", "ArT", "#7DD3FC", formatStat(toughness)));
-        lore.add(TooltipBuilder.attribute("⚓", "KbR", "#93C5FD", formatStat(kbResist)));
+        lore.add(TooltipBuilder.attribute("💎", "Armor Tough", "#7DD3FC", formatStat(toughness)));
+        lore.add(TooltipBuilder.attribute("⚓", "Knockback Res", "#93C5FD", formatStat(kbResist)));
         lore.add(TooltipBuilder.attribute("✦", "Block Rate", "#5EEAD4", formatStat(blockRate) + "%", false));
         lore.add(TooltipBuilder.attribute("🔥", "Block Power", "#FCD34D", formatStat(blockPower)));
         lore.add(TooltipBuilder.divider());

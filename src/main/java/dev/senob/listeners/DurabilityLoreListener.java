@@ -1,5 +1,6 @@
-package dev.senob;
+package dev.senob.listeners;
 
+import dev.senob.items.TooltipBuilder;
 import net.kyori.adventure.text.Component;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;

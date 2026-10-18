@@ -1,5 +1,6 @@
-package dev.senob;
+package dev.senob.commands;
 
+import dev.senob.core.GravenTheme;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;

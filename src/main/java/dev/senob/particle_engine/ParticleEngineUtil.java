@@ -1,4 +1,4 @@
-package dev.senob;
+package dev.senob.particle_engine;
 
 import org.bukkit.Location;
 import org.bukkit.Particle;

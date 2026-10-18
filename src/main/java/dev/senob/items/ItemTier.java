@@ -1,4 +1,4 @@
-package dev.senob;
+package dev.senob.items;
 
 import net.kyori.adventure.text.format.TextColor;
 
@@ -20,7 +20,7 @@ public enum ItemTier {
         this.displayName = displayName;
         this.color = color;
     }
-
+    @SuppressWarnings("unused")
     public String getId() {
         return id;
     }

@@ -1,4 +1,4 @@
-package dev.senob;
+package dev.senob.core;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

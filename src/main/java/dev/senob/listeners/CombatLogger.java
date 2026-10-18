@@ -1,5 +1,7 @@
-package dev.senob;
+package dev.senob.listeners;
 
+import dev.senob.core.CooldownManager;
+import dev.senob.core.GravenTheme;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

@@ -51,8 +51,6 @@ public class GravenCore extends JavaPlugin {
         itemManager.registerItem(draculaPlate);
         itemManager.registerItem(mythicalArmorSet);
 
-        // 4. Live durability lore — refreshes the "Durability: <actual>/<max>" line
-        //    as tracked items take damage. Future armor sets: track their PDC id key here.
         DurabilityLoreListener durabilityLore = new DurabilityLoreListener(this);
         durabilityLore.track(mythicalArmorSet.idKey());
         Bukkit.getPluginManager().registerEvents(durabilityLore, this);

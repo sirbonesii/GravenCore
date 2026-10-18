@@ -1,4 +1,4 @@
-package dev.senob;
+package dev.senob.guis;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

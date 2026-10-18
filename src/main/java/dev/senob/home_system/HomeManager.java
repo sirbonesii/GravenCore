@@ -1,4 +1,4 @@
-package dev.senob;
+package dev.senob.home_system;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

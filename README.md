@@ -40,6 +40,10 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   have an `armor.mythical.block-rate`% chance (default 25.0) to trigger a block that subtracts
   `armor.mythical.block-power` flat damage (default 4.0), with a shield-clang sound and crit
   particles on proc. `MythicalArmorSet` is now also a Listener, registered in `onEnable`.
+- **Lore hardcoded (2026-10-18):** item lore text is no longer read from the config — the
+  Redline spear lore, Dracula ABILITY lines and Dracula EFFECTS lines now live as constants in
+  `RedlineSpear`/`DraculaPlate`. Stat numbers still come from config (placeholders keep working),
+  but the text itself can't be broken by config edits. Dead `lore:`/`effects:` keys removed.
 - **Tooltip system prototype (2026-10-17):** new `TooltipBuilder` utility that composes sectioned
   item tooltips (tier line, dividers, `ATTRIBUTES` / `EFFECTS` headers, creator footer) so item
   classes only declare content. New `ItemTier` enum (currently only `MYTHICAL`; more tiers later).

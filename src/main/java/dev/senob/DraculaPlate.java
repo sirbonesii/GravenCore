@@ -42,6 +42,22 @@ public class DraculaPlate implements Listener, CustomItem {
     private final NamespacedKey attackKey;
 
     private static final Set<UUID> activeVampires = new HashSet<>();
+
+    /**
+     * Hardcoded lore templates — lore text lives here, not in the config, by design.
+     * Placeholders (&lt;duration&gt;, &lt;cooldown&gt;, &lt;creator&gt;, &lt;lifesteal&gt;)
+     * are replaced with live values at sync time.
+     */
+    private static final List<String> LORE = List.of(
+            "<gold>ABILITY</gold><gray>:</gray> <dark_red><bold>VAMPIRE'S FLIGHT</bold></dark_red>",
+            "<dark_gray>• <blue>Duration</blue><gray>:</gray> <yellow><duration>s 🦇</yellow>",
+            "<dark_gray>• <yellow>Cooldown</yellow><gray>:</gray> <gold><cooldown>s ⏳</gold>"
+    );
+
+    private static final List<String> EFFECTS = List.of(
+            "<dark_gray>• <green>Passive</green><gray>:</gray> <color:#F8F858>Regeneration I</color>",
+            "<dark_gray>• <dark_red>Lifesteal</dark_red><gray>:</gray> <red><lifesteal>%</red> <gray>of damage dealt</gray>"
+    );
     private static final Map<UUID, ItemStack[]> hiddenArmor = new HashMap<>();
     private static boolean isRegistered = false;
 
@@ -120,7 +136,7 @@ public class DraculaPlate implements Listener, CustomItem {
         lore.add(TooltipBuilder.attribute("⚔", "Atk Damage", "green", formatStat(attackDamage)));
         lore.add(TooltipBuilder.attribute("🛡", "Defense", "#ADD8E6", formatStat(GravenConfig.DRACULA_ARMOR)));
         lore.add(TooltipBuilder.divider());
-        for (String line : GravenConfig.DRACULA_LORE) {
+        for (String line : LORE) {
             String parsed = line
                     .replace("<duration>", String.valueOf(durationSec))
                     .replace("<cooldown>", String.valueOf(cooldownSec))
@@ -128,7 +144,7 @@ public class DraculaPlate implements Listener, CustomItem {
             lore.add(GravenTheme.parse(parsed));
         }
         lore.add(TooltipBuilder.section("EFFECTS"));
-        for (String line : GravenConfig.DRACULA_EFFECTS) {
+        for (String line : EFFECTS) {
             String parsed = line
                     .replace("<lifesteal>", formatStat(GravenConfig.DRACULA_LIFESTEAL_PERCENT))
                     .replace("<lifesteal_chance>", formatStat(GravenConfig.DRACULA_LIFESTEAL_CHANCE));

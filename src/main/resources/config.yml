@@ -49,19 +49,6 @@ weapons:
     # Whether the ability beam passes straight through solid blocks/walls
     pierce-blocks: true
 
-    # Spear lore / item description.
-    # Placeholders: <ability_damage>, <range>, <cooldown>, <creator>
-    lore:
-      - "<gray>Lunge IV</gray>"
-      - "<gray>—————————————————</gray>"
-      - "<gold><bold>ABILITY</gold><gray>:</gray> <gold><bold>CRIMSON PIERCER</bold></gold>"
-      - "<gray>—————————————————</gray>"
-      - "<dark_gray>• <green>Ability Damage</green><gray>:</gray> <red><ability_damage> ❤</red>"
-      - "<dark_gray>• <blue>Ability Range</blue><gray>:</gray> <yellow><range> Blocks</yellow>"
-      - "<dark_gray>• <yellow>Cooldown</yellow><gray>:</gray> <gold><cooldown>s 🔥</gold>"
-      - "<gray>—————————————————</gray>"
-      - "<dark_red>✦</dark_red> <gray>Created by</gray> <gradient:#FF3B1F:#FF9E2C><italic><creator></italic></gradient>"
-
   dracula:
     # No dracula section existed in the old file - these are the values
     # the server was already running on (code defaults).
@@ -81,19 +68,6 @@ weapons:
 
     # Item tier (full tier system coming later; only "mythical" for now)
     tier: "mythical"
-
-    # ABILITY section of the tooltip. Section chrome (dividers, headers,
-    # footer) is added by TooltipBuilder - keep this to content only.
-    # Placeholders: <duration>, <cooldown>, <creator>
-    lore:
-      - "<gold>ABILITY</gold><gray>:</gray> <dark_red><bold>VAMPIRE'S FLIGHT</bold></dark_red>"
-      - "<dark_gray>• <blue>Duration</blue><gray>:</gray> <yellow><duration>s 🦇</yellow>"
-      - "<dark_gray>• <yellow>Cooldown</yellow><gray>:</gray> <gold><cooldown>s ⏳</gold>"
-
-    # EFFECTS section of the tooltip. Placeholders: <lifesteal>, <lifesteal_chance>
-    effects:
-      - "<dark_gray>• <green>Passive</green><gray>:</gray> <color:#F8F858>Regeneration I</color>"
-      - "<dark_gray>• <dark_red>Lifesteal</dark_red><gray>:</gray> <red><lifesteal>%</red> <gray>of damage dealt</gray>"
 
 # --- Mythical Armor Set (prototype) ---
 # The default Mythical netherite set. Per-piece defensive stats;

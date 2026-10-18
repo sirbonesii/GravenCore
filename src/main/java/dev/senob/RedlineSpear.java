@@ -43,6 +43,23 @@ public class RedlineSpear implements Listener, CustomItem {
     private final NamespacedKey meleeDamageKey;
     private final NamespacedKey rangeKey;
 
+    /**
+     * Hardcoded lore template — lore text lives here, not in the config, by design.
+     * Placeholders (&lt;ability_damage&gt;, &lt;range&gt;, &lt;cooldown&gt;, &lt;creator&gt;)
+     * are replaced with live values at sync time.
+     */
+    private static final List<String> LORE = List.of(
+            "<gray>Lunge IV</gray>",
+            "<gray>—————————————————</gray>",
+            "<gold><bold>ABILITY</gold><gray>:</gray> <gold><bold>CRIMSON PIERCER</bold></gold>",
+            "<gray>—————————————————</gray>",
+            "<dark_gray>• <green>Ability Damage</green><gray>:</gray> <red><ability_damage> ❤</red>",
+            "<dark_gray>• <blue>Ability Range</blue><gray>:</gray> <yellow><range> Blocks</yellow>",
+            "<dark_gray>• <yellow>Cooldown</yellow><gray>:</gray> <gold><cooldown>s 🔥</gold>",
+            "<gray>—————————————————</gray>",
+            "<dark_red>✦</dark_red> <gray>Created by</gray> <gradient:#FF3B1F:#FF9E2C><italic><creator></italic></gradient>"
+    );
+
     private final Set<UUID> chargingPlayers = new HashSet<>();
     private final Map<UUID, Long> lastRightClickTime = new HashMap<>();
     private final Map<UUID, Long> fallImmunity = new HashMap<>();
@@ -152,7 +169,7 @@ public class RedlineSpear implements Listener, CustomItem {
         meta.addAttributeModifier(Attribute.ATTACK_SPEED, speedModifier);
 
         List<Component> finalLore = new ArrayList<>();
-        for (String line : GravenConfig.REDLINE_LORE) {
+        for (String line : LORE) {
             if (lungeEnchant != null && line.contains("Lunge IV")) continue;
 
             String parsed = line

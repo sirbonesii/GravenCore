@@ -4,7 +4,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 public class GravenConfig {
@@ -22,7 +21,6 @@ public class GravenConfig {
     public static double REDLINE_ATTACK_SPEED;
     public static double REDLINE_LAUNCH_VELOCITY;
     public static boolean REDLINE_PIERCE_BLOCKS;
-    public static List<String> REDLINE_LORE;
 
     // --- DRACULA PLATE ---
     public static long DRACULA_COOLDOWN;
@@ -33,8 +31,6 @@ public class GravenConfig {
     public static double DRACULA_LIFESTEAL_PERCENT;
     public static double DRACULA_LIFESTEAL_CHANCE;
     public static String DRACULA_TIER;
-    public static List<String> DRACULA_LORE;
-    public static List<String> DRACULA_EFFECTS;
 
     // --- MYTHICAL ARMOR SET ---
     public static String MYTHICAL_TIER;
@@ -72,21 +68,6 @@ public class GravenConfig {
         REDLINE_LAUNCH_VELOCITY = config.getDouble("weapons.redline.launch-velocity", 2.85);
         REDLINE_PIERCE_BLOCKS = config.getBoolean("weapons.redline.pierce-blocks", true);
 
-        REDLINE_LORE = config.getStringList("weapons.redline.lore");
-        if (REDLINE_LORE.isEmpty()) {
-            REDLINE_LORE = List.of(
-                    "<gray>Lunge IV</gray>",
-                    "<gray>—————————————————</gray>",
-                    "<gold>ABILITY</gold><gray>:</gray> <gold><bold>CRIMSON PIERCER</bold></gold>",
-                    "<gray>—————————————————</gray>",
-                    "<dark_gray>• <green>Ability Damage</green><gray>: <red><ability_damage> ❤</red>",
-                    "<dark_gray>• <blue>Ability Range</blue><gray>:</gray> <yellow><range> Blocks</yellow>",
-                    "<dark_gray>• <yellow>Cooldown</yellow><gray>:</gray> <gold><cooldown>s 🔥</gold>",
-                    "<gray>—————————————————</gray>",
-                    "<dark_red>✦</dark_red> <gray>Created by</gray> <gradient:#FF3B1F:#FF9E2C><italic><creator></italic></gradient>"
-            );
-        }
-
         // 3. DRACULA PLATE
         DRACULA_COOLDOWN = config.getLong("weapons.dracula.cooldown", 30L);
         DRACULA_DURATION = config.getLong("weapons.dracula.duration", 10L);
@@ -97,25 +78,6 @@ public class GravenConfig {
         DRACULA_LIFESTEAL_PERCENT = config.getDouble("weapons.dracula.lifesteal-percent", 20.0);
         DRACULA_LIFESTEAL_CHANCE = config.getDouble("weapons.dracula.lifesteal-chance", 85.0);
         DRACULA_TIER = config.getString("weapons.dracula.tier", "mythical");
-
-        // Ability body lines. Section chrome (dividers, headers, footer)
-        // is added by TooltipBuilder; keep this to content only.
-        DRACULA_LORE = config.getStringList("weapons.dracula.lore");
-        if (DRACULA_LORE.isEmpty()) {
-            DRACULA_LORE = List.of(
-                    "<gold>ABILITY</gold><gray>:</gray> <dark_red><bold>VAMPIRE'S FLIGHT</bold></dark_red>",
-                    "<dark_gray>• <blue>Duration</blue><gray>:</gray> <yellow><duration>s 🦇</yellow>",
-                    "<dark_gray>• <yellow>Cooldown</yellow><gray>:</gray> <gold><cooldown>s ⏳</gold>"
-            );
-        }
-
-        DRACULA_EFFECTS = config.getStringList("weapons.dracula.effects");
-        if (DRACULA_EFFECTS.isEmpty()) {
-            DRACULA_EFFECTS = List.of(
-                    "<dark_gray>• <green>Passive</green><gray>:</gray> <color:#F8F858>Regeneration I</color>",
-                    "<dark_gray>• <dark_red>Lifesteal</dark_red><gray>:</gray> <red><lifesteal>%</red> <gray>of damage dealt</gray>"
-            );
-        }
 
         // 4. MYTHICAL ARMOR SET
         MYTHICAL_TIER = config.getString("armor.mythical.tier", "mythical");

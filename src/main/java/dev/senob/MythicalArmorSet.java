@@ -3,8 +3,15 @@ package dev.senob;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
@@ -15,16 +22,19 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * The default Mythical netherite armor set (prototype).
  * Four pieces sharing the Mythical tier tooltip chrome: tier line,
- * durability line, ATTRIBUTES (Defense / Armor Toughness / Knockback
- * Resistance), and the creator footer. Stats are real attribute
- * modifiers plus per-item PDC overrides, synced from config.
+ * durability line and ATTRIBUTES (Defense / ArT / KbR). Stats are real
+ * attribute modifiers plus per-item PDC overrides, synced from config.
+ * Also owns the set's block system: while wearing a piece, incoming attacks
+ * have a block-rate% chance to be reduced by block-power (flat), with a
+ * shield-clang sound and impact particles on trigger.
  */
 @SuppressWarnings({"UnstableApiUsage", "unused"})
-public class MythicalArmorSet implements CustomItem {
+public class MythicalArmorSet implements CustomItem, Listener {
 
     private final GravenCore plugin;
 
@@ -180,5 +190,35 @@ public class MythicalArmorSet implements CustomItem {
 
     private static String formatStat(double value) {
         return String.format("%.1f", value);
+    }
+
+    /**
+     * Block system: while wearing at least one set piece, incoming attacks have
+     * a {@code block-rate}% chance to be partially blocked, reducing the damage
+     * by {@code block-power} (flat). A shield-clang sound and impact particles
+     * play when the block triggers.
+     */
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    public void onAttackBlocked(EntityDamageByEntityEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (!isWearingMythical(player)) return;
+
+        double rate = Math.min(100.0, Math.max(0.0, GravenConfig.MYTHICAL_BLOCK_RATE));
+        if (rate <= 0.0) return;
+        if (ThreadLocalRandom.current().nextDouble(100.0) >= rate) return;
+
+        double power = Math.max(0.0, GravenConfig.MYTHICAL_BLOCK_POWER);
+        event.setDamage(Math.max(0.0, event.getDamage() - power));
+
+        player.getWorld().playSound(player.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1.0f, 1.0f);
+        player.getWorld().spawnParticle(Particle.CRIT,
+                player.getLocation().add(0.0, 1.2, 0.0), 10, 0.3, 0.3, 0.3, 0.1);
+    }
+
+    private boolean isWearingMythical(Player player) {
+        for (ItemStack armor : player.getInventory().getArmorContents()) {
+            if (isItem(armor)) return true;
+        }
+        return false;
     }
 }

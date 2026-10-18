@@ -39,6 +39,10 @@ public class GravenConfig {
     // --- MYTHICAL ARMOR SET ---
     public static String MYTHICAL_TIER;
     public static int MYTHICAL_DURABILITY;
+    /** Chance (percent, 0-100) for a worn piece to block an incoming attack. */
+    public static double MYTHICAL_BLOCK_RATE;
+    /** Flat damage subtracted when the block triggers. */
+    public static double MYTHICAL_BLOCK_POWER;
     /** Piece id -> [defense, toughness, knockback-resistance]. */
     public static Map<String, double[]> MYTHICAL_PIECES;
 
@@ -116,6 +120,8 @@ public class GravenConfig {
         // 4. MYTHICAL ARMOR SET
         MYTHICAL_TIER = config.getString("armor.mythical.tier", "mythical");
         MYTHICAL_DURABILITY = config.getInt("armor.mythical.durability", 2096);
+        MYTHICAL_BLOCK_RATE = config.getDouble("armor.mythical.block-rate", 25.0);
+        MYTHICAL_BLOCK_POWER = config.getDouble("armor.mythical.block-power", 4.0);
         MYTHICAL_PIECES = new LinkedHashMap<>();
         loadMythicalPiece(config, "helmet", 3.0);
         loadMythicalPiece(config, "chestplate", 8.0);

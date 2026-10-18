@@ -45,6 +45,7 @@ public class GravenCore extends JavaPlugin {
 
         // Internal standard listeners for items
         Bukkit.getPluginManager().registerEvents(redlineSpear, this);
+        Bukkit.getPluginManager().registerEvents(mythicalArmorSet, this);
 
         // 4. Register Command Router
         GravenCoreCommand gravencoreCmd = new GravenCoreCommand(this, redlineSpear, draculaPlate, mythicalArmorSet);

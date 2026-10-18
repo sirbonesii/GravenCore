@@ -38,6 +38,7 @@ public class GravenConfig {
 
     // --- MYTHICAL ARMOR SET ---
     public static String MYTHICAL_TIER;
+    public static int MYTHICAL_DURABILITY;
     /** Piece id -> [defense, toughness, knockback-resistance]. */
     public static Map<String, double[]> MYTHICAL_PIECES;
 
@@ -114,6 +115,7 @@ public class GravenConfig {
 
         // 4. MYTHICAL ARMOR SET
         MYTHICAL_TIER = config.getString("armor.mythical.tier", "mythical");
+        MYTHICAL_DURABILITY = config.getInt("armor.mythical.durability", 2096);
         MYTHICAL_PIECES = new LinkedHashMap<>();
         loadMythicalPiece(config, "helmet", 3.0);
         loadMythicalPiece(config, "chestplate", 8.0);

@@ -103,6 +103,9 @@ armor:
     # Item tier (full tier system coming later; only "mythical" for now)
     tier: "mythical"
 
+    # Max durability per piece (the set is NOT unbreakable)
+    durability: 2096
+
     pieces:
       helmet:
         defense: 3.0

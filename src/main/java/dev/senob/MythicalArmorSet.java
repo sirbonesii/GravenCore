@@ -7,12 +7,14 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * The default Mythical netherite armor set (prototype).
@@ -33,25 +35,34 @@ public class MythicalArmorSet implements CustomItem {
 
     /** The four set pieces. */
     public enum Piece {
-        HELMET("helmet", "Mythical Helmet", Material.NETHERITE_HELMET, EquipmentSlotGroup.HEAD),
-        CHESTPLATE("chestplate", "Mythical Chestplate", Material.NETHERITE_CHESTPLATE, EquipmentSlotGroup.CHEST),
-        LEGGINGS("leggings", "Mythical Leggings", Material.NETHERITE_LEGGINGS, EquipmentSlotGroup.LEGS),
-        BOOTS("boots", "Mythical Boots", Material.NETHERITE_BOOTS, EquipmentSlotGroup.FEET);
+        HELMET("helmet", Material.NETHERITE_HELMET, EquipmentSlotGroup.HEAD),
+        CHESTPLATE("chestplate", Material.NETHERITE_CHESTPLATE, EquipmentSlotGroup.CHEST),
+        LEGGINGS("leggings", Material.NETHERITE_LEGGINGS, EquipmentSlotGroup.LEGS),
+        BOOTS("boots", Material.NETHERITE_BOOTS, EquipmentSlotGroup.FEET);
 
         private final String id;
-        private final String displayName;
         private final Material material;
         private final EquipmentSlotGroup slotGroup;
 
-        Piece(String id, String displayName, Material material, EquipmentSlotGroup slotGroup) {
+        Piece(String id, Material material, EquipmentSlotGroup slotGroup) {
             this.id = id;
-            this.displayName = displayName;
             this.material = material;
             this.slotGroup = slotGroup;
         }
 
         public String id() {
             return id;
+        }
+
+        /** "NETHERITE_CHESTPLATE" -> "Netherite Chestplate". */
+        public String vanillaName() {
+            String[] words = material.name().toLowerCase(Locale.ROOT).split("_");
+            StringBuilder sb = new StringBuilder();
+            for (String word : words) {
+                if (!sb.isEmpty()) sb.append(' ');
+                sb.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
+            }
+            return sb.toString();
         }
 
         public static Piece fromId(String id) {
@@ -107,9 +118,15 @@ public class MythicalArmorSet implements CustomItem {
 
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
 
-        meta.displayName(GravenTheme.parse("<color:#F8F8A0><italic>" + piece.displayName + "</italic></color>"));
-        meta.itemName(GravenTheme.parse("<color:#F8F8A0>" + piece.displayName + "</color>"));
-        meta.setUnbreakable(true);
+        String vanillaName = piece.vanillaName();
+        meta.displayName(GravenTheme.parse("<gray>" + vanillaName + "</gray>"));
+        meta.itemName(GravenTheme.parse("<gray>" + vanillaName + "</gray>"));
+        meta.setUnbreakable(false);
+
+        int durability = GravenConfig.MYTHICAL_DURABILITY;
+        if (meta instanceof Damageable damageable) {
+            damageable.setMaxDamage(durability);
+        }
 
         double[] defaults = GravenConfig.MYTHICAL_PIECES.getOrDefault(piece.id,
                 new double[]{3.0, 3.0, 0.1});
@@ -138,8 +155,7 @@ public class MythicalArmorSet implements CustomItem {
 
         List<Component> lore = new ArrayList<>();
         lore.add(TooltipBuilder.tierLine(tier));
-        lore.add(TooltipBuilder.durabilityLine("<blue>Unbreakable</blue>"));
-        lore.add(TooltipBuilder.divider());
+        lore.add(TooltipBuilder.durabilityLine("<green>" + durability + "</green>"));
         lore.add(TooltipBuilder.section("ATTRIBUTES"));
         lore.add(TooltipBuilder.attribute("🛡", "Defense", "#ADD8E6", formatStat(defense)));
         lore.add(TooltipBuilder.attribute("💎", "Armor Toughness", "#7DD3FC", formatStat(toughness)));

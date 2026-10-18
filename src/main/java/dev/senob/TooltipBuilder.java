@@ -15,17 +15,29 @@ public final class TooltipBuilder {
     }
 
     /**
+     * Dash budget for divider lines; section headers size their dashes
+     * to match so every line aligns.
+     */
+    private static final int DIVIDER_WIDTH = 17;
+
+    /**
      * The standard divider line placed between tooltip sections.
      */
     public static Component divider() {
-        return GravenTheme.parse("<gray>—————————————————</gray>");
+        return GravenTheme.parse("<gray>" + "—".repeat(DIVIDER_WIDTH) + "</gray>");
     }
 
     /**
-     * A section header, e.g. ATTRIBUTES or EFFECTS.
+     * A section header embedded in the middle of the divider,
+     * e.g. ——————ATTRIBUTES——————. The dashes are sized so the whole
+     * line matches divider() width (roughly: one em-dash ≈ two title
+     * characters wide).
      */
     public static Component section(String title) {
-        return GravenTheme.parse("<gold><bold>" + title + "</bold></gold>");
+        int titleDashes = Math.max(1, (int) Math.ceil(title.length() / 2.0));
+        int side = Math.max(2, (DIVIDER_WIDTH - titleDashes) / 2);
+        String dashes = "—".repeat(side);
+        return GravenTheme.parse("<gray>" + dashes + "</gray><gold><bold>" + title + "</bold></gold><gray>" + dashes + "</gray>");
     }
 
     /**

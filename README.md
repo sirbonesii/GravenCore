@@ -18,6 +18,14 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   `/gravencore give armor mythical <helmet|chestplate|leggings|boots|set>` (category + tier
   structure, ready for more tiers later), `/gravencore config
   mythical <defense|toughness|kbresist> <value>`, and `/gravencore reload` all cover the set.
+- **Mythical armor set tweaks (2026-10-17):** piece names are now the vanilla item name in
+  gray (e.g. "Netherite Chestplate") instead of the aurora "Mythical ..." names; the set is
+  no longer unbreakable — each piece has `armor.mythical.durability` max durability
+  (default 2096), shown in the tooltip's Durability line.
+- **Section headers embedded in dividers (2026-10-17):** `TooltipBuilder.section()` now
+  renders the title centered inside the divider line (e.g. `——————ATTRIBUTES——————`, dashes
+  sized to match the plain divider width) instead of a separate header line; the plain
+  dividers that used to sit right before each header were removed.
 - **Tooltip system prototype (2026-10-17):** new `TooltipBuilder` utility that composes sectioned
   item tooltips (tier line, dividers, `ATTRIBUTES` / `EFFECTS` headers, creator footer) so item
   classes only declare content. New `ItemTier` enum (currently only `MYTHICAL`; more tiers later).

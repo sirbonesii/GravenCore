@@ -72,8 +72,9 @@ public final class TooltipBuilder {
     }
 
     /**
-     * Resizes every divider and section-header line in the lore to span the
-     * widest content line, so dividers always match the tooltip box width.
+     * Resizes every divider and section-header line in the lore to span wider
+     * than the widest content line, Teldaria-style: the dividers bleed to the
+     * tooltip edges and define the box width instead of hugging the text.
      * Call after building the lore list, before meta.lore(lore).
      */
     public static void fitDividers(List<Component> lore) {
@@ -85,14 +86,17 @@ public final class TooltipBuilder {
             max = Math.max(max, text.length());
         }
         int width = Math.max(DIVIDER_WIDTH, max);
+        // Full-bleed: dividers run past the content. Minimum 34 chars so even
+        // short tooltips get the wide Teldaria look; grows if content is wider.
+        int dividerWidth = Math.max(34, width + 8);
         ListIterator<Component> it = lore.listIterator();
         while (it.hasNext()) {
             Component line = it.next();
             String text = plain.serialize(line);
             if (text.matches("-+")) {
-                it.set(divider(width));
+                it.set(divider(dividerWidth));
             } else if (text.matches("-+[^-]+-+")) {
-                it.set(section(text.replaceAll("^-+|-+$", ""), width));
+                it.set(section(text.replaceAll("^-+|-+$", ""), dividerWidth));
             }
         }
     }

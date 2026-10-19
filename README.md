@@ -85,6 +85,9 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
 
 #### Changed
+- **Teldaria-style full-bleed dividers (2026-10-18):** `fitDividers()` now sizes dividers to
+  run past the content (minimum 34 chars, +8 over the widest line) so they bleed to the
+  tooltip edges and define the box width, instead of hugging the text.
 - **Section header pixel-matching (2026-10-18):** `TooltipBuilder.section()` now sizes side
   dashes using pixel-width ratios (content char ≈ 1.33 dashes, bold title char ≈ 1.67 dashes)
   instead of the old 0.7 estimate, so headers with different title lengths ("Enchantments" vs

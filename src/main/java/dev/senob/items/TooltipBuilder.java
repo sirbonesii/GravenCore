@@ -39,11 +39,10 @@ public final class TooltipBuilder {
     }
 
     /**
-     * A divider line with an explicit width, in content-characters. Scaled by
-     * ~1.33x since dashes are narrower than average content characters.
+     * A divider line with an explicit width, in dashes.
      */
     public static Component divider(int width) {
-        return GravenTheme.parse("<gray>" + "-".repeat(Math.max(1, (int) Math.round(width * 1.33))) + "</gray>");
+        return GravenTheme.parse("<gray>" + "-".repeat(Math.max(1, width)) + "</gray>");
     }
 
     /**
@@ -57,16 +56,11 @@ public final class TooltipBuilder {
 
     /**
      * A section header embedded in the middle of the divider,
-     * e.g. -------------ATTRIBUTES-------------. The side dashes are sized so
-     * the whole header spans the given content width in pixels. Ratios tuned
-     * from in-game screenshots: a content char is ~1.33 dashes wide, a bold
-     * title char is ~1.67 dashes wide. Compensating for both keeps headers
-     * with different titles ("Enchantments" vs "ATTRIBUTES") visually aligned
-     * with each other and with the content.
+     * e.g. -------------ATTRIBUTES-------------. The title is centered with
+     * equal dashes per side so all headers align consistently, Teldaria-style.
      */
     public static Component section(String title, int width) {
-        int side = (int) Math.round((width * 1.33 - title.length() * 1.67) / 2);
-        side = Math.max(1, side);
+        int side = Math.max(4, (width - title.length()) / 2);
         String dashes = "-".repeat(side);
         return GravenTheme.parse("<gray>" + dashes + "</gray><gold><bold>" + title + "</bold></gold><gray>" + dashes + "</gray>");
     }

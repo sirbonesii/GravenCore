@@ -86,13 +86,9 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 
 #### Changed
 - **Teldaria-style full-bleed dividers (2026-10-18):** `fitDividers()` now sizes dividers to
-  run past the content (minimum 34 chars, +8 over the widest line) so they bleed to the
-  tooltip edges and define the box width, instead of hugging the text.
-- **Section header pixel-matching (2026-10-18):** `TooltipBuilder.section()` now sizes side
-  dashes using pixel-width ratios (content char ≈ 1.33 dashes, bold title char ≈ 1.67 dashes)
-  instead of the old 0.7 estimate, so headers with different title lengths ("Enchantments" vs
-  "ATTRIBUTES") render at the same visual width. Plain `divider(width)` scaled the same way.
-  Also renamed the "Enchants" section to "Enchantments".
+  a fixed minimum width (34 chars) so they bleed to the tooltip edges Teldaria-style.
+  `section()` centers titles with equal dashes per side — no more fragile pixel-ratio math,
+  all headers align consistently. Also renamed the "Enchants" section to "Enchantments".
 - **Config migration (2026-10-17):** `src/main/resources/config.yml` migrated from the old flat
   "TheRedline" format to the nested `settings.*` / `weapons.*` structure that `GravenConfig`
   actually reads. Carried over: `settings.creator`, the full `weapons.redline` section

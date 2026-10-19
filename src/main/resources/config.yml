@@ -85,6 +85,14 @@ weapons:
     block-rate: 25.0
     block-power: 4.0
 
+    # Sound effects: block proc sound as [sound-name, volume, pitch]
+    # Same args as: /playsound minecraft:block.anvil.land player @a ~ ~ ~ 100 1.9
+    sound-effects:
+      block:
+        - minecraft:block.anvil.land
+        - 100
+        - 1.9
+
 # --- Mythical Armor Set (prototype) ---
 # The default Mythical netherite set. Per-piece defensive stats;
 # knockback-resistance uses vanilla scale (0.1 = 10% per piece).
@@ -100,6 +108,14 @@ armor:
     # on an incoming attack, and flat damage subtracted when it triggers
     block-rate: 45.0
     block-power: 4.0
+
+    # Sound effects: block proc sound as [sound-name, volume, pitch]
+    # Same args as: /playsound minecraft:block.anvil.land player @a ~ ~ ~ 100 1.9
+    sound-effects:
+      block:
+        - minecraft:block.anvil.land
+        - 100
+        - 1.9
 
     pieces:
       helmet:

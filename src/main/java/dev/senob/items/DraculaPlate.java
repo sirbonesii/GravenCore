@@ -242,7 +242,8 @@ public class DraculaPlate implements Listener, CustomItem {
                 pdc.getOrDefault(blockPowerKey, PersistentDataType.DOUBLE, GravenConfig.DRACULA_BLOCK_POWER));
         event.setDamage(Math.max(0.0, event.getDamage() - power));
 
-        player.getWorld().playSound(player.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1.0f, 1.0f);
+        player.getWorld().playSound(player.getLocation(),
+                GravenConfig.DRACULA_BLOCK_SOUND, GravenConfig.DRACULA_BLOCK_VOLUME, GravenConfig.DRACULA_BLOCK_PITCH);
         player.getWorld().spawnParticle(Particle.CRIT,
                 player.getLocation().add(0.0, 1.2, 0.0), 10, 0.3, 0.3, 0.3, 0.1);
     }

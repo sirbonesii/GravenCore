@@ -8,7 +8,6 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
@@ -244,7 +243,8 @@ public class MythicalArmorSet implements CustomItem, Listener {
         double power = Math.max(0.0, bestPower);
         event.setDamage(Math.max(0.0, event.getDamage() - power));
 
-        player.getWorld().playSound(player.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1.0f, 1.0f);
+        player.getWorld().playSound(player.getLocation(),
+                GravenConfig.MYTHICAL_BLOCK_SOUND, GravenConfig.MYTHICAL_BLOCK_VOLUME, GravenConfig.MYTHICAL_BLOCK_PITCH);
         player.getWorld().spawnParticle(Particle.CRIT,
                 player.getLocation().add(0.0, 1.2, 0.0), 10, 0.3, 0.3, 0.3, 0.1);
     }

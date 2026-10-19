@@ -8,6 +8,12 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
+- **Block sound effects config (2026-10-19):** block proc sounds are now configurable as
+  `[sound-name, volume, pitch]` lists — same args as `/playsound` (default
+  `minecraft:block.anvil.land`, 100, 1.9). Applies to both the Mythical set
+  (`armor.mythical.sound-effects.block`) and Dracula's Plate
+  (`weapons.dracula.sound-effects.block`). The hardcoded shield-clang is gone;
+  `GravenConfig` parses the lists with safe fallbacks.
 - **Enchants tooltip section (2026-10-18):** vanilla enchantment lines no longer float at the
   top of armor tooltips — `HIDE_ENCHANTS` suppresses the client's automatic block and the
   enchantments render under their own "Enchants" divider (after Durability, before ATTRIBUTES),

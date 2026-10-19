@@ -4,6 +4,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class GravenConfig {
@@ -32,6 +33,10 @@ public class GravenConfig {
     public static double DRACULA_LIFESTEAL_CHANCE;
     public static double DRACULA_BLOCK_RATE;
     public static double DRACULA_BLOCK_POWER;
+    /** Block proc sound: namespaced id, volume, pitch (from sound-effects.block). */
+    public static String DRACULA_BLOCK_SOUND;
+    public static float DRACULA_BLOCK_VOLUME;
+    public static float DRACULA_BLOCK_PITCH;
     public static String DRACULA_TIER;
 
     // --- MYTHICAL ARMOR SET ---
@@ -41,6 +46,10 @@ public class GravenConfig {
     public static double MYTHICAL_BLOCK_RATE;
     /** Flat damage subtracted when the block triggers. */
     public static double MYTHICAL_BLOCK_POWER;
+    /** Block proc sound: namespaced id, volume, pitch (from sound-effects.block). */
+    public static String MYTHICAL_BLOCK_SOUND;
+    public static float MYTHICAL_BLOCK_VOLUME;
+    public static float MYTHICAL_BLOCK_PITCH;
     /** Piece id -> [defense, toughness, knockback-resistance]. */
     public static Map<String, double[]> MYTHICAL_PIECES;
 
@@ -81,6 +90,7 @@ public class GravenConfig {
         DRACULA_LIFESTEAL_CHANCE = config.getDouble("weapons.dracula.lifesteal-chance", 85.0);
         DRACULA_BLOCK_RATE = config.getDouble("weapons.dracula.block-rate", 25.0);
         DRACULA_BLOCK_POWER = config.getDouble("weapons.dracula.block-power", 4.0);
+        loadDraculaBlockSound(config);
         DRACULA_TIER = config.getString("weapons.dracula.tier", "mythical");
 
         // 4. MYTHICAL ARMOR SET
@@ -88,11 +98,43 @@ public class GravenConfig {
         MYTHICAL_DURABILITY = config.getInt("armor.mythical.durability", 2096);
         MYTHICAL_BLOCK_RATE = config.getDouble("armor.mythical.block-rate", 25.0);
         MYTHICAL_BLOCK_POWER = config.getDouble("armor.mythical.block-power", 4.0);
+        loadMythicalBlockSound(config);
         MYTHICAL_PIECES = new LinkedHashMap<>();
         loadMythicalPiece(config, "helmet", 3.0);
         loadMythicalPiece(config, "chestplate", 8.0);
         loadMythicalPiece(config, "leggings", 6.0);
         loadMythicalPiece(config, "boots", 3.0);
+    }
+
+    private static void loadDraculaBlockSound(FileConfiguration config) {
+        String[] s = readBlockSound(config, "weapons.dracula.sound-effects.block");
+        DRACULA_BLOCK_SOUND = s[0];
+        DRACULA_BLOCK_VOLUME = Float.parseFloat(s[1]);
+        DRACULA_BLOCK_PITCH = Float.parseFloat(s[2]);
+    }
+
+    private static void loadMythicalBlockSound(FileConfiguration config) {
+        String[] s = readBlockSound(config, "armor.mythical.sound-effects.block");
+        MYTHICAL_BLOCK_SOUND = s[0];
+        MYTHICAL_BLOCK_VOLUME = Float.parseFloat(s[1]);
+        MYTHICAL_BLOCK_PITCH = Float.parseFloat(s[2]);
+    }
+
+    /** Reads a [sound-name, volume, pitch] list; falls back to anvil defaults on any problem. */
+    private static String[] readBlockSound(FileConfiguration config, String path) {
+        List<String> list = config.getStringList(path);
+        if (list.size() >= 3) {
+            try {
+                return new String[]{
+                        list.get(0),
+                        String.valueOf(Float.parseFloat(list.get(1))),
+                        String.valueOf(Float.parseFloat(list.get(2)))
+                };
+            } catch (NumberFormatException ignored) {
+                // fall through to defaults
+            }
+        }
+        return new String[]{"minecraft:block.anvil.land", "100.0", "1.9"};
     }
 
     private static void loadMythicalPiece(FileConfiguration config, String id, double defaultDefense) {

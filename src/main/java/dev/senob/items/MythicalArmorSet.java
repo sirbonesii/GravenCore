@@ -2,19 +2,26 @@ package dev.senob.items;
 
 import dev.senob.listeners.AttributeHider;
 import dev.senob.GravenCore;
+import dev.senob.core.CooldownManager;
 import dev.senob.core.GravenConfig;
 import dev.senob.core.GravenTheme;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -22,6 +29,9 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,12 +45,18 @@ import java.util.concurrent.ThreadLocalRandom;
  * attribute modifiers plus per-item PDC overrides, synced from config.
  * Also owns the set's block system: while wearing a piece, incoming attacks
  * have a block-rate% chance to be reduced by block-power (flat), with a
- * shield-clang sound and impact particles on trigger.
+ * configurable proc sound and impact particles on trigger. The boots also
+ * carry the Time Slow ability: shift + left-click slows everything nearby
+ * except the wearer.
  */
 @SuppressWarnings({"UnstableApiUsage", "unused"})
 public class MythicalArmorSet implements CustomItem, Listener {
 
     private final GravenCore plugin;
+    private final CooldownManager cooldownManager;
+
+    public static final CooldownManager.CooldownType TIMESLOW_COOLDOWN_TYPE =
+            new CooldownManager.CooldownType("mythical-timeslow", "⏳", TextColor.color(0x5EEAD4));
 
     private final NamespacedKey pieceKey;
     private final NamespacedKey defenseKey;
@@ -91,8 +107,10 @@ public class MythicalArmorSet implements CustomItem, Listener {
         }
     }
 
-    public MythicalArmorSet(GravenCore plugin) {
+    public MythicalArmorSet(GravenCore plugin, CooldownManager cooldownManager) {
         this.plugin = plugin;
+        this.cooldownManager = cooldownManager;
+        this.cooldownManager.registerType(TIMESLOW_COOLDOWN_TYPE);
         this.pieceKey = new NamespacedKey(plugin, "mythical_armor");
         this.defenseKey = new NamespacedKey(plugin, "mythical_defense");
         this.toughnessKey = new NamespacedKey(plugin, "mythical_toughness");
@@ -201,6 +219,12 @@ public class MythicalArmorSet implements CustomItem, Listener {
         lore.add(TooltipBuilder.attribute("⚓", "Knockback Res", "#93C5FD", formatStat(kbResist)));
         lore.add(TooltipBuilder.attribute("✦", "Block Rate", "#5EEAD4", formatStat(blockRate) + "%", false));
         lore.add(TooltipBuilder.attribute("🔥", "Block Power", "#FCD34D", formatStat(blockPower)));
+        if (piece == Piece.BOOTS && GravenConfig.MYTHICAL_TIMESLOW_ENABLED) {
+            lore.add(TooltipBuilder.section("ABILITY"));
+            lore.add(GravenTheme.parse("<aqua>⏳ TIME SLOW</aqua><gray>:</gray> <white>Shift + Left Click</white>"));
+            lore.add(GravenTheme.parse("<gray>Slows everything nearby for <aqua>"
+                    + GravenConfig.MYTHICAL_TIMESLOW_DURATION + "s</aqua>, except you</gray>"));
+        }
         lore.add(TooltipBuilder.divider());
 
         TooltipBuilder.fitDividers(lore);
@@ -247,5 +271,60 @@ public class MythicalArmorSet implements CustomItem, Listener {
                 GravenConfig.MYTHICAL_BLOCK_SOUND, GravenConfig.MYTHICAL_BLOCK_VOLUME, GravenConfig.MYTHICAL_BLOCK_PITCH);
         player.getWorld().spawnParticle(Particle.CRIT,
                 player.getLocation().add(0.0, 1.2, 0.0), 10, 0.3, 0.3, 0.3, 0.1);
+    }
+
+    /**
+     * Boots ability: shift + left-click slows every other living entity in
+     * radius with Slowness; the wearer is unaffected.
+     */
+    @EventHandler
+    public void onTimeSlowTrigger(PlayerInteractEvent event) {
+        Action action = event.getAction();
+        if (action != Action.LEFT_CLICK_AIR && action != Action.LEFT_CLICK_BLOCK) return;
+        Player player = event.getPlayer();
+        if (!player.isSneaking() || !GravenConfig.MYTHICAL_TIMESLOW_ENABLED) return;
+        if (!"boots".equals(getPieceId(player.getInventory().getBoots()))) return;
+        if (cooldownManager.isOnCooldown(player, TIMESLOW_COOLDOWN_TYPE)) return;
+
+        double radius = Math.max(1.0, GravenConfig.MYTHICAL_TIMESLOW_RADIUS);
+        int durationTicks = (int) (Math.max(0.5, GravenConfig.MYTHICAL_TIMESLOW_DURATION) * 20.0);
+        int amplifier = Math.max(0, GravenConfig.MYTHICAL_TIMESLOW_AMPLIFIER);
+
+        for (Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), radius, radius, radius)) {
+            if (entity instanceof LivingEntity living && !living.equals(player)) {
+                living.addPotionEffect(new PotionEffect(
+                        PotionEffectType.SLOWNESS, durationTicks, amplifier, false, true, true));
+            }
+        }
+
+        player.getWorld().playSound(player.getLocation(),
+                GravenConfig.MYTHICAL_TIMESLOW_SOUND, GravenConfig.MYTHICAL_TIMESLOW_VOLUME, GravenConfig.MYTHICAL_TIMESLOW_PITCH);
+        spawnTimeSlowRing(player, radius);
+
+        cooldownManager.setCooldown(player, TIMESLOW_COOLDOWN_TYPE, GravenConfig.MYTHICAL_TIMESLOW_COOLDOWN);
+
+        if (action == Action.LEFT_CLICK_BLOCK) event.setCancelled(true);
+    }
+
+    private void spawnTimeSlowRing(Player player, double radius) {
+        new BukkitRunnable() {
+            int step = 0;
+
+            @Override
+            public void run() {
+                if (step > 4 || !player.isOnline()) {
+                    cancel();
+                    return;
+                }
+                double r = radius * (step + 1) / 5.0;
+                Location center = player.getLocation();
+                for (int i = 0; i < 24; i++) {
+                    double angle = (Math.PI * 2 * i) / 24;
+                    Location at = center.clone().add(Math.cos(angle) * r, 0.1, Math.sin(angle) * r);
+                    player.getWorld().spawnParticle(Particle.WITCH, at, 2, 0.05, 0.05, 0.05, 0.0);
+                }
+                step++;
+            }
+        }.runTaskTimer(plugin, 0L, 2L);
     }
 }

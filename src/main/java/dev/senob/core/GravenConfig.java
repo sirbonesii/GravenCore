@@ -50,6 +50,15 @@ public class GravenConfig {
     public static String MYTHICAL_BLOCK_SOUND;
     public static float MYTHICAL_BLOCK_VOLUME;
     public static float MYTHICAL_BLOCK_PITCH;
+    /** Boots time-slow ability: shift + left-click slows everything nearby except the wearer. */
+    public static boolean MYTHICAL_TIMESLOW_ENABLED;
+    public static double MYTHICAL_TIMESLOW_DURATION;
+    public static long MYTHICAL_TIMESLOW_COOLDOWN;
+    public static double MYTHICAL_TIMESLOW_RADIUS;
+    public static int MYTHICAL_TIMESLOW_AMPLIFIER;
+    public static String MYTHICAL_TIMESLOW_SOUND;
+    public static float MYTHICAL_TIMESLOW_VOLUME;
+    public static float MYTHICAL_TIMESLOW_PITCH;
     /** Piece id -> [defense, toughness, knockback-resistance]. */
     public static Map<String, double[]> MYTHICAL_PIECES;
 
@@ -99,6 +108,7 @@ public class GravenConfig {
         MYTHICAL_BLOCK_RATE = config.getDouble("armor.mythical.block-rate", 25.0);
         MYTHICAL_BLOCK_POWER = config.getDouble("armor.mythical.block-power", 4.0);
         loadMythicalBlockSound(config);
+        loadMythicalTimeSlow(config);
         MYTHICAL_PIECES = new LinkedHashMap<>();
         loadMythicalPiece(config, "helmet", 3.0);
         loadMythicalPiece(config, "chestplate", 8.0);
@@ -107,21 +117,34 @@ public class GravenConfig {
     }
 
     private static void loadDraculaBlockSound(FileConfiguration config) {
-        String[] s = readBlockSound(config, "weapons.dracula.sound-effects.block");
+        String[] s = readSoundList(config, "weapons.dracula.sound-effects.block");
         DRACULA_BLOCK_SOUND = s[0];
         DRACULA_BLOCK_VOLUME = Float.parseFloat(s[1]);
         DRACULA_BLOCK_PITCH = Float.parseFloat(s[2]);
     }
 
     private static void loadMythicalBlockSound(FileConfiguration config) {
-        String[] s = readBlockSound(config, "armor.mythical.sound-effects.block");
+        String[] s = readSoundList(config, "armor.mythical.sound-effects.block");
         MYTHICAL_BLOCK_SOUND = s[0];
         MYTHICAL_BLOCK_VOLUME = Float.parseFloat(s[1]);
         MYTHICAL_BLOCK_PITCH = Float.parseFloat(s[2]);
     }
 
+    private static void loadMythicalTimeSlow(FileConfiguration config) {
+        String base = "armor.mythical.abilities.time-slow";
+        MYTHICAL_TIMESLOW_ENABLED = config.getBoolean(base + ".enabled", true);
+        MYTHICAL_TIMESLOW_DURATION = config.getDouble(base + ".duration", 6.0);
+        MYTHICAL_TIMESLOW_COOLDOWN = config.getLong(base + ".cooldown", 45L);
+        MYTHICAL_TIMESLOW_RADIUS = config.getDouble(base + ".radius", 12.0);
+        MYTHICAL_TIMESLOW_AMPLIFIER = config.getInt(base + ".amplifier", 5);
+        String[] s = readSoundList(config, "armor.mythical.sound-effects.time-slow");
+        MYTHICAL_TIMESLOW_SOUND = s[0];
+        MYTHICAL_TIMESLOW_VOLUME = Float.parseFloat(s[1]);
+        MYTHICAL_TIMESLOW_PITCH = Float.parseFloat(s[2]);
+    }
+
     /** Reads a [sound-name, volume, pitch] list; falls back to anvil defaults on any problem. */
-    private static String[] readBlockSound(FileConfiguration config, String path) {
+    private static String[] readSoundList(FileConfiguration config, String path) {
         List<String> list = config.getStringList(path);
         if (list.size() >= 3) {
             try {

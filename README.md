@@ -8,6 +8,12 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
+- **Mythical boots Time Slow ability (2026-10-19):** shift + left-click while wearing the
+  Mythical boots slows every other living entity in a radius (Slowness VI, 6s) — the wearer
+  is unaffected. New `armor.mythical.abilities.time-slow` keys (enabled, duration, cooldown
+  45s, radius 12, amplifier) plus a `sound-effects.time-slow` sound list (beacon activate).
+  Expanding witch-particle ring + configurable sound on trigger, action-bar cooldown via
+  `CooldownManager` (⏳ icon), and an ABILITY section on the boots tooltip.
 - **Block sound effects config (2026-10-19):** block proc sounds are now configurable as
   `[sound-name, volume, pitch]` lists — same args as `/playsound` (default
   `minecraft:block.anvil.land`, 100, 1.9). Applies to both the Mythical set

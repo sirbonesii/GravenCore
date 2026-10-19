@@ -45,7 +45,7 @@ public class GravenCore extends JavaPlugin {
         // 3. Initialize Custom Items (Passing in the Cooldown Manager)
         RedlineSpear redlineSpear = new RedlineSpear(this, cooldownManager);
         DraculaPlate draculaPlate = new DraculaPlate(this, cooldownManager);
-        MythicalArmorSet mythicalArmorSet = new MythicalArmorSet(this);
+        MythicalArmorSet mythicalArmorSet = new MythicalArmorSet(this, cooldownManager);
 
         itemManager.registerItem(redlineSpear);
         itemManager.registerItem(draculaPlate);

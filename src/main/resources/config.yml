@@ -116,6 +116,19 @@ armor:
         - minecraft:block.anvil.land
         - 100
         - 1.9
+      time-slow:
+        - minecraft:block.beacon.activate
+        - 100
+        - 0.8
+
+    # Boots ability: shift + left-click slows everything nearby except the wearer
+    abilities:
+      time-slow:
+        enabled: true
+        duration: 6.0   # seconds of slowness applied
+        cooldown: 45    # seconds between activations
+        radius: 12.0    # blocks around the wearer
+        amplifier: 5    # Slowness VI (each level is -15% move speed)
 
     pieces:
       helmet:

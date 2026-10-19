@@ -151,8 +151,8 @@ armor:
       duration: 6.0           # seconds the tick rate stays lowered
       cooldown: 45            # seconds between activations
       tick-rate: 4.0          # server tick rate during the slow (20 = normal)
-      compensation-speed: 1   # Speed amplifier given to the wearer
-      compensation-haste: 1   # Haste amplifier given to the wearer
+      compensation-speed: 0   # Speed for the wearer (0 = unaffected; movement is client-predicted)
+      compensation-haste: 1   # Haste for the wearer (offsets slower block breaking)
 
     # Sound effects: trigger sound as [sound-name, volume, pitch]
     sound-effects:

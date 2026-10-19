@@ -143,7 +143,7 @@ public class GravenConfig {
         MYTHICAL_BOOTS_TIMESLOW_DURATION = config.getDouble(base + ".time-slow.duration", 6.0);
         MYTHICAL_BOOTS_TIMESLOW_COOLDOWN = config.getLong(base + ".time-slow.cooldown", 45L);
         MYTHICAL_BOOTS_TIMESLOW_TICKRATE = config.getDouble(base + ".time-slow.tick-rate", 4.0);
-        MYTHICAL_BOOTS_TIMESLOW_SPEEDAMP = config.getInt(base + ".time-slow.compensation-speed", 1);
+        MYTHICAL_BOOTS_TIMESLOW_SPEEDAMP = config.getInt(base + ".time-slow.compensation-speed", 0);
         MYTHICAL_BOOTS_TIMESLOW_HASTEAMP = config.getInt(base + ".time-slow.compensation-haste", 1);
         String[] s = readSoundList(config, base + ".sound-effects.time-slow");
         MYTHICAL_BOOTS_TIMESLOW_SOUND = s[0];

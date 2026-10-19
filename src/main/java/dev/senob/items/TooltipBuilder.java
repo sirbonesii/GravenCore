@@ -39,11 +39,10 @@ public final class TooltipBuilder {
     }
 
     /**
-     * A divider line with an explicit width. Uses the box-drawing character
-     * ── for a continuous thin line, Teldaria-style, instead of dashes.
+     * A divider line with an explicit width, in dashes.
      */
     public static Component divider(int width) {
-        return GravenTheme.parse("<gray>" + "─".repeat(Math.max(1, width)) + "</gray>");
+        return GravenTheme.parse("<gray>" + "-".repeat(Math.max(1, width)) + "</gray>");
     }
 
     /**
@@ -62,7 +61,7 @@ public final class TooltipBuilder {
      */
     public static Component section(String title, String color, int width) {
         int side = Math.max(4, (width - title.length()) / 2);
-        String line = "─".repeat(side);
+        String line = "-".repeat(side);
         return GravenTheme.parse("<gray>" + line + "</gray><" + color + ">" + title + "</" + color + "><gray>" + line + "</gray>");
     }
 
@@ -92,24 +91,23 @@ public final class TooltipBuilder {
             max = Math.max(max, text.length());
         }
         int width = Math.max(DIVIDER_WIDTH, max);
-        // Full-bleed: dividers run past the content. Minimum 34 chars so even
-        // short tooltips get the wide Teldaria look; grows if content is wider.
-        int dividerWidth = Math.max(34, width + 8);
+        // Size dividers to the content width, not full-bleed.
+        int dividerWidth = width;
         ListIterator<Component> it = lore.listIterator();
         while (it.hasNext()) {
             Component line = it.next();
             String text = plain.serialize(line);
-            if (text.matches("─+")) {
+            if (text.matches("-+")) {
                 it.set(divider(dividerWidth));
-            } else if (text.matches("─+[^─]+─+")) {
-                String title = text.replaceAll("^─+|─+$", "");
+            } else if (text.matches("-+[^-]+-+")) {
+                String title = text.replaceAll("^-+|-+$", "");
                 it.set(section(title, sectionColor(title), dividerWidth));
             }
         }
     }
 
     private static boolean isDividerText(String text) {
-        return text.matches("─+") || text.matches("─+[^─]+─+");
+        return text.matches("-+") || text.matches("-+[^-]+-+");
     }
 
     /**

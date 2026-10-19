@@ -85,9 +85,9 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
 
 #### Changed
-- **Teldaria-style dividers v2 (2026-10-19):** dividers now use the continuous ── line
-  character instead of dashes, with non-bold centered titles in section-specific colors
-  (white ATTRIBUTES, aqua EFFECTS, gold ENCHANTMENTS) — matching Teldaria's new look.
+- **Teldaria-style dividers v3 (2026-10-19):** reverted to dashes (the ── character didn't
+  render in-game) sized to content width instead of full-bleed; kept the section colors
+  (white ATTRIBUTES, aqua EFFECTS, gold ENCHANTMENTS) with centered non-bold titles.
 - **Config migration (2026-10-17):** `src/main/resources/config.yml` migrated from the old flat
   "TheRedline" format to the nested `settings.*` / `weapons.*` structure that `GravenConfig`
   actually reads. Carried over: `settings.creator`, the full `weapons.redline` section

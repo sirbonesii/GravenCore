@@ -39,30 +39,42 @@ public final class TooltipBuilder {
     }
 
     /**
-     * A divider line with an explicit width, in dashes.
+     * A divider line with an explicit width. Uses the box-drawing character
+     * ── for a continuous thin line, Teldaria-style, instead of dashes.
      */
     public static Component divider(int width) {
-        return GravenTheme.parse("<gray>" + "-".repeat(Math.max(1, width)) + "</gray>");
+        return GravenTheme.parse("<gray>" + "─".repeat(Math.max(1, width)) + "</gray>");
     }
 
     /**
      * A section header embedded in the middle of the divider,
-     * e.g. -------------ATTRIBUTES-------------. Sized to the
-     * standard divider width; see {@link #section(String, int)}.
+     * e.g. ──────────ATTRIBUTES──────────. The title is centered with equal
+     * line segments per side so all headers align consistently, Teldaria-style.
+     * Each section has its own title color (white ATTRIBUTES, aqua EFFECTS,
+     * gold ENCHANTMENTS).
      */
     public static Component section(String title) {
-        return section(title, DIVIDER_WIDTH);
+        return section(title, sectionColor(title), DIVIDER_WIDTH);
     }
 
     /**
-     * A section header embedded in the middle of the divider,
-     * e.g. -------------ATTRIBUTES-------------. The title is centered with
-     * equal dashes per side so all headers align consistently, Teldaria-style.
+     * A section header with an explicit title color and width.
      */
-    public static Component section(String title, int width) {
+    public static Component section(String title, String color, int width) {
         int side = Math.max(4, (width - title.length()) / 2);
-        String dashes = "-".repeat(side);
-        return GravenTheme.parse("<gray>" + dashes + "</gray><gold><bold>" + title + "</bold></gold><gray>" + dashes + "</gray>");
+        String line = "─".repeat(side);
+        return GravenTheme.parse("<gray>" + line + "</gray><" + color + ">" + title + "</" + color + "><gray>" + line + "</gray>");
+    }
+
+    /**
+     * The Teldaria-style title color for a section.
+     */
+    private static String sectionColor(String title) {
+        return switch (title.toUpperCase()) {
+            case "ATTRIBUTES" -> "white";
+            case "EFFECTS" -> "aqua";
+            default -> "gold";
+        };
     }
 
     /**
@@ -87,16 +99,17 @@ public final class TooltipBuilder {
         while (it.hasNext()) {
             Component line = it.next();
             String text = plain.serialize(line);
-            if (text.matches("-+")) {
+            if (text.matches("─+")) {
                 it.set(divider(dividerWidth));
-            } else if (text.matches("-+[^-]+-+")) {
-                it.set(section(text.replaceAll("^-+|-+$", ""), dividerWidth));
+            } else if (text.matches("─+[^─]+─+")) {
+                String title = text.replaceAll("^─+|─+$", "");
+                it.set(section(title, sectionColor(title), dividerWidth));
             }
         }
     }
 
     private static boolean isDividerText(String text) {
-        return text.matches("-+") || text.matches("-+[^-]+-+");
+        return text.matches("─+") || text.matches("─+[^─]+─+");
     }
 
     /**

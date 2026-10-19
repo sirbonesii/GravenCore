@@ -85,10 +85,9 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
 
 #### Changed
-- **Teldaria-style full-bleed dividers (2026-10-18):** `fitDividers()` now sizes dividers to
-  a fixed minimum width (34 chars) so they bleed to the tooltip edges Teldaria-style.
-  `section()` centers titles with equal dashes per side — no more fragile pixel-ratio math,
-  all headers align consistently. Also renamed the "Enchants" section to "Enchantments".
+- **Teldaria-style dividers v2 (2026-10-19):** dividers now use the continuous ── line
+  character instead of dashes, with non-bold centered titles in section-specific colors
+  (white ATTRIBUTES, aqua EFFECTS, gold ENCHANTMENTS) — matching Teldaria's new look.
 - **Config migration (2026-10-17):** `src/main/resources/config.yml` migrated from the old flat
   "TheRedline" format to the nested `settings.*` / `weapons.*` structure that `GravenConfig`
   actually reads. Carried over: `settings.creator`, the full `weapons.redline` section

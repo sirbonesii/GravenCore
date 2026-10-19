@@ -153,7 +153,7 @@ public class DraculaPlate implements Listener, CustomItem {
         lore.add(TooltipBuilder.durabilityLine("<blue>Unbreakable</blue>"));
         List<Component> enchants = TooltipBuilder.enchantLines(meta);
         if (!enchants.isEmpty()) {
-            lore.add(TooltipBuilder.section("Enchants"));
+            lore.add(TooltipBuilder.section("Enchantments"));
             lore.addAll(enchants);
         }
         lore.add(TooltipBuilder.section("ATTRIBUTES"));

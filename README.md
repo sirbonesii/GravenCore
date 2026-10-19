@@ -85,6 +85,11 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
 
 #### Changed
+- **Section header pixel-matching (2026-10-18):** `TooltipBuilder.section()` now sizes side
+  dashes using pixel-width ratios (content char ≈ 1.33 dashes, bold title char ≈ 1.67 dashes)
+  instead of the old 0.7 estimate, so headers with different title lengths ("Enchantments" vs
+  "ATTRIBUTES") render at the same visual width. Plain `divider(width)` scaled the same way.
+  Also renamed the "Enchants" section to "Enchantments".
 - **Config migration (2026-10-17):** `src/main/resources/config.yml` migrated from the old flat
   "TheRedline" format to the nested `settings.*` / `weapons.*` structure that `GravenConfig`
   actually reads. Carried over: `settings.creator`, the full `weapons.redline` section

@@ -3,6 +3,7 @@ version: 1.4.2
 main: dev.senob.GravenCore
 api-version: '1.21'
 description: Core server plugin including the Modules.
+github-repo: "sirbonesii/GravenCore"
 commands:
   homes:
     description: Open your homes GUI menu

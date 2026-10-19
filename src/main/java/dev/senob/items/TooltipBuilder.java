@@ -58,11 +58,15 @@ public final class TooltipBuilder {
 
     /**
      * A section header with an explicit title color and width.
+     * The total character count exactly matches width so headers align
+     * with plain dividers.
      */
     public static Component section(String title, String color, int width) {
-        int side = Math.max(4, (width - title.length()) / 2);
-        String line = "-".repeat(side);
-        return GravenTheme.parse("<gray>" + line + "</gray><" + color + ">" + title + "</" + color + "><gray>" + line + "</gray>");
+        int left = Math.max(4, (width - title.length()) / 2);
+        int right = Math.max(4, width - title.length() - left);
+        String leftLine = "-".repeat(left);
+        String rightLine = "-".repeat(right);
+        return GravenTheme.parse("<gray>" + leftLine + "</gray><" + color + ">" + title + "</" + color + "><gray>" + rightLine + "</gray>");
     }
 
     /**

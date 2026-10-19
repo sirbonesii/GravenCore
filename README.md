@@ -88,6 +88,10 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - **Teldaria-style dividers v3 (2026-10-19):** reverted to dashes (the ── character didn't
   render in-game) sized to content width instead of full-bleed; kept the section colors
   (white ATTRIBUTES, aqua EFFECTS, gold ENCHANTMENTS) with centered non-bold titles.
+- **Divider length fix (2026-10-19):** section headers now use exact character counts
+  (left + title + right = width) so the Enchantments/ATTRIBUTES header dividers are
+  precisely the same length as the plain bottom divider — fixes the off-by-one from
+  integer division.
 - **Config migration (2026-10-17):** `src/main/resources/config.yml` migrated from the old flat
   "TheRedline" format to the nested `settings.*` / `weapons.*` structure that `GravenConfig`
   actually reads. Carried over: `settings.creator`, the full `weapons.redline` section

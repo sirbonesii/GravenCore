@@ -116,19 +116,6 @@ armor:
         - minecraft:block.anvil.land
         - 100
         - 1.9
-      time-slow:
-        - minecraft:block.beacon.activate
-        - 100
-        - 0.8
-
-    # Boots ability: shift + left-click slows everything nearby except the wearer
-    abilities:
-      time-slow:
-        enabled: true
-        duration: 6.0   # seconds of slowness applied
-        cooldown: 45    # seconds between activations
-        radius: 12.0    # blocks around the wearer
-        amplifier: 5    # Slowness VI (each level is -15% move speed)
 
     pieces:
       helmet:
@@ -147,6 +134,32 @@ armor:
         defense: 3.0
         toughness: 3.0
         knockback-resistance: 0.1
+
+  # --- Standalone Mythical Boots (not part of the armor set) ---
+  mythical-boots:
+    # Item tier (full tier system coming later; only "mythical" for now)
+    tier: "mythical"
+
+    # Max durability (the boots are NOT unbreakable)
+    durability: 2096
+
+    # Time Slow: shift + left-click drops the server tick rate for <duration>
+    # seconds. The tick rate is server-global, so the wearer is compensated
+    # with Speed/Haste to feel unaffected while the world crawls.
+    time-slow:
+      enabled: true
+      duration: 6.0           # seconds the tick rate stays lowered
+      cooldown: 45            # seconds between activations
+      tick-rate: 4.0          # server tick rate during the slow (20 = normal)
+      compensation-speed: 1   # Speed amplifier given to the wearer
+      compensation-haste: 1   # Haste amplifier given to the wearer
+
+    # Sound effects: trigger sound as [sound-name, volume, pitch]
+    sound-effects:
+      time-slow:
+        - minecraft:block.beacon.activate
+        - 100
+        - 0.8
 
 # --- Retired keys (kept for reference, not read by the code) ---
 # use-animation: "spear"   # old first-person right-click animation key

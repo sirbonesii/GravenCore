@@ -5,6 +5,7 @@ import dev.senob.core.GravenConfig;
 import dev.senob.core.GravenTheme;
 import dev.senob.items.DraculaPlate;
 import dev.senob.items.MythicalArmorSet;
+import dev.senob.items.MythicalBoots;
 import dev.senob.items.RedlineSpear;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -31,12 +32,14 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
     private final RedlineSpear redlineSpear;
     private final DraculaPlate draculaPlate;
     private final MythicalArmorSet mythicalArmorSet;
+    private final MythicalBoots mythicalBoots;
 
-    public GravenCoreCommand(GravenCore plugin, RedlineSpear redlineSpear, DraculaPlate draculaPlate, MythicalArmorSet mythicalArmorSet) {
+    public GravenCoreCommand(GravenCore plugin, RedlineSpear redlineSpear, DraculaPlate draculaPlate, MythicalArmorSet mythicalArmorSet, MythicalBoots mythicalBoots) {
         this.plugin = plugin;
         this.redlineSpear = redlineSpear;
         this.draculaPlate = draculaPlate;
         this.mythicalArmorSet = mythicalArmorSet;
+        this.mythicalBoots = mythicalBoots;
     }
 
     @Override
@@ -99,6 +102,11 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                     player.sendMessage(GravenTheme.parse("<gray>Received </gray><color:#AA0000><italic>Dracula's Plate</italic></color><gray>!</gray>"));
                     return true;
                 }
+                else if (args[1].equalsIgnoreCase("mythicalboots")) {
+                    player.getInventory().addItem(mythicalBoots.createMythicalBoots());
+                    player.sendMessage(GravenTheme.parse("<gray>Received </gray><color:#F8F8A0><italic>Mythical Boots</italic></color><gray>!</gray>"));
+                    return true;
+                }
                 else if (args[1].equalsIgnoreCase("armor")) {
                     // Armor tiers: more coming with the full tier system (only "mythical" for now)
                     if (args.length < 3 || !args[2].equalsIgnoreCase("mythical")) {
@@ -123,7 +131,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
             }
-            sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore give <redline|dracula|armor></red>"));
+            sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore give <redline|dracula|mythicalboots|armor></red>"));
             return true;
         }
 
@@ -244,7 +252,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 2) {
             if (args[0].equalsIgnoreCase("give")) {
-                return List.of("redline", "dracula", "armor");
+                return List.of("redline", "dracula", "mythicalboots", "armor");
             }
             if (args[0].equalsIgnoreCase("config")) {
                 return List.of("redline", "dracula", "mythical");

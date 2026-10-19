@@ -8,12 +8,15 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
-- **Mythical boots Time Slow ability (2026-10-19):** shift + left-click while wearing the
-  Mythical boots slows every other living entity in a radius (Slowness VI, 6s) — the wearer
-  is unaffected. New `armor.mythical.abilities.time-slow` keys (enabled, duration, cooldown
-  45s, radius 12, amplifier) plus a `sound-effects.time-slow` sound list (beacon activate).
-  Expanding witch-particle ring + configurable sound on trigger, action-bar cooldown via
-  `CooldownManager` (⏳ icon), and an ABILITY section on the boots tooltip.
+- **Mythical Boots + Time Slow ability (2026-10-19):** standalone Mythical boots
+  (like Dracula's Plate — own item, own `armor.mythical-boots` config section, not part
+  of the armor set; `/gravencore give mythicalboots`). Shift + left-click drops the
+  **server tick rate** (default 4 tps for 6s, 45s cooldown) — the tick rate is
+  server-global, so the wearer is compensated with Speed/Haste to feel unaffected while
+  the world crawls. Witch-particle ring follows the wearer for the whole slow, trigger
+  sound is configurable (`sound-effects.time-slow`), action-bar cooldown via
+  `CooldownManager` (⏳ icon), ABILITY section on the boots tooltip, live durability
+  lore via `DurabilityLoreListener`.
 - **Block sound effects config (2026-10-19):** block proc sounds are now configurable as
   `[sound-name, volume, pitch]` lists — same args as `/playsound` (default
   `minecraft:block.anvil.land`, 100, 1.9). Applies to both the Mythical set

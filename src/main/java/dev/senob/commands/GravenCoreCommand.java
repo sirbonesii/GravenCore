@@ -52,7 +52,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 0) {
-            sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore <armor|config|reload></red>"));
+            sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore <armor|weapon|config|reload></red>"));
             return true;
         }
 
@@ -88,6 +88,58 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                     + "</white> a <color:#F8F8A0>" + tierLabel + "</color> armor set.</green>"));
             target.sendMessage(GravenTheme.parse("<green>You have received <color:#F8F8A0>" + tierLabel
                     + "</color> armor set.</green>"));
+            return true;
+        }
+
+        // --- WEAPON LOGIC ---
+        // New weapons plug in here: add a case + label/color below, and extend
+        // the tab completion + "Unknown weapon" list.
+        if (args[0].equalsIgnoreCase("weapon")) {
+            if (args.length < 3) {
+                sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore weapon <username> <weapon_name></red>"));
+                return true;
+            }
+            Player target = Bukkit.getPlayer(args[1]);
+            if (target == null) {
+                sender.sendMessage(GravenTheme.parse("<red>Player '" + args[1] + "' is not online.</red>"));
+                return true;
+            }
+            String weaponArg = args[2].toLowerCase(Locale.ROOT);
+            ItemStack weaponItem;
+            String weaponLabel;
+            String weaponColor;
+            switch (weaponArg) {
+                case "redline" -> {
+                    int tier = (args.length > 3 && args[3].equalsIgnoreCase("base")) ? 1 : 2;
+                    weaponItem = redlineSpear.createRedlineSpear(tier);
+                    weaponLabel = (tier == 2) ? "Upgraded Redline Spear" : "Base Redline Spear";
+                    weaponColor = "#FF4B2B";
+                }
+                case "dracula" -> {
+                    weaponItem = draculaPlate.createDraculaPlate();
+                    weaponLabel = "Dracula's Plate";
+                    weaponColor = "#AA0000";
+                }
+                case "mythicalboots" -> {
+                    weaponItem = mythicalBoots.createMythicalBoots();
+                    weaponLabel = "Mythical Boots";
+                    weaponColor = "#F8F8A0";
+                }
+                default -> {
+                    sender.sendMessage(GravenTheme.parse("<red>Unknown weapon. Available: redline, dracula, mythicalboots</red>"));
+                    return true;
+                }
+            }
+
+            Map<Integer, ItemStack> leftover = target.getInventory().addItem(weaponItem);
+            for (ItemStack drop : leftover.values()) {
+                target.getWorld().dropItemNaturally(target.getLocation(), drop);
+            }
+
+            sender.sendMessage(GravenTheme.parse("<green>You have given <white>" + target.getName()
+                    + "</white> a <color:" + weaponColor + "><italic>" + weaponLabel + "</italic></color>.</green>"));
+            target.sendMessage(GravenTheme.parse("<green>You have received a <color:" + weaponColor + "><italic>"
+                    + weaponLabel + "</italic></color>.</green>"));
             return true;
         }
 
@@ -267,10 +319,10 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String @NotNull [] args) {
-        if (args.length == 1) return List.of("armor", "config", "reload");
+        if (args.length == 1) return List.of("armor", "weapon", "config", "reload");
 
         if (args.length == 2) {
-            if (args[0].equalsIgnoreCase("armor")) {
+            if (args[0].equalsIgnoreCase("armor") || args[0].equalsIgnoreCase("weapon")) {
                 List<String> names = new ArrayList<>();
                 for (Player online : Bukkit.getOnlinePlayers()) names.add(online.getName());
                 return names;
@@ -284,11 +336,20 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
             if (args[0].equalsIgnoreCase("armor")) {
                 return List.of("mythical");
             }
+            if (args[0].equalsIgnoreCase("weapon")) {
+                return List.of("redline", "dracula", "mythicalboots");
+            }
             if (args[0].equalsIgnoreCase("config")) {
                 if (args[1].equalsIgnoreCase("redline")) return List.of("cooldown", "range", "basedamage", "abilitydamage");
                 if (args[1].equalsIgnoreCase("dracula")) return List.of("cooldown", "duration", "blockrate", "blockpower");
                 if (args[1].equalsIgnoreCase("mythical")) return List.of("defense", "toughness", "kbresist", "blockrate", "blockpower");
                 if (args[1].equalsIgnoreCase("time_boots")) return List.of("duration", "cooldown", "speedboost", "freezeplayers", "weaknesslevel");
+            }
+        }
+
+        if (args.length == 4) {
+            if (args[0].equalsIgnoreCase("weapon") && args[2].equalsIgnoreCase("redline")) {
+                return List.of("base", "upgraded");
             }
         }
 

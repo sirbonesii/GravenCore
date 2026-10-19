@@ -135,7 +135,7 @@ armor:
         toughness: 3.0
         knockback-resistance: 0.1
 
-  # --- Standalone Mythical Boots (not part of the armor set) ---
+  # --- Standalone Celerity Boots (not part of the armor set) ---
   mythical-boots:
     # Item tier (full tier system coming later; only "mythical" for now)
     tier: "mythical"

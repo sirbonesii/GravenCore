@@ -8,6 +8,9 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
+- **Renamed Mythical Boots → Celerity Boots (2026-10-19):** display name now uses the
+  chromatic-aberration text effect (`#F8F8BC`); weapon command key is now `celerity`.
+  Still Mythical tier; class/PDC/config identifiers unchanged (existing boots keep working).
 - **Command rework: `/gravencore armor` + `time_boots` config (2026-10-19):** new
   `/gravencore armor <username> <tier>` gives a full armor set to a player (console-safe,
   overflow drops at their feet) with "You have given <name> a <tier> armor set." /

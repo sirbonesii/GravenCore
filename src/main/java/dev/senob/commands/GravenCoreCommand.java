@@ -185,8 +185,10 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                         switch (setting) {
                             case "cooldown" -> pdc.set(new NamespacedKey(plugin, "dracula_cooldown"), PersistentDataType.LONG, Long.parseLong(valueStr));
                             case "duration" -> pdc.set(new NamespacedKey(plugin, "dracula_duration"), PersistentDataType.LONG, Long.parseLong(valueStr));
+                            case "blockrate" -> pdc.set(new NamespacedKey(plugin, "dracula_blockrate"), PersistentDataType.DOUBLE, Double.parseDouble(valueStr));
+                            case "blockpower" -> pdc.set(new NamespacedKey(plugin, "dracula_blockpower"), PersistentDataType.DOUBLE, Double.parseDouble(valueStr));
                             default -> {
-                                player.sendMessage(GravenTheme.parse("<red>Valid Dracula settings: cooldown, duration</red>"));
+                                player.sendMessage(GravenTheme.parse("<red>Valid Dracula settings: cooldown, duration, blockrate, blockpower</red>"));
                                 return true;
                             }
                         }
@@ -258,7 +260,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
             }
             if (args[0].equalsIgnoreCase("config")) {
                 if (args[1].equalsIgnoreCase("redline")) return List.of("cooldown", "range", "basedamage", "abilitydamage");
-                if (args[1].equalsIgnoreCase("dracula")) return List.of("cooldown", "duration");
+                if (args[1].equalsIgnoreCase("dracula")) return List.of("cooldown", "duration", "blockrate", "blockpower");
                 if (args[1].equalsIgnoreCase("mythical")) return List.of("defense", "toughness", "kbresist", "blockrate", "blockpower");
             }
         }

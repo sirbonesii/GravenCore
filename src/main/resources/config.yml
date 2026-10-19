@@ -80,18 +80,10 @@ weapons:
     # Item tier (full tier system coming later; only "mythical" for now)
     tier: "mythical"
 
-    # ABILITY section of the tooltip. Section chrome (dividers, headers,
-    # footer) is added by TooltipBuilder - keep this to content only.
-    # Placeholders: <duration>, <cooldown>, <creator>
-    lore:
-      - "<gold>ABILITY</gold><gray>:</gray> <dark_red><bold>VAMPIRE'S FLIGHT</bold></dark_red>"
-      - "<dark_gray>• <blue>Duration</blue><gray>:</gray> <yellow><duration>s 🦇</yellow>"
-      - "<dark_gray>• <yellow>Cooldown</yellow><gray>:</gray> <gold><cooldown>s ⏳</gold>"
-
-    # EFFECTS section of the tooltip. Placeholders: <lifesteal>, <lifesteal_chance>
-    effects:
-      - "<dark_gray>• <green>Passive</green><gray>:</gray> <color:#F8F858>Regeneration I</color>"
-      - "<dark_gray>• <dark_red>Lifesteal</dark_red><gray>:</gray> <red><lifesteal>%</red> <gray>of damage dealt</gray>"
+    # Block system: chance (percent, 0-100) to trigger a block on an incoming
+    # attack while wearing the plate, and flat damage subtracted when it triggers
+    block-rate: 25.0
+    block-power: 4.0
 
 # --- Mythical Armor Set (prototype) ---
 # The default Mythical netherite set. Per-piece defensive stats;

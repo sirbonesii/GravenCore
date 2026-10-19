@@ -30,6 +30,8 @@ public class GravenConfig {
     public static double DRACULA_ATTACK_DAMAGE;
     public static double DRACULA_LIFESTEAL_PERCENT;
     public static double DRACULA_LIFESTEAL_CHANCE;
+    public static double DRACULA_BLOCK_RATE;
+    public static double DRACULA_BLOCK_POWER;
     public static String DRACULA_TIER;
 
     // --- MYTHICAL ARMOR SET ---
@@ -77,6 +79,8 @@ public class GravenConfig {
         DRACULA_ATTACK_DAMAGE = config.getDouble("weapons.dracula.attack-damage", 2.0);
         DRACULA_LIFESTEAL_PERCENT = config.getDouble("weapons.dracula.lifesteal-percent", 20.0);
         DRACULA_LIFESTEAL_CHANCE = config.getDouble("weapons.dracula.lifesteal-chance", 85.0);
+        DRACULA_BLOCK_RATE = config.getDouble("weapons.dracula.block-rate", 25.0);
+        DRACULA_BLOCK_POWER = config.getDouble("weapons.dracula.block-power", 4.0);
         DRACULA_TIER = config.getString("weapons.dracula.tier", "mythical");
 
         // 4. MYTHICAL ARMOR SET

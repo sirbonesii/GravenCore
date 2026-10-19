@@ -8,6 +8,13 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
+- **Dracula's Plate block system (2026-10-18):** the plate now has the same blocking mechanic
+  as the Mythical set — `weapons.dracula.block-rate`% chance (default 25.0) to trigger on an
+  incoming attack while wearing it, subtracting `weapons.dracula.block-power` flat damage
+  (default 4.0), with shield-clang sound and crit particles. Per-plate PDC values
+  (`dracula_blockrate`/`dracula_blockpower`), tunable via `/gravencore config dracula
+  <blockrate|blockpower>` (tab-completed); Block Rate (✦ teal) and Block Power (🔥 amber)
+  shown in the ATTRIBUTES tooltip section.
 - **Mythical armor set prototype (2026-10-17):** new `MythicalArmorSet` module — a full
   netherite armor set (helmet/chestplate/leggings/boots) sharing the Mythical tier tooltip
   chrome (tier line, indented Durability: Unbreakable, ATTRIBUTES — no "Created by" footer). ATTRIBUTES

@@ -17,6 +17,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -32,6 +33,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressWarnings({"UnstableApiUsage", "SpellCheckingInspection", "BooleanMethodIsAlwaysInverted", "unused"})
 public class DraculaPlate implements Listener, CustomItem {
@@ -46,6 +48,8 @@ public class DraculaPlate implements Listener, CustomItem {
     private final NamespacedKey cooldownKey;
     private final NamespacedKey durationKey;
     private final NamespacedKey attackKey;
+    private final NamespacedKey blockRateKey;
+    private final NamespacedKey blockPowerKey;
 
     private static final Set<UUID> activeVampires = new HashSet<>();
 
@@ -76,6 +80,8 @@ public class DraculaPlate implements Listener, CustomItem {
         this.cooldownKey = new NamespacedKey(plugin, "dracula_cooldown");
         this.durationKey = new NamespacedKey(plugin, "dracula_duration");
         this.attackKey = new NamespacedKey(plugin, "dracula_attack");
+        this.blockRateKey = new NamespacedKey(plugin, "dracula_blockrate");
+        this.blockPowerKey = new NamespacedKey(plugin, "dracula_blockpower");
 
         if (!isRegistered) {
             plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -126,6 +132,11 @@ public class DraculaPlate implements Listener, CustomItem {
         long durationSec = pdc.getOrDefault(durationKey, PersistentDataType.LONG, GravenConfig.DRACULA_DURATION);
         double attackDamage = pdc.getOrDefault(attackKey, PersistentDataType.DOUBLE, GravenConfig.DRACULA_ATTACK_DAMAGE);
 
+        if (!pdc.has(blockRateKey, PersistentDataType.DOUBLE)) pdc.set(blockRateKey, PersistentDataType.DOUBLE, GravenConfig.DRACULA_BLOCK_RATE);
+        if (!pdc.has(blockPowerKey, PersistentDataType.DOUBLE)) pdc.set(blockPowerKey, PersistentDataType.DOUBLE, GravenConfig.DRACULA_BLOCK_POWER);
+        double blockRate = pdc.getOrDefault(blockRateKey, PersistentDataType.DOUBLE, GravenConfig.DRACULA_BLOCK_RATE);
+        double blockPower = pdc.getOrDefault(blockPowerKey, PersistentDataType.DOUBLE, GravenConfig.DRACULA_BLOCK_POWER);
+
         meta.removeAttributeModifier(Attribute.ARMOR);
         meta.removeAttributeModifier(Attribute.ARMOR_TOUGHNESS);
         meta.removeAttributeModifier(Attribute.ATTACK_DAMAGE);
@@ -141,6 +152,8 @@ public class DraculaPlate implements Listener, CustomItem {
         lore.add(TooltipBuilder.section("ATTRIBUTES"));
         lore.add(TooltipBuilder.attribute("⚔", "Atk Damage", "green", formatStat(attackDamage)));
         lore.add(TooltipBuilder.attribute("🛡", "Defense", "#ADD8E6", formatStat(GravenConfig.DRACULA_ARMOR)));
+        lore.add(TooltipBuilder.attribute("✦", "Block Rate", "#5EEAD4", formatStat(blockRate) + "%", false));
+        lore.add(TooltipBuilder.attribute("🔥", "Block Power", "#FCD34D", formatStat(blockPower)));
         lore.add(TooltipBuilder.divider());
         for (String line : LORE) {
             String parsed = line
@@ -196,6 +209,34 @@ public class DraculaPlate implements Listener, CustomItem {
                     6, 0.3, 0.3, 0.3, 0,
                     new Particle.DustOptions(Color.fromRGB(170, 0, 0), 1.0f));
         }
+    }
+
+    /**
+     * Block system: while wearing the plate, incoming attacks have a block-rate%
+     * chance to be partially blocked, reducing the damage by block-power (flat).
+     * A shield-clang sound and impact particles play when the block triggers.
+     */
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    public void onAttackBlocked(EntityDamageByEntityEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (player.isDead() || !isWearingDraculaPlate(player)) return;
+
+        ItemStack chestplate = player.getInventory().getChestplate();
+        if (chestplate == null || !isItem(chestplate)) return;
+        PersistentDataContainer pdc = chestplate.getItemMeta().getPersistentDataContainer();
+
+        double rate = Math.min(100.0, Math.max(0.0,
+                pdc.getOrDefault(blockRateKey, PersistentDataType.DOUBLE, GravenConfig.DRACULA_BLOCK_RATE)));
+        if (rate <= 0.0) return;
+        if (ThreadLocalRandom.current().nextDouble(100.0) >= rate) return;
+
+        double power = Math.max(0.0,
+                pdc.getOrDefault(blockPowerKey, PersistentDataType.DOUBLE, GravenConfig.DRACULA_BLOCK_POWER));
+        event.setDamage(Math.max(0.0, event.getDamage() - power));
+
+        player.getWorld().playSound(player.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1.0f, 1.0f);
+        player.getWorld().spawnParticle(Particle.CRIT,
+                player.getLocation().add(0.0, 1.2, 0.0), 10, 0.3, 0.3, 0.3, 0.1);
     }
 
     @EventHandler

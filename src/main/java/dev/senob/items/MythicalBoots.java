@@ -61,6 +61,8 @@ public class MythicalBoots implements Listener, CustomItem {
     private static boolean preSlowFrozen = false;
     /** Players exempt from the movement lock (the activators). */
     private static final Set<UUID> timeSlowExempt = new HashSet<>();
+    /** Whether the active freeze pins other players (from the triggering boots). */
+    private static boolean activeFreezePlayers = true;
 
     public MythicalBoots(GravenCore plugin, CooldownManager cooldownManager) {
         this.plugin = plugin;
@@ -88,6 +90,52 @@ public class MythicalBoots implements Listener, CustomItem {
 
     public boolean isWearingMythicalBoots(Player player) {
         return isItem(player.getInventory().getBoots());
+    }
+
+    // --- Per-item time-slow tuning: PDC override, else config default ---
+
+    private double slowDuration(ItemStack boots) {
+        return pdcDouble(boots, "mythical_boots_duration", GravenConfig.MYTHICAL_BOOTS_TIMESLOW_DURATION);
+    }
+
+    private long slowCooldown(ItemStack boots) {
+        return pdcLong(boots, "mythical_boots_cooldown", GravenConfig.MYTHICAL_BOOTS_TIMESLOW_COOLDOWN);
+    }
+
+    private int slowSpeedBoost(ItemStack boots) {
+        return pdcInt(boots, "mythical_boots_speedboost", GravenConfig.MYTHICAL_BOOTS_TIMESLOW_SPEEDBOOST);
+    }
+
+    private boolean slowFreezePlayers(ItemStack boots) {
+        return pdcBoolean(boots, "mythical_boots_freezeplayers", GravenConfig.MYTHICAL_BOOTS_TIMESLOW_FREEZEPLAYERS);
+    }
+
+    private int slowWeaknessLevel(ItemStack boots) {
+        return pdcInt(boots, "mythical_boots_weakness", GravenConfig.MYTHICAL_BOOTS_TIMESLOW_WEAKNESS);
+    }
+
+    private double pdcDouble(ItemStack item, String key, double def) {
+        if (item == null || !item.hasItemMeta()) return def;
+        return item.getItemMeta().getPersistentDataContainer()
+                .getOrDefault(new NamespacedKey(plugin, key), PersistentDataType.DOUBLE, def);
+    }
+
+    private long pdcLong(ItemStack item, String key, long def) {
+        if (item == null || !item.hasItemMeta()) return def;
+        return item.getItemMeta().getPersistentDataContainer()
+                .getOrDefault(new NamespacedKey(plugin, key), PersistentDataType.LONG, def);
+    }
+
+    private int pdcInt(ItemStack item, String key, int def) {
+        if (item == null || !item.hasItemMeta()) return def;
+        return item.getItemMeta().getPersistentDataContainer()
+                .getOrDefault(new NamespacedKey(plugin, key), PersistentDataType.INTEGER, def);
+    }
+
+    private boolean pdcBoolean(ItemStack item, String key, boolean def) {
+        if (item == null || !item.hasItemMeta()) return def;
+        return item.getItemMeta().getPersistentDataContainer()
+                .getOrDefault(new NamespacedKey(plugin, key), PersistentDataType.BOOLEAN, def);
     }
 
     public ItemStack createMythicalBoots() {
@@ -149,7 +197,7 @@ public class MythicalBoots implements Listener, CustomItem {
             lore.add(TooltipBuilder.section("ABILITY"));
             lore.add(GravenTheme.parse("<aqua>⏳ TIME SLOW</aqua><gray>:</gray> <white>Shift + Left Click</white>"));
             lore.add(GravenTheme.parse("<gray>Freezes everything for <yellow>"
-                    + GravenConfig.MYTHICAL_BOOTS_TIMESLOW_DURATION + "s</yellow> — only you keep moving</gray>"));
+                    + slowDuration(item) + "s</yellow> — only you keep moving</gray>"));
         }
         lore.add(TooltipBuilder.divider());
 
@@ -173,8 +221,9 @@ public class MythicalBoots implements Listener, CustomItem {
         if (!player.isSneaking() || !GravenConfig.MYTHICAL_BOOTS_TIMESLOW_ENABLED) return;
         if (!isWearingMythicalBoots(player)) return;
         if (cooldownManager.isOnCooldown(player, COOLDOWN_TYPE)) return;
+        ItemStack wornBoots = player.getInventory().getBoots();
 
-        double durationSec = Math.max(1.0, GravenConfig.MYTHICAL_BOOTS_TIMESLOW_DURATION);
+        double durationSec = Math.max(1.0, slowDuration(wornBoots));
         long freezeTicks = (long) (durationSec * 20.0);
 
         var tickManager = Bukkit.getServerTickManager();
@@ -185,18 +234,19 @@ public class MythicalBoots implements Listener, CustomItem {
         }
         tickManager.setFrozen(true);
         timeSlowExempt.add(player.getUniqueId());
+        activeFreezePlayers = slowFreezePlayers(wornBoots);
 
         // Small speed boost for the wearer while the world is frozen.
         // Config uses 1-indexed levels (1 = Speed I); 0 disables the effect.
-        int speedLevel = Math.max(0, GravenConfig.MYTHICAL_BOOTS_TIMESLOW_SPEEDBOOST);
+        int speedLevel = Math.max(0, slowSpeedBoost(wornBoots));
         if (speedLevel > 0) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, (int) freezeTicks, speedLevel - 1, false, false, true));
         }
 
         // Weaken everyone else for the freeze so their attacks don't matter
         // (config uses 1-indexed levels; 0 disables the effect)
-        if (GravenConfig.MYTHICAL_BOOTS_TIMESLOW_FREEZEPLAYERS) {
-            int weaknessLevel = Math.max(0, GravenConfig.MYTHICAL_BOOTS_TIMESLOW_WEAKNESS);
+        if (activeFreezePlayers) {
+            int weaknessLevel = Math.max(0, slowWeaknessLevel(wornBoots));
             if (weaknessLevel > 0) {
                 PotionEffect weakness = new PotionEffect(
                         PotionEffectType.WEAKNESS, (int) freezeTicks, weaknessLevel - 1, false, false, true);
@@ -214,7 +264,7 @@ public class MythicalBoots implements Listener, CustomItem {
                 GravenConfig.MYTHICAL_BOOTS_TIMESLOW_PITCH);
         spawnTimeSlowAura(player, freezeTicks);
 
-        cooldownManager.setCooldown(player, COOLDOWN_TYPE, GravenConfig.MYTHICAL_BOOTS_TIMESLOW_COOLDOWN);
+        cooldownManager.setCooldown(player, COOLDOWN_TYPE, slowCooldown(wornBoots));
 
         // Unfreeze even if the wearer logs out mid-freeze
         activeRestoreTask = new BukkitRunnable() {
@@ -235,7 +285,7 @@ public class MythicalBoots implements Listener, CustomItem {
      */
     @EventHandler
     public void onFrozenPlayerMove(PlayerMoveEvent event) {
-        if (activeRestoreTask == null || !GravenConfig.MYTHICAL_BOOTS_TIMESLOW_FREEZEPLAYERS) return;
+        if (activeRestoreTask == null || !activeFreezePlayers) return;
         Player player = event.getPlayer();
         if (timeSlowExempt.contains(player.getUniqueId())) return;
         event.setTo(event.getFrom());

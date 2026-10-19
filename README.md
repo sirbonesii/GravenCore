@@ -8,6 +8,15 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
+- **Command rework: `/gravencore armor` + `time_boots` config (2026-10-19):** new
+  `/gravencore armor <username> <tier>` gives a full armor set to a player (console-safe,
+  overflow drops at their feet) with "You have given <name> a <tier> armor set." /
+  "You have received <tier> armor set." messages; `/gravencore config` gains the
+  `time_boots` item (duration, cooldown, speedboost, freezeplayers, weaknesslevel as
+  per-item PDC overrides, like the other items); `/gravencore reload` now also syncs
+  worn armor, not just inventory contents. The old `/gravencore give` subcommand was
+  removed entirely — note: redline spear, Dracula's Plate, and Mythical Boots currently
+  have no command give path.
 - **Time Slow reworked: tick freeze (2026-10-19):** the boots now freeze the world
   (`ServerTickManager.setFrozen`) instead of lowering the tick rate — tick freeze
   natively exempts players, so the wearer is *truly* unaffected (plus a configurable

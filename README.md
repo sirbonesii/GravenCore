@@ -15,6 +15,10 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   same trigger, particles, sound, and cooldown; `tick-rate`/`compensation-*` keys
   replaced by `speed-boost`. Overlap guard and `onDisable` safety net now guard the
   frozen flag instead of the tick rate.
+- **Time Slow freezes other players (2026-10-19):** new `freeze-players` key (default
+  true) — while frozen, every non-activator is fully pinned (no moving, no looking
+  around) and gets Weakness (`weakness-level`, default 5, 0 = off); only the wearer
+  keeps moving.
 - **Mythical Boots + Time Slow ability (2026-10-19):** standalone Mythical boots
   (like Dracula's Plate — own item, own `armor.mythical-boots` config section, not part
   of the armor set; `/gravencore give mythicalboots`). Shift + left-click drops the

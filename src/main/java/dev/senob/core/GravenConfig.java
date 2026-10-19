@@ -61,6 +61,8 @@ public class GravenConfig {
     public static double MYTHICAL_BOOTS_TIMESLOW_DURATION;
     public static long MYTHICAL_BOOTS_TIMESLOW_COOLDOWN;
     public static int MYTHICAL_BOOTS_TIMESLOW_SPEEDBOOST;
+    public static boolean MYTHICAL_BOOTS_TIMESLOW_FREEZEPLAYERS;
+    public static int MYTHICAL_BOOTS_TIMESLOW_WEAKNESS;
     public static String MYTHICAL_BOOTS_TIMESLOW_SOUND;
     public static float MYTHICAL_BOOTS_TIMESLOW_VOLUME;
     public static float MYTHICAL_BOOTS_TIMESLOW_PITCH;
@@ -141,6 +143,8 @@ public class GravenConfig {
         MYTHICAL_BOOTS_TIMESLOW_DURATION = config.getDouble(base + ".time-slow.duration", 6.0);
         MYTHICAL_BOOTS_TIMESLOW_COOLDOWN = config.getLong(base + ".time-slow.cooldown", 45L);
         MYTHICAL_BOOTS_TIMESLOW_SPEEDBOOST = config.getInt(base + ".time-slow.speed-boost", 1);
+        MYTHICAL_BOOTS_TIMESLOW_FREEZEPLAYERS = config.getBoolean(base + ".time-slow.freeze-players", true);
+        MYTHICAL_BOOTS_TIMESLOW_WEAKNESS = config.getInt(base + ".time-slow.weakness-level", 5);
         String[] s = readSoundList(config, base + ".sound-effects.time-slow");
         MYTHICAL_BOOTS_TIMESLOW_SOUND = s[0];
         MYTHICAL_BOOTS_TIMESLOW_VOLUME = Float.parseFloat(s[1]);

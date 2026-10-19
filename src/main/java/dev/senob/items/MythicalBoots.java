@@ -18,6 +18,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -31,7 +32,10 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Standalone Mythical boots (not part of the Mythical armor set), in the same
@@ -55,6 +59,8 @@ public class MythicalBoots implements Listener, CustomItem {
     /** Guard for overlapping freezes: the first trigger's pre-freeze state wins. */
     private static BukkitTask activeRestoreTask = null;
     private static boolean preSlowFrozen = false;
+    /** Players exempt from the movement lock (the activators). */
+    private static final Set<UUID> timeSlowExempt = new HashSet<>();
 
     public MythicalBoots(GravenCore plugin, CooldownManager cooldownManager) {
         this.plugin = plugin;
@@ -142,8 +148,8 @@ public class MythicalBoots implements Listener, CustomItem {
         if (GravenConfig.MYTHICAL_BOOTS_TIMESLOW_ENABLED) {
             lore.add(TooltipBuilder.section("ABILITY"));
             lore.add(GravenTheme.parse("<aqua>⏳ TIME SLOW</aqua><gray>:</gray> <white>Shift + Left Click</white>"));
-            lore.add(GravenTheme.parse("<gray>Freezes the world for <yellow>"
-                    + GravenConfig.MYTHICAL_BOOTS_TIMESLOW_DURATION + "s</yellow> — you keep moving</gray>"));
+            lore.add(GravenTheme.parse("<gray>Freezes everything for <yellow>"
+                    + GravenConfig.MYTHICAL_BOOTS_TIMESLOW_DURATION + "s</yellow> — only you keep moving</gray>"));
         }
         lore.add(TooltipBuilder.divider());
 
@@ -178,12 +184,28 @@ public class MythicalBoots implements Listener, CustomItem {
             activeRestoreTask.cancel();
         }
         tickManager.setFrozen(true);
+        timeSlowExempt.add(player.getUniqueId());
 
         // Small speed boost for the wearer while the world is frozen.
         // Config uses 1-indexed levels (1 = Speed I); 0 disables the effect.
         int speedLevel = Math.max(0, GravenConfig.MYTHICAL_BOOTS_TIMESLOW_SPEEDBOOST);
         if (speedLevel > 0) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, (int) freezeTicks, speedLevel - 1, false, false, true));
+        }
+
+        // Weaken everyone else for the freeze so their attacks don't matter
+        // (config uses 1-indexed levels; 0 disables the effect)
+        if (GravenConfig.MYTHICAL_BOOTS_TIMESLOW_FREEZEPLAYERS) {
+            int weaknessLevel = Math.max(0, GravenConfig.MYTHICAL_BOOTS_TIMESLOW_WEAKNESS);
+            if (weaknessLevel > 0) {
+                PotionEffect weakness = new PotionEffect(
+                        PotionEffectType.WEAKNESS, (int) freezeTicks, weaknessLevel - 1, false, false, true);
+                for (Player other : Bukkit.getOnlinePlayers()) {
+                    if (!timeSlowExempt.contains(other.getUniqueId())) {
+                        other.addPotionEffect(weakness);
+                    }
+                }
+            }
         }
 
         player.getWorld().playSound(player.getLocation(),
@@ -200,10 +222,23 @@ public class MythicalBoots implements Listener, CustomItem {
             public void run() {
                 Bukkit.getServerTickManager().setFrozen(preSlowFrozen);
                 activeRestoreTask = null;
+                timeSlowExempt.clear();
             }
         }.runTaskLater(plugin, freezeTicks);
 
         if (action == Action.LEFT_CLICK_BLOCK) event.setCancelled(true);
+    }
+
+    /**
+     * While the world is frozen, pin every non-exempt player fully in place —
+     * no moving, no looking around.
+     */
+    @EventHandler
+    public void onFrozenPlayerMove(PlayerMoveEvent event) {
+        if (activeRestoreTask == null || !GravenConfig.MYTHICAL_BOOTS_TIMESLOW_FREEZEPLAYERS) return;
+        Player player = event.getPlayer();
+        if (timeSlowExempt.contains(player.getUniqueId())) return;
+        event.setTo(event.getFrom());
     }
 
     /**
@@ -215,6 +250,7 @@ public class MythicalBoots implements Listener, CustomItem {
         if (activeRestoreTask != null) {
             activeRestoreTask.cancel();
             activeRestoreTask = null;
+            timeSlowExempt.clear();
             Bukkit.getServerTickManager().setFrozen(preSlowFrozen);
         }
     }

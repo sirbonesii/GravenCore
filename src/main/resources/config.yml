@@ -151,6 +151,8 @@ armor:
       duration: 6.0        # seconds the world stays frozen
       cooldown: 45         # seconds between activations
       speed-boost: 1       # Speed level for the wearer during the freeze (0 = off)
+      freeze-players: true # also pin other players in place (activator exempt)
+      weakness-level: 5    # Weakness level for frozen players (0 = off)
 
     # Sound effects: trigger sound as [sound-name, volume, pitch]
     sound-effects:

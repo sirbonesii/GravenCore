@@ -71,4 +71,11 @@ public class GravenCore extends JavaPlugin {
 
         getLogger().info("GravenCore enabled!");
     }
+
+    @Override
+    public void onDisable() {
+        // Never leave the server stuck at a slowed tick rate after a reload/stop mid-slow
+        MythicalBoots.cancelActiveSlow();
+        getLogger().info("GravenCore disabled!");
+    }
 }

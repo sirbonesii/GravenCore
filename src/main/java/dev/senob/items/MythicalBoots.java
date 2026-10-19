@@ -28,6 +28,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,10 @@ public class MythicalBoots implements Listener, CustomItem {
             new CooldownManager.CooldownType("mythical-boots-timeslow", "⏳", TextColor.color(0x5EEAD4));
 
     private final NamespacedKey bootsKey;
+
+    /** Guard for overlapping slows: the first trigger's pre-slow rate wins. */
+    private static BukkitTask activeRestoreTask = null;
+    private static float preSlowTickRate = 20.0f;
 
     public MythicalBoots(GravenCore plugin, CooldownManager cooldownManager) {
         this.plugin = plugin;
@@ -168,7 +173,11 @@ public class MythicalBoots implements Listener, CustomItem {
         long slowTicks = Math.max(1L, (long) (durationSec * tickRate));
 
         var tickManager = Bukkit.getServerTickManager();
-        float previousRate = tickManager.getTickRate();
+        if (activeRestoreTask == null) {
+            preSlowTickRate = tickManager.getTickRate();
+        } else {
+            activeRestoreTask.cancel();
+        }
         tickManager.setTickRate((float) tickRate);
 
         // Compensate the wearer so they feel unaffected while the world crawls
@@ -185,15 +194,29 @@ public class MythicalBoots implements Listener, CustomItem {
 
         cooldownManager.setCooldown(player, COOLDOWN_TYPE, GravenConfig.MYTHICAL_BOOTS_TIMESLOW_COOLDOWN);
 
-        // Restore the previous tick rate even if the wearer logs out mid-slow
-        new BukkitRunnable() {
+        // Restore the pre-slow tick rate even if the wearer logs out mid-slow
+        activeRestoreTask = new BukkitRunnable() {
             @Override
             public void run() {
-                Bukkit.getServerTickManager().setTickRate(previousRate);
+                Bukkit.getServerTickManager().setTickRate(preSlowTickRate);
+                activeRestoreTask = null;
             }
         }.runTaskLater(plugin, slowTicks);
 
         if (action == Action.LEFT_CLICK_BLOCK) event.setCancelled(true);
+    }
+
+    /**
+     * Cancels an in-progress slow and restores the pre-slow tick rate.
+     * Called on plugin disable so a reload/stop mid-slow can't leave the
+     * tick rate stuck (the restore task dies with the scheduler).
+     */
+    public static void cancelActiveSlow() {
+        if (activeRestoreTask != null) {
+            activeRestoreTask.cancel();
+            activeRestoreTask = null;
+            Bukkit.getServerTickManager().setTickRate(preSlowTickRate);
+        }
     }
 
     /** Witch-particle ring that follows the wearer for the whole slow. */

@@ -120,13 +120,13 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                     weaponLabel = "Dracula's Plate";
                     weaponColor = "#AA0000";
                 }
-                case "mythicalboots" -> {
+                case "celerity" -> {
                     weaponItem = mythicalBoots.createMythicalBoots();
-                    weaponLabel = "Mythical Boots";
-                    weaponColor = "#F8F8A0";
+                    weaponLabel = "Celerity Boots";
+                    weaponColor = "#F8F8BC";
                 }
                 default -> {
-                    sender.sendMessage(GravenTheme.parse("<red>Unknown weapon. Available: redline, dracula, mythicalboots</red>"));
+                    sender.sendMessage(GravenTheme.parse("<red>Unknown weapon. Available: redline, dracula, celerity</red>"));
                     return true;
                 }
             }
@@ -283,7 +283,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                 else if (args[1].equalsIgnoreCase("time_boots")) {
                     NamespacedKey bootsKey = new NamespacedKey(plugin, "mythical_boots");
                     if (!pdc.has(bootsKey, PersistentDataType.INTEGER)) {
-                        player.sendMessage(GravenTheme.parse("<red>You must be holding the Mythical Boots!</red>"));
+                        player.sendMessage(GravenTheme.parse("<red>You must be holding the Celerity Boots!</red>"));
                         return true;
                     }
 
@@ -337,7 +337,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                 return List.of("mythical");
             }
             if (args[0].equalsIgnoreCase("weapon")) {
-                return List.of("redline", "dracula", "mythicalboots");
+                return List.of("redline", "dracula", "celerity");
             }
             if (args[0].equalsIgnoreCase("config")) {
                 if (args[1].equalsIgnoreCase("redline")) return List.of("cooldown", "range", "basedamage", "abilitydamage");

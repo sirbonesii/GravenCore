@@ -38,8 +38,9 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Standalone Mythical boots (not part of the Mythical armor set), in the same
- * style as Dracula's Plate: its own item, config section and ability.
+ * Celerity Boots — standalone Mythical-tier boots (not part of the Mythical
+ * armor set), in the same style as Dracula's Plate: its own item, config
+ * section and ability.
  *
  * Ability — Time Slow: shift + left-click freezes the world for a few
  * seconds. Tick freeze natively exempts players, so the wearer is truly
@@ -69,7 +70,7 @@ public class MythicalBoots implements Listener, CustomItem {
         this.cooldownManager = cooldownManager;
         this.cooldownManager.registerType(COOLDOWN_TYPE);
         this.bootsKey = new NamespacedKey(plugin, "mythical_boots");
-        plugin.getLogger().info("Mythical Boots module initialized!");
+        plugin.getLogger().info("Celerity Boots module initialized!");
     }
 
     /**
@@ -154,8 +155,8 @@ public class MythicalBoots implements Listener, CustomItem {
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
 
-        meta.displayName(GravenTheme.parse("<color:#F8F8A0><italic>Mythical Boots</italic></color>"));
-        meta.itemName(GravenTheme.parse("<color:#F8F8A0>Mythical Boots</color>"));
+        meta.displayName(GravenTheme.parse("<color:#F8F8BC><italic>Celerity Boots</italic></color>"));
+        meta.itemName(GravenTheme.parse("<color:#F8F8BC>Celerity Boots</color>"));
         meta.setUnbreakable(false);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 

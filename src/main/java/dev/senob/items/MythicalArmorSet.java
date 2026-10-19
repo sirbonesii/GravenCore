@@ -197,6 +197,7 @@ public class MythicalArmorSet implements CustomItem, Listener {
         lore.add(TooltipBuilder.attribute("🔥", "Block Power", "#FCD34D", formatStat(blockPower)));
         lore.add(TooltipBuilder.divider());
 
+        TooltipBuilder.fitDividers(lore);
         meta.lore(lore);
         item.setItemMeta(meta);
 

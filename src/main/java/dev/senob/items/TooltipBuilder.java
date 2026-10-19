@@ -5,6 +5,9 @@ import dev.senob.core.GravenTheme;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
+import java.util.List;
+import java.util.ListIterator;
+
 /**
  * Builds the sectioned item tooltips (Tier / ATTRIBUTES / ABILITY / EFFECTS)
  * shared by GravenCore custom items.
@@ -26,20 +29,66 @@ public final class TooltipBuilder {
      * The standard divider line placed between tooltip sections.
      */
     public static Component divider() {
-        return GravenTheme.parse("<gray>" + "-".repeat(DIVIDER_WIDTH) + "</gray>");
+        return divider(DIVIDER_WIDTH);
+    }
+
+    /**
+     * A divider line with an explicit width, in dashes.
+     */
+    public static Component divider(int width) {
+        return GravenTheme.parse("<gray>" + "-".repeat(Math.max(1, width)) + "</gray>");
     }
 
     /**
      * A section header embedded in the middle of the divider,
-     * e.g. —————ATTRIBUTES—————. The dashes are sized so the whole
-     * line matches divider() width. Width estimate (tuned from
-     * in-game screenshots): one bold title character ≈ 0.7 em-dashes.
+     * e.g. -------------ATTRIBUTES-------------. Sized to the
+     * standard divider width; see {@link #section(String, int)}.
      */
     public static Component section(String title) {
+        return section(title, DIVIDER_WIDTH);
+    }
+
+    /**
+     * A section header embedded in the middle of the divider,
+     * e.g. -------------ATTRIBUTES-------------. The dashes are sized so the whole
+     * line matches the given width. Width estimate (tuned from
+     * in-game screenshots): one bold title character ≈ 0.7 dashes.
+     */
+    public static Component section(String title, int width) {
         int titleDashes = Math.max(1, (int) Math.ceil(title.length() * 0.7));
-        int side = Math.max(2, (DIVIDER_WIDTH - titleDashes) / 2);
+        int side = Math.max(2, (width - titleDashes) / 2);
         String dashes = "-".repeat(side);
         return GravenTheme.parse("<gray>" + dashes + "</gray><gold><bold>" + title + "</bold></gold><gray>" + dashes + "</gray>");
+    }
+
+    /**
+     * Resizes every divider and section-header line in the lore to span the
+     * widest content line, so dividers always match the tooltip box width.
+     * Call after building the lore list, before meta.lore(lore).
+     */
+    public static void fitDividers(List<Component> lore) {
+        PlainTextComponentSerializer plain = PlainTextComponentSerializer.plainText();
+        int max = 0;
+        for (Component line : lore) {
+            String text = plain.serialize(line);
+            if (isDividerText(text)) continue;
+            max = Math.max(max, text.length());
+        }
+        int width = Math.max(DIVIDER_WIDTH, max);
+        ListIterator<Component> it = lore.listIterator();
+        while (it.hasNext()) {
+            Component line = it.next();
+            String text = plain.serialize(line);
+            if (text.matches("-+")) {
+                it.set(divider(width));
+            } else if (text.matches("-+[^-]+-+")) {
+                it.set(section(text.replaceAll("^-+|-+$", ""), width));
+            }
+        }
+    }
+
+    private static boolean isDividerText(String text) {
+        return text.matches("-+") || text.matches("-+[^-]+-+");
     }
 
     /**

@@ -188,6 +188,7 @@ public class RedlineSpear implements Listener, CustomItem {
             finalLore.add(GravenTheme.parse(parsed));
         }
 
+        TooltipBuilder.fitDividers(finalLore);
         meta.lore(finalLore);
         item.setItemMeta(meta);
 

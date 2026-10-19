@@ -8,6 +8,11 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
+- **Divider auto-fit (2026-10-18):** `TooltipBuilder.fitDividers()` resizes every divider and
+  section-header line to span the widest content line, so dividers always match the tooltip
+  box width (previously fixed at 17 dashes, which looked short once Block Rate/Power widened
+  the ATTRIBUTES section). Applied in all three item sync methods; never shrinks below the
+  classic 17-dash width.
 - **Dracula's Plate block system (2026-10-18):** the plate now has the same blocking mechanic
   as the Mythical set — `weapons.dracula.block-rate`% chance (default 25.0) to trigger on an
   incoming attack while wearing it, subtracting `weapons.dracula.block-power` flat damage

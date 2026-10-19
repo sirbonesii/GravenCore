@@ -172,6 +172,7 @@ public class DraculaPlate implements Listener, CustomItem {
         lore.add(TooltipBuilder.divider());
         lore.add(TooltipBuilder.creatorFooter());
 
+        TooltipBuilder.fitDividers(lore);
         meta.lore(lore);
         item.setItemMeta(meta);
 

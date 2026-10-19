@@ -8,6 +8,11 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
+- **Enchants tooltip section (2026-10-18):** vanilla enchantment lines no longer float at the
+  top of armor tooltips — `HIDE_ENCHANTS` suppresses the client's automatic block and the
+  enchantments render under their own "Enchants" divider (after Durability, before ATTRIBUTES),
+  using vanilla's display names. Only shows when the piece actually has enchantments. Applies
+  to the Mythical set and Dracula's Plate.
 - **Divider auto-fit (2026-10-18):** `TooltipBuilder.fitDividers()` resizes every divider and
   section-header line to span the widest content line, so dividers always match the tooltip
   box width (previously fixed at 17 dashes, which looked short once Block Rate/Power widened

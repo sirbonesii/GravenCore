@@ -3,10 +3,16 @@ package dev.senob.items;
 import dev.senob.core.GravenConfig;
 import dev.senob.core.GravenTheme;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 /**
  * Builds the sectioned item tooltips (Tier / ATTRIBUTES / ABILITY / EFFECTS)
@@ -133,6 +139,25 @@ public final class TooltipBuilder {
     public static boolean isDurabilityLine(Component line) {
         String plain = PlainTextComponentSerializer.plainText().serialize(line).trim();
         return plain.startsWith("Durability:");
+    }
+
+    /**
+     * The item's enchantments as lore lines, using vanilla's own display names.
+     * Pair with ItemFlag.HIDE_ENCHANTS (which suppresses the client's automatic
+     * enchantment block) so enchantments live under their own section instead
+     * of floating at the top of the tooltip. Empty when the item has none.
+     */
+    public static List<Component> enchantLines(ItemMeta meta) {
+        List<Component> lines = new ArrayList<>();
+        meta.getEnchants().entrySet().stream()
+                .sorted(Comparator.comparing(e -> e.getKey().getKey().toString()))
+                .forEach(e -> lines.add(enchantLine(e.getKey(), e.getValue())));
+        return lines;
+    }
+
+    private static Component enchantLine(Enchantment enchantment, int level) {
+        return enchantment.displayName(level)
+                .decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
     }
 
     /**

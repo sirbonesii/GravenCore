@@ -23,6 +23,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlotGroup;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -123,6 +124,7 @@ public class DraculaPlate implements Listener, CustomItem {
         meta.displayName(GravenTheme.parse("<color:#F8F854><italic>Dracula's Plate</italic></color>"));
         meta.itemName(GravenTheme.parse("<color:#AA0000>Dracula's Plate</color>"));
         meta.setUnbreakable(true);
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 
         if (!pdc.has(cooldownKey, PersistentDataType.LONG)) pdc.set(cooldownKey, PersistentDataType.LONG, GravenConfig.DRACULA_COOLDOWN);
         if (!pdc.has(durationKey, PersistentDataType.LONG)) pdc.set(durationKey, PersistentDataType.LONG, GravenConfig.DRACULA_DURATION);
@@ -149,6 +151,11 @@ public class DraculaPlate implements Listener, CustomItem {
         List<Component> lore = new ArrayList<>();
         lore.add(TooltipBuilder.tierLine(tier));
         lore.add(TooltipBuilder.durabilityLine("<blue>Unbreakable</blue>"));
+        List<Component> enchants = TooltipBuilder.enchantLines(meta);
+        if (!enchants.isEmpty()) {
+            lore.add(TooltipBuilder.section("Enchants"));
+            lore.addAll(enchants);
+        }
         lore.add(TooltipBuilder.section("ATTRIBUTES"));
         lore.add(TooltipBuilder.attribute("⚔", "Atk Damage", "green", formatStat(attackDamage)));
         lore.add(TooltipBuilder.attribute("🛡", "Defense", "#ADD8E6", formatStat(GravenConfig.DRACULA_ARMOR)));

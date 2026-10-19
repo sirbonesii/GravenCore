@@ -17,6 +17,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.EquipmentSlotGroup;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -148,6 +149,7 @@ public class MythicalArmorSet implements CustomItem, Listener {
         meta.displayName(GravenTheme.parse("<gray>" + vanillaName + "</gray>"));
         meta.itemName(GravenTheme.parse("<gray>" + vanillaName + "</gray>"));
         meta.setUnbreakable(false);
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 
         int maxDurability = GravenConfig.MYTHICAL_DURABILITY;
         int remainingDurability = maxDurability;
@@ -189,6 +191,11 @@ public class MythicalArmorSet implements CustomItem, Listener {
         List<Component> lore = new ArrayList<>();
         lore.add(TooltipBuilder.tierLine(tier));
         lore.add(TooltipBuilder.durabilityLine("<green>" + remainingDurability + "/" + maxDurability + "</green>"));
+        List<Component> enchants = TooltipBuilder.enchantLines(meta);
+        if (!enchants.isEmpty()) {
+            lore.add(TooltipBuilder.section("Enchants"));
+            lore.addAll(enchants);
+        }
         lore.add(TooltipBuilder.section("ATTRIBUTES"));
         lore.add(TooltipBuilder.attribute("🛡", "Defense", "#ADD8E6", formatStat(defense)));
         lore.add(TooltipBuilder.attribute("💎", "Armor Tough", "#7DD3FC", formatStat(toughness)));

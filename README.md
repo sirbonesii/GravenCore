@@ -8,6 +8,13 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
+- **Time Slow reworked: tick freeze (2026-10-19):** the boots now freeze the world
+  (`ServerTickManager.setFrozen`) instead of lowering the tick rate — tick freeze
+  natively exempts players, so the wearer is *truly* unaffected (plus a configurable
+  `speed-boost`, default Speed I) while everything else stops. Same 6s/45s tuning,
+  same trigger, particles, sound, and cooldown; `tick-rate`/`compensation-*` keys
+  replaced by `speed-boost`. Overlap guard and `onDisable` safety net now guard the
+  frozen flag instead of the tick rate.
 - **Mythical Boots + Time Slow ability (2026-10-19):** standalone Mythical boots
   (like Dracula's Plate — own item, own `armor.mythical-boots` config section, not part
   of the armor set; `/gravencore give mythicalboots`). Shift + left-click drops the

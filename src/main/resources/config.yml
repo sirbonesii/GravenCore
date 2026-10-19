@@ -143,16 +143,14 @@ armor:
     # Max durability (the boots are NOT unbreakable)
     durability: 2096
 
-    # Time Slow: shift + left-click drops the server tick rate for <duration>
-    # seconds. The tick rate is server-global, so the wearer is compensated
-    # with Speed/Haste to feel unaffected while the world crawls.
+    # Time Slow: shift + left-click freezes the world for <duration> seconds.
+    # Tick freeze natively exempts players, so the wearer is truly unaffected
+    # (plus a small speed boost) while everything else stops.
     time-slow:
       enabled: true
-      duration: 6.0           # seconds the tick rate stays lowered
-      cooldown: 45            # seconds between activations
-      tick-rate: 4.0          # server tick rate during the slow (20 = normal)
-      compensation-speed: 0   # Speed for the wearer (0 = unaffected; movement is client-predicted)
-      compensation-haste: 1   # Haste for the wearer (offsets slower block breaking)
+      duration: 6.0        # seconds the world stays frozen
+      cooldown: 45         # seconds between activations
+      speed-boost: 1       # Speed level for the wearer during the freeze (0 = off)
 
     # Sound effects: trigger sound as [sound-name, volume, pitch]
     sound-effects:

@@ -56,13 +56,11 @@ public class GravenConfig {
     // --- MYTHICAL BOOTS (standalone item, not part of the set) ---
     public static String MYTHICAL_BOOTS_TIER;
     public static int MYTHICAL_BOOTS_DURABILITY;
-    /** Time Slow: shift + left-click drops the server tick rate; the wearer is compensated. */
+    /** Time Slow: shift + left-click freezes the world; the wearer is exempt plus speed boost. */
     public static boolean MYTHICAL_BOOTS_TIMESLOW_ENABLED;
     public static double MYTHICAL_BOOTS_TIMESLOW_DURATION;
     public static long MYTHICAL_BOOTS_TIMESLOW_COOLDOWN;
-    public static double MYTHICAL_BOOTS_TIMESLOW_TICKRATE;
-    public static int MYTHICAL_BOOTS_TIMESLOW_SPEEDAMP;
-    public static int MYTHICAL_BOOTS_TIMESLOW_HASTEAMP;
+    public static int MYTHICAL_BOOTS_TIMESLOW_SPEEDBOOST;
     public static String MYTHICAL_BOOTS_TIMESLOW_SOUND;
     public static float MYTHICAL_BOOTS_TIMESLOW_VOLUME;
     public static float MYTHICAL_BOOTS_TIMESLOW_PITCH;
@@ -142,9 +140,7 @@ public class GravenConfig {
         MYTHICAL_BOOTS_TIMESLOW_ENABLED = config.getBoolean(base + ".time-slow.enabled", true);
         MYTHICAL_BOOTS_TIMESLOW_DURATION = config.getDouble(base + ".time-slow.duration", 6.0);
         MYTHICAL_BOOTS_TIMESLOW_COOLDOWN = config.getLong(base + ".time-slow.cooldown", 45L);
-        MYTHICAL_BOOTS_TIMESLOW_TICKRATE = config.getDouble(base + ".time-slow.tick-rate", 4.0);
-        MYTHICAL_BOOTS_TIMESLOW_SPEEDAMP = config.getInt(base + ".time-slow.compensation-speed", 0);
-        MYTHICAL_BOOTS_TIMESLOW_HASTEAMP = config.getInt(base + ".time-slow.compensation-haste", 1);
+        MYTHICAL_BOOTS_TIMESLOW_SPEEDBOOST = config.getInt(base + ".time-slow.speed-boost", 1);
         String[] s = readSoundList(config, base + ".sound-effects.time-slow");
         MYTHICAL_BOOTS_TIMESLOW_SOUND = s[0];
         MYTHICAL_BOOTS_TIMESLOW_VOLUME = Float.parseFloat(s[1]);

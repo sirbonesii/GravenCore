@@ -37,9 +37,9 @@ import java.util.List;
  * Standalone Mythical boots (not part of the Mythical armor set), in the same
  * style as Dracula's Plate: its own item, config section and ability.
  *
- * Ability — Time Slow: shift + left-click drops the server tick rate for a few
- * seconds. The tick rate is server-global, so the wearer is compensated with
- * Speed/Haste to feel unaffected while the world crawls.
+ * Ability — Time Slow: shift + left-click freezes the world for a few
+ * seconds. Tick freeze natively exempts players, so the wearer is truly
+ * unaffected (plus a small speed boost) while everything else stops.
  */
 @SuppressWarnings({"UnstableApiUsage", "unused"})
 public class MythicalBoots implements Listener, CustomItem {
@@ -52,9 +52,9 @@ public class MythicalBoots implements Listener, CustomItem {
 
     private final NamespacedKey bootsKey;
 
-    /** Guard for overlapping slows: the first trigger's pre-slow rate wins. */
+    /** Guard for overlapping freezes: the first trigger's pre-freeze state wins. */
     private static BukkitTask activeRestoreTask = null;
-    private static float preSlowTickRate = 20.0f;
+    private static boolean preSlowFrozen = false;
 
     public MythicalBoots(GravenCore plugin, CooldownManager cooldownManager) {
         this.plugin = plugin;
@@ -142,9 +142,8 @@ public class MythicalBoots implements Listener, CustomItem {
         if (GravenConfig.MYTHICAL_BOOTS_TIMESLOW_ENABLED) {
             lore.add(TooltipBuilder.section("ABILITY"));
             lore.add(GravenTheme.parse("<aqua>⏳ TIME SLOW</aqua><gray>:</gray> <white>Shift + Left Click</white>"));
-            lore.add(GravenTheme.parse("<gray>Slows the world to <aqua>"
-                    + GravenConfig.MYTHICAL_BOOTS_TIMESLOW_TICKRATE + " tps</aqua> for <yellow>"
-                    + GravenConfig.MYTHICAL_BOOTS_TIMESLOW_DURATION + "s</yellow> — you feel nothing</gray>"));
+            lore.add(GravenTheme.parse("<gray>Freezes the world for <yellow>"
+                    + GravenConfig.MYTHICAL_BOOTS_TIMESLOW_DURATION + "s</yellow> — you keep moving</gray>"));
         }
         lore.add(TooltipBuilder.divider());
 
@@ -154,9 +153,11 @@ public class MythicalBoots implements Listener, CustomItem {
     }
 
     /**
-     * Time Slow: shift + left-click drops the server tick rate for the
-     * configured duration. Game ticks run slower than real time while active,
-     * so all delays are measured in slowed ticks (duration * tick-rate).
+     * Time Slow: shift + left-click freezes the world for the configured
+     * duration. Tick freeze natively exempts players, so the wearer is truly
+     * unaffected (plus a small speed boost); everything else stops.
+     * The server loop keeps running while frozen, so Bukkit tasks still fire
+     * in real time — delays are measured in normal 20tps ticks.
      */
     @EventHandler
     public void onTimeSlowTrigger(PlayerInteractEvent event) {
@@ -167,66 +168,65 @@ public class MythicalBoots implements Listener, CustomItem {
         if (!isWearingMythicalBoots(player)) return;
         if (cooldownManager.isOnCooldown(player, COOLDOWN_TYPE)) return;
 
-        double tickRate = Math.clamp(GravenConfig.MYTHICAL_BOOTS_TIMESLOW_TICKRATE, 1.0, 20.0);
         double durationSec = Math.max(1.0, GravenConfig.MYTHICAL_BOOTS_TIMESLOW_DURATION);
-        // Slowed ticks covering the real-time duration: duration * tick-rate
-        long slowTicks = Math.max(1L, (long) (durationSec * tickRate));
+        long freezeTicks = (long) (durationSec * 20.0);
 
         var tickManager = Bukkit.getServerTickManager();
         if (activeRestoreTask == null) {
-            preSlowTickRate = tickManager.getTickRate();
+            preSlowFrozen = tickManager.isFrozen();
         } else {
             activeRestoreTask.cancel();
         }
-        tickManager.setTickRate((float) tickRate);
+        tickManager.setFrozen(true);
 
-        // Compensate the wearer so they feel unaffected while the world crawls
-        int speedAmp = Math.max(0, GravenConfig.MYTHICAL_BOOTS_TIMESLOW_SPEEDAMP);
-        int hasteAmp = Math.max(0, GravenConfig.MYTHICAL_BOOTS_TIMESLOW_HASTEAMP);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, (int) slowTicks, speedAmp, false, false, true));
-        player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, (int) slowTicks, hasteAmp, false, false, true));
+        // Small speed boost for the wearer while the world is frozen.
+        // Config uses 1-indexed levels (1 = Speed I); 0 disables the effect.
+        int speedLevel = Math.max(0, GravenConfig.MYTHICAL_BOOTS_TIMESLOW_SPEEDBOOST);
+        if (speedLevel > 0) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, (int) freezeTicks, speedLevel - 1, false, false, true));
+        }
 
         player.getWorld().playSound(player.getLocation(),
                 GravenConfig.MYTHICAL_BOOTS_TIMESLOW_SOUND,
                 GravenConfig.MYTHICAL_BOOTS_TIMESLOW_VOLUME,
                 GravenConfig.MYTHICAL_BOOTS_TIMESLOW_PITCH);
-        spawnTimeSlowAura(player, slowTicks);
+        spawnTimeSlowAura(player, freezeTicks);
 
         cooldownManager.setCooldown(player, COOLDOWN_TYPE, GravenConfig.MYTHICAL_BOOTS_TIMESLOW_COOLDOWN);
 
-        // Restore the pre-slow tick rate even if the wearer logs out mid-slow
+        // Unfreeze even if the wearer logs out mid-freeze
         activeRestoreTask = new BukkitRunnable() {
             @Override
             public void run() {
-                Bukkit.getServerTickManager().setTickRate(preSlowTickRate);
+                Bukkit.getServerTickManager().setFrozen(preSlowFrozen);
                 activeRestoreTask = null;
             }
-        }.runTaskLater(plugin, slowTicks);
+        }.runTaskLater(plugin, freezeTicks);
 
         if (action == Action.LEFT_CLICK_BLOCK) event.setCancelled(true);
     }
 
     /**
-     * Cancels an in-progress slow and restores the pre-slow tick rate.
-     * Called on plugin disable so a reload/stop mid-slow can't leave the
-     * tick rate stuck (the restore task dies with the scheduler).
+     * Cancels an in-progress freeze and restores the pre-freeze state.
+     * Called on plugin disable so a reload/stop mid-freeze can't leave the
+     * world frozen (the restore task dies with the scheduler).
      */
     public static void cancelActiveSlow() {
         if (activeRestoreTask != null) {
             activeRestoreTask.cancel();
             activeRestoreTask = null;
-            Bukkit.getServerTickManager().setTickRate(preSlowTickRate);
+            Bukkit.getServerTickManager().setFrozen(preSlowFrozen);
         }
     }
 
-    /** Witch-particle ring that follows the wearer for the whole slow. */
-    private void spawnTimeSlowAura(Player player, long slowTicks) {
+    /** Witch-particle ring that follows the wearer for the whole freeze. */
+    private void spawnTimeSlowAura(Player player, long freezeTicks) {
         new BukkitRunnable() {
             long elapsed = 0;
 
             @Override
             public void run() {
-                if (elapsed >= slowTicks || !player.isOnline()) {
+                if (elapsed >= freezeTicks || !player.isOnline()) {
                     cancel();
                     return;
                 }

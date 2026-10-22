@@ -33,9 +33,10 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   offers online player names.
 - **Alter of Despair (2026-10-22):** new placeable altar dropper, given with
   `/gravencore alter <username> [count]` (count defaults to 1, clamped 1–64). The dropper item carries the name in the red shake
-  color (#F8F854) and a PDC marker, and renders as a crafting table via the
-  item_model component (the placed block stays a dropper); placing it spawns the glinting
-  crafting-table ItemDisplay inside the dropper's block (enchantment glint
+  color (#F8F854) and a PDC marker, and renders as the configured block
+  (`alter.block`, default `minecraft:crafting_table`) via the item_model
+  component (the placed block stays a dropper); placing it spawns the glinting
+  ItemDisplay of that block inside the dropper's block (enchantment glint
   override, display scale and forced brightness from the new `alter` config
   section), and breaking the dropper removes the display and drops a fresh
   alter item so the cycle survives. It composes with the Redline Altar: the

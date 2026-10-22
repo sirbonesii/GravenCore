@@ -25,10 +25,11 @@ import org.joml.Vector3f;
 
 /**
  * The Alter of Despair: a named dropper given out by
- * {@code /gravencore alter <username> [count]}, rendered as a crafting
- * table via the item_model component (the placed block stays a
+ * {@code /gravencore alter <username> [count]}, rendered as the
+ * configured block (alter.block, default crafting table) via the
+ * item_model component (the placed block stays a
  * dropper). Placing it spawns the
- * glinting crafting-table ItemDisplay inside the dropper's own block —
+ * glinting ItemDisplay of that block inside the dropper's own block —
  * the same setup as summoning an item_display with the
  * enchantment_glint_override component, a full transformation and a
  * forced brightness — and breaking the dropper removes the display and
@@ -52,9 +53,9 @@ public class AlterOfDespair implements Listener {
         if (meta != null) {
             meta.displayName(GravenTheme.parse("<color:#F8F854>Alter of Despair</color>"));
             meta.itemName(GravenTheme.parse("<color:#F8F854>Alter of Despair</color>"));
-            // Render the item as a crafting table (the altar's look); the
+            // Render the item as the configured block (alter.block); the
             // base item stays a dropper so it still places the altar block
-            meta.setItemModel(new NamespacedKey(NamespacedKey.MINECRAFT_NAMESPACE, "crafting_table"));
+            meta.setItemModel(GravenConfig.alterItemModelKey());
             meta.getPersistentDataContainer().set(alterItemKey, PersistentDataType.INTEGER, 1);
             item.setItemMeta(meta);
         }
@@ -95,7 +96,7 @@ public class AlterOfDespair implements Listener {
         if (existing != null) existing.remove(); // never stack two
         Location center = block.getLocation().add(0.5, 0.5, 0.5);
         block.getWorld().spawn(center, ItemDisplay.class, display -> {
-            ItemStack table = new ItemStack(Material.CRAFTING_TABLE);
+            ItemStack table = new ItemStack(GravenConfig.alterBlockMaterial());
             ItemMeta tableMeta = table.getItemMeta();
             if (tableMeta != null) {
                 if (GravenConfig.ALTER_GLINT) tableMeta.setEnchantmentGlintOverride(true);

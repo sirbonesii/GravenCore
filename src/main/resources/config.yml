@@ -230,7 +230,12 @@ upgrading:
 # Given with /gravencore alter <username> [count]. Placing the dropper
 # spawns the glinting crafting-table display inside its block.
 alter:
-  # Scale of the crafting-table display (1.0 = exactly one block; 1.01
+  # The block the alter shows. Drives BOTH the item's model (item_model,
+  # so the item looks like this block in hand/inventory) and the 3D block
+  # the placed display renders. Any block id works, e.g.
+  # minecraft:enchanting_table
+  block: "minecraft:crafting_table"
+  # Scale of the block display (1.0 = exactly one block; 1.01
   # gives it a hair of overhang so it never z-fights the dropper)
   display-scale: 1.01
   # Forced brightness of the display, 0-15 each. It sits inside a solid

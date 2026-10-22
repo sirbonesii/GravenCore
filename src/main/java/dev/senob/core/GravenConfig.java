@@ -60,6 +60,7 @@ public class GravenConfig {
     public static int ALTER_BRIGHTNESS_BLOCK;
     public static int ALTER_BRIGHTNESS_SKY;
     public static boolean ALTER_GLINT;
+    public static String ALTER_BLOCK_ID;
 
     // --- DRACULA PLATE ---
     public static long DRACULA_COOLDOWN;
@@ -213,6 +214,22 @@ public class GravenConfig {
         ALTER_BRIGHTNESS_BLOCK = config.getInt("alter.brightness-block", 0);
         ALTER_BRIGHTNESS_SKY = config.getInt("alter.brightness-sky", 15);
         ALTER_GLINT = config.getBoolean("alter.glint", true);
+        ALTER_BLOCK_ID = config.getString("alter.block", "minecraft:crafting_table");
+    }
+
+    /** The block the Alter of Despair shows, resolved from alter.block. */
+    public static org.bukkit.Material alterBlockMaterial() {
+        org.bukkit.Material mat = org.bukkit.Material.matchMaterial(
+                ALTER_BLOCK_ID != null ? ALTER_BLOCK_ID : "minecraft:crafting_table");
+        return mat != null ? mat : org.bukkit.Material.CRAFTING_TABLE;
+    }
+
+    /** The item_model key for the alter item, from the same alter.block id. */
+    public static org.bukkit.NamespacedKey alterItemModelKey() {
+        org.bukkit.NamespacedKey key = ALTER_BLOCK_ID != null
+                ? org.bukkit.NamespacedKey.fromString(ALTER_BLOCK_ID) : null;
+        return key != null ? key
+                : new org.bukkit.NamespacedKey(org.bukkit.NamespacedKey.MINECRAFT_NAMESPACE, "crafting_table");
     }
 
     private static void loadResourcePack(FileConfiguration config) {

@@ -32,8 +32,9 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   and the view closes itself if the target logs out. Tab completion
   offers online player names.
 - **Alter of Despair (2026-10-22):** new placeable altar dropper, given with
-  `/gravencore alter <username> [count]` (count defaults to 1, clamped 1–64). The dropper item carries the name in the red shake
-  color (#F8F854) and a PDC marker, and renders as the configured block
+  `/gravencore alter <username> [count]` (count defaults to 1, clamped 1–64). The dropper item carries the configured name and color
+  (`alter.display_name` / `alter.hex_code`, default "Alter of Despair" in
+  the red shake color #F8F854) and a PDC marker, and renders as the configured block
   (`alter.block`, default `minecraft:crafting_table`) via the item_model
   component (the placed block stays a dropper); placing it spawns the glinting
   ItemDisplay of that block inside the dropper's block (enchantment glint

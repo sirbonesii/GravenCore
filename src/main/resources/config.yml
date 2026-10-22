@@ -55,15 +55,15 @@ weapons:
     # the end of the charge as the beam shoots.
     sound-effects:
       charge:
-        - minecraft:block.end_portal_frame.fill
+        - "minecraft:block.end_portal_frame.fill"
         - 100
         - 0.9
       pre-fire:
-        - minecraft:entity.warden.sonic_charge
+        - "minecraft:entity.warden.sonic_charge"
         - 100
         - 0.6
       fire:
-        - minecraft:entity.warden.sonic_boom
+        - "minecraft:entity.warden.sonic_boom"
         - 100
         - 0.6
 
@@ -109,7 +109,7 @@ weapons:
     # Same args as: /playsound minecraft:block.anvil.land player @a ~ ~ ~ 100 1.9
     sound-effects:
       block:
-        - minecraft:block.anvil.land
+        - "minecraft:block.anvil.land"
         - 100
         - 1.9
 
@@ -133,7 +133,7 @@ armor:
     # Same args as: /playsound minecraft:block.anvil.land player @a ~ ~ ~ 100 1.9
     sound-effects:
       block:
-        - minecraft:block.anvil.land
+        - "minecraft:block.anvil.land"
         - 100
         - 1.9
 
@@ -182,11 +182,11 @@ armor:
     # Sound effects: trigger sound as [sound-name, volume, pitch]
     sound-effects:
       time-slow:
-        - minecraft:block.beacon.activate
+        - "minecraft:block.beacon.activate"
         - 100
         - 0.8
       block:
-        - minecraft:block.anvil.land
+        - "minecraft:block.anvil.land"
         - 100
         - 1.9
 
@@ -207,22 +207,22 @@ upgrading:
     # Sound effects: [sound-name, volume, pitch]
     sound-effects:
       start:
-        - minecraft:block.beacon.activate
+        - "minecraft:block.beacon.activate"
         - 100
         - 0.8
       complete:
-        - minecraft:entity.player.levelup
+        - "minecraft:entity.player.levelup"
         - 100
         - 1.0
       # Played when the upgraded spear lands, 1.5s after the explosion
       anvil:
-        - minecraft:block.anvil.land
+        - "minecraft:block.anvil.land"
         - 100
         - 0.8
       # Played to nearby players when an ingredient locks into the altar
       # (same as: /playsound minecraft:entity.creaking.spawn master @p ~ ~ ~ 100 .1)
       lock-in:
-        - minecraft:entity.creaking.spawn
+        - "minecraft:entity.creaking.spawn"
         - 100
         - 0.1
 
@@ -235,6 +235,11 @@ alter:
   # the placed display renders. Any block id works, e.g.
   # minecraft:enchanting_table
   block: "minecraft:crafting_table"
+  # The item's display name and its color as a MiniMessage hex tag.
+  # The exact hex matters if your client animates specific colors —
+  # the default <#F8F854> is the red-shake trigger.
+  display_name: "Alter of Despair"
+  hex_code: "<#F8F854>"
   # Scale of the block display (1.0 = exactly one block; 1.01
   # gives it a hair of overhang so it never z-fights the dropper)
   display-scale: 1.01

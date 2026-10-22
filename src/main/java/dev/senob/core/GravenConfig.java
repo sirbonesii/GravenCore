@@ -61,6 +61,8 @@ public class GravenConfig {
     public static int ALTER_BRIGHTNESS_SKY;
     public static boolean ALTER_GLINT;
     public static String ALTER_BLOCK_ID;
+    public static String ALTER_DISPLAY_NAME;
+    public static String ALTER_HEX_CODE;
 
     // --- DRACULA PLATE ---
     public static long DRACULA_COOLDOWN;
@@ -215,6 +217,8 @@ public class GravenConfig {
         ALTER_BRIGHTNESS_SKY = config.getInt("alter.brightness-sky", 15);
         ALTER_GLINT = config.getBoolean("alter.glint", true);
         ALTER_BLOCK_ID = config.getString("alter.block", "minecraft:crafting_table");
+        ALTER_DISPLAY_NAME = config.getString("alter.display_name", "Alter of Despair");
+        ALTER_HEX_CODE = config.getString("alter.hex_code", "<#F8F854>");
     }
 
     /** The block the Alter of Despair shows, resolved from alter.block. */

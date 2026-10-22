@@ -51,8 +51,10 @@ public class AlterOfDespair implements Listener {
         ItemStack item = new ItemStack(Material.DROPPER, Math.max(1, Math.min(64, count)));
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(GravenTheme.parse("<color:#F8F854>Alter of Despair</color>"));
-            meta.itemName(GravenTheme.parse("<color:#F8F854>Alter of Despair</color>"));
+            String nameText = (GravenConfig.ALTER_HEX_CODE == null ? "" : GravenConfig.ALTER_HEX_CODE)
+                    + (GravenConfig.ALTER_DISPLAY_NAME == null ? "" : GravenConfig.ALTER_DISPLAY_NAME);
+            meta.displayName(GravenTheme.parse(nameText));
+            meta.itemName(GravenTheme.parse(nameText));
             // Render the item as the configured block (alter.block); the
             // base item stays a dropper so it still places the altar block
             meta.setItemModel(GravenConfig.alterItemModelKey());

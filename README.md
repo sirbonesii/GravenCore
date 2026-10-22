@@ -17,7 +17,8 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   itself sticks point-down into the dropper using its big in-hand model, also
   spinning), wrong items are left untouched like any dropper, and locked items
   can be clicked back out. The altar never sends chat messages. When all 9
-  slots lock, lightning strikes the altar and the ritual starts: the
+  slots lock, lightning strikes the altar, a flame circle bursts from the
+  spear and expands outward across the ground, and the ritual starts: the
   pedestal items orbit the center and spiral into the spear (level
   throughout — nothing rises, nothing shrinks), easing to a stop as they
   reach it, ending in an explosion that is lethal to anyone standing within 8 blocks

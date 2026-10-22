@@ -3,6 +3,7 @@ package dev.senob.items;
 import dev.senob.GravenCore;
 import dev.senob.core.GravenConfig;
 import dev.senob.core.GravenTheme;
+import dev.senob.particle_engine.ParticleEngineUtil;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -65,7 +66,8 @@ import java.util.Set;
  * into the dropper, also spinning. Wrong items are left completely
  * untouched, like any dropper. Clicking a green pane with an empty hand
  * takes the stored item back out. When all 9 slots are locked, lightning
- * strikes the altar and the ritual starts: the pedestal items orbit the
+ * strikes the altar, a flame circle bursts from the spear and expands
+ * outward across the ground, and the ritual starts: the pedestal items orbit the
  * center and spiral into the spear — level throughout, nothing rises,
  * nothing shrinks — easing to a stop as they reach it, and the ritual
  * ends in an explosion — lethal to anyone standing in it, unless
@@ -654,6 +656,13 @@ public class RedlineAltar implements Listener {
         // The moment the recipe completes, lightning crashes down on the altar
         // (effect-only bolt: no fire, no damage — pure ceremony)
         world.strikeLightningEffect(center.clone().add(0.5, 1.0, 0.5));
+
+        // And a flame circle bursts from the spear, starting small and
+        // expanding outward flat across the ground — the Redline spear's
+        // first charge pulse (0.22 start, 0.135 expansion, 96 points,
+        // 2 layers), laid horizontal (Aaron's diagram, 2026-10-22)
+        ParticleEngineUtil.spawnExpandingRing(center.clone().add(0.5, 1.1, 0.5),
+                new Vector(0, 1, 0), 0.22, 0.135, Particle.FLAME, 96, 2);
 
         // Adopt the live preview displays where they exist; spawn any missing ones
         List<ItemDisplay> displays = new ArrayList<>();

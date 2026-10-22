@@ -274,8 +274,8 @@ public class RedlineSpear implements Listener, CustomItem {
 
                         // Pre-fire sound (config: weapons.redline.sound-effects.pre-fire):
                         // Aaron (2026-10-22) — the warden sonic charge plays on
-                        // the 2nd pulse only, to everyone (master @a style)
-                        if (beat.tick() == PULSE_BEATS.get(1).tick()) {
+                        // the 1st pulse only, to everyone (master @a style)
+                        if (beat.tick() == PULSE_BEATS.get(0).tick()) {
                             world.playSound(eye, GravenConfig.REDLINE_PREFIRE_SOUND,
                                     SoundCategory.MASTER, GravenConfig.REDLINE_PREFIRE_VOLUME,
                                     GravenConfig.REDLINE_PREFIRE_PITCH);

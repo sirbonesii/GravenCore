@@ -172,7 +172,7 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   pulse rings stay as they were (a fixed-hoop variant from Aaron's reference
   video was tried and reverted the same day), and the per-beat charge chime
   is unchanged. The new `weapons.redline.sound-effects.pre-fire` sound
-  (default warden sonic_charge, 100, 0.6) plays to everyone on the 2nd
+  (default warden sonic_charge, 100, 0.6) plays to everyone on the 1st
   pulse of the charge-up, and at the end of the charge the beam fires
   with the new `weapons.redline.sound-effects.fire` sound (default warden
   sonic_boom, 100, 0.6) ahead of the existing blast sounds. The end-of-beam

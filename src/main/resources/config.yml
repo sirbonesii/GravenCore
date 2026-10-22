@@ -51,7 +51,7 @@ weapons:
     # charge: /playsound ... player @a[distance=..30] — only players within
     # 30 blocks of the charging player hear it.
     # pre-fire / fire: /playsound ... master @a — everyone hears them;
-    # pre-fire plays on the 2nd pulse of the charge-up, fire plays at
+    # pre-fire plays on the 1st pulse of the charge-up, fire plays at
     # the end of the charge as the beam shoots.
     sound-effects:
       charge:

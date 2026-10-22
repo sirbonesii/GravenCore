@@ -76,16 +76,16 @@ public class RedlineSpear implements Listener, CustomItem {
     private static final int RING_LAYERS = 2;
     private static final int SHIELD_DURABILITY_DAMAGE = 180;
 
-    private record PulseBeat(int tick, double startRadius, double expansionSpeed, float pitch) {}
+    private record PulseBeat(int tick, double startRadius, double expansionSpeed) {}
 
     private static final List<PulseBeat> PULSE_BEATS = List.of(
-            new PulseBeat(0,  0.22, 0.135, 0.85f),
-            new PulseBeat(20, 0.20, 0.125, 1.00f),
-            new PulseBeat(27, 0.20, 0.115, 1.18f),
-            new PulseBeat(34, 0.18, 0.105, 1.35f),
-            new PulseBeat(41, 0.18, 0.095, 1.52f),
-            new PulseBeat(48, 0.16, 0.085, 1.72f),
-            new PulseBeat(54, 0.15, 0.075, 1.95f)
+            new PulseBeat(0,  0.22, 0.135),
+            new PulseBeat(20, 0.20, 0.125),
+            new PulseBeat(27, 0.20, 0.115),
+            new PulseBeat(34, 0.18, 0.105),
+            new PulseBeat(41, 0.18, 0.095),
+            new PulseBeat(48, 0.16, 0.085),
+            new PulseBeat(54, 0.15, 0.075)
     );
 
     public RedlineSpear(GravenCore plugin, CooldownManager cooldownManager) {
@@ -261,9 +261,16 @@ public class RedlineSpear implements Listener, CustomItem {
 
                 for (PulseBeat beat : PULSE_BEATS) {
                     if (tick == beat.tick()) {
-                        world.playSound(eye, Sound.BLOCK_NOTE_BLOCK_CHIME, 1.3f, beat.pitch());
-                        world.playSound(eye, Sound.BLOCK_NOTE_BLOCK_PLING, 1.1f, beat.pitch());
-                        world.playSound(eye, Sound.ITEM_FIRECHARGE_USE, 0.65f, beat.pitch());
+                        // Charge-up sound (config: weapons.redline.sound-effects.charge),
+                        // heard only by players within 30 blocks — the plugin
+                        // equivalent of /playsound ... player @a[distance=..30]
+                        for (Player listener : world.getPlayers()) {
+                            if (listener.getLocation().distanceSquared(eye) <= 900.0) {
+                                listener.playSound(eye, GravenConfig.REDLINE_CHARGE_SOUND,
+                                        SoundCategory.PLAYERS, GravenConfig.REDLINE_CHARGE_VOLUME,
+                                        GravenConfig.REDLINE_CHARGE_PITCH);
+                            }
+                        }
 
                         Location ringCenter = eye.clone().add(dir.clone().multiply(2.8));
                         ParticleEngineUtil.spawnExpandingRing(ringCenter, dir, beat.startRadius(), beat.expansionSpeed(), Particle.FLAME, RING_POINTS, RING_LAYERS);

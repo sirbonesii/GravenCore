@@ -47,6 +47,15 @@ weapons:
     # Whether the ability beam passes straight through solid blocks/walls
     pierce-blocks: true
 
+    # Sound effects: charge-up sound as [sound-name, volume, pitch]
+    # Same args as: /playsound minecraft:block.end_portal_frame.fill player @a[distance=..30] ~ ~ ~ 100 0.9
+    # (only players within 30 blocks of the charging player hear it)
+    sound-effects:
+      charge:
+        - minecraft:block.end_portal_frame.fill
+        - 100
+        - 0.9
+
     # Spear lore / item description.
     # Placeholders: <ability_damage>, <range>, <cooldown>, <creator>
     lore:
@@ -172,13 +181,18 @@ armor:
 
 # --- Upgrading ---
 upgrading:
-  # Redline Altar: right-click a dropper ringed by 8 lodestone pedestals to
-  # open the REDLINE bench GUI and lock in the upgrade recipe.
+  # Redline Altar: a dropper ringed by 8 lodestone pedestals. Place the
+  # recipe in the dropper (it works like a normal dropper) to lock it in
+  # and start the upgrade ritual.
   # Recipe: 4x Dragon's Breath (corners), Heavy Core (top), 2x Netherite Ingot
   # (sides), Ghast Tear (bottom), base Redline spear (center).
   redline-altar:
     enabled: true
     ritual-duration: 10.0   # seconds the ritual takes
+    # Play minecraft:block.end_portal.spawn to everyone when the upgraded
+    # spear spawns at the end of the ritual (same as:
+    # /playsound minecraft:block.end_portal.spawn master @a ~ ~ ~ 100 .8)
+    spawn-sound: true
     # Sound effects: [sound-name, volume, pitch]
     sound-effects:
       start:

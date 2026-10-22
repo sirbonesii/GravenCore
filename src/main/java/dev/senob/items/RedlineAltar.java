@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -62,11 +63,11 @@ import java.util.Set;
  * into the dropper, also spinning. Wrong items are left completely
  * untouched, like any dropper. Clicking a green pane with an empty hand
  * takes the stored item back out. When all 9 slots are locked, the ritual
- * starts: the pedestal items orbit the center, spiraling in and shrinking
- * into the spear as it spins faster and rises out of the altar, and the
+ * starts: the pedestal items orbit the center and spiral into the spear
+ * as it spins faster — level throughout, nothing rises, nothing shrinks — and the
  * ritual ends in an explosion — lethal to anyone standing in it, unless
- * a totem of undying saves them — after which the upgraded spear drops
- * at the center. The center spear uses its big in-hand model, stuck
+ * a totem of undying saves them — after which lightning strikes the
+ * center and the upgraded spear drops there. The center spear uses its big in-hand model, stuck
  * point-down into the dropper. The altar's only particles are the
  * enchant sparkles on the pedestal items, and it never sends chat
  * messages.
@@ -472,9 +473,14 @@ public class RedlineAltar implements Listener {
             // frame/dropped model; the half-turn around X flips that held
             // pose point-down so the spear sticks down into the altar.
             // Scale 1.0 = exactly the size it has in a player's hand.
+            // The hand pose renders the spear shifted off the display's
+            // origin (measured ~0.15 blocks in Aaron's screenshot), so the
+            // translation shifts it back by that much — because the shift
+            // lives in the same rotating frame as the hand offset, the
+            // spear stays centered at every spin angle.
             disp.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.THIRDPERSON_RIGHTHAND);
             disp.setTransformation(new Transformation(
-                    new Vector3f(), new Quaternionf().rotateX((float) Math.PI),
+                    new Vector3f(-0.15f, 0.0f, 0.0f), new Quaternionf().rotateX((float) Math.PI),
                     new Vector3f(1.0f, 1.0f, 1.0f), new Quaternionf()));
         });
     }
@@ -637,10 +643,9 @@ public class RedlineAltar implements Listener {
             for (ItemDisplay leftover : adopted.values()) leftover.remove();
         }
         final ItemDisplay centerDisplay = spearDisplay;
-        final double spearStartY = centerDisplay.getLocation().getY();
 
         // Orbit paths for the pedestal items: each starts above its pedestal,
-        // then circles the center while spiraling in and shrinking toward the spear
+        // then circles the center while spiraling in toward the spear
         List<Double> orbitAngles = new ArrayList<>();
         List<Double> orbitRadii = new ArrayList<>();
         List<Double> orbitY = new ArrayList<>();
@@ -668,11 +673,11 @@ public class RedlineAltar implements Listener {
                 }
                 double progress = (double) elapsed / totalTicks;
                 yaw += 9f + (float) (progress * 9.0);
-                // The planted spear spins faster and faster and rises out of the altar
+                // The planted spear spins faster and faster in place —
+                // the whole animation stays level, nothing rises
                 if (centerDisplay.isValid()) {
                     spearYaw += 9f + (float) (progress * 27.0);
                     Location l = centerDisplay.getLocation();
-                    l.setY(spearStartY + progress * 1.3);
                     l.setYaw(spearYaw);
                     centerDisplay.teleport(l);
                 }
@@ -680,20 +685,16 @@ public class RedlineAltar implements Listener {
                     ItemDisplay display = displays.get(i);
                     if (!display.isValid()) continue;
                     // Circular motion: two full revolutions while the radius
-                    // collapses toward the spear and the item shrinks away
+                    // collapses toward the spear. The items keep their size
+                    // and their height — the animation stays level throughout
                     double angle = orbitAngles.get(i) + progress * Math.PI * 4.0;
                     double radius = orbitRadii.get(i) * (1.0 - progress) + 0.35 * progress;
-                    double oy = orbitY.get(i) + ((spearStartY + 1.0) - orbitY.get(i)) * progress;
                     Location l = new Location(world,
                             center.getX() + 0.5 + Math.cos(angle) * radius,
-                            oy,
+                            orbitY.get(i),
                             center.getZ() + 0.5 + Math.sin(angle) * radius);
                     l.setYaw(yaw);
                     display.teleport(l);
-                    float s = (float) (0.5 * (1.0 - progress * 0.92));
-                    display.setTransformation(new Transformation(
-                            new Vector3f(), new Quaternionf(),
-                            new Vector3f(s, s, s), new Quaternionf()));
                     // The only particles in the whole ritual: the sparkles
                     // on the pedestal items themselves
                     world.spawnParticle(Particle.ENCHANT, display.getLocation(), 2, 0.2, 0.2, 0.2, 0.5);
@@ -724,12 +725,25 @@ public class RedlineAltar implements Listener {
         }
         if (spearDisplay.isValid()) spearDisplay.remove();
 
+        // Lightning crashes down on the spot, then the upgraded spear appears
+        // (effect-only bolt: no fire, and it can't hurt or destroy the drop)
         Location dropAt = center.clone().add(0.5, 1.5, 0.5);
+        world.strikeLightningEffect(dropAt);
         Item dropped = world.dropItem(dropAt, redlineSpear.createRedlineSpear(2));
         dropped.setVelocity(new Vector(0, 0, 0));
         dropped.setGlowing(true);
         dropped.setOwner(player != null ? player.getUniqueId() : null);
         dropped.setPickupDelay(10);
+
+        // Spawn sound, played to everyone in the world at the drop point —
+        // same as: /playsound minecraft:block.end_portal.spawn master @a ~ ~ ~ 100 .8
+        // Toggle: upgrading.redline-altar.spawn-sound in the config
+        if (GravenConfig.REDLINE_ALTAR_SPAWN_SOUND) {
+            for (Player listener : world.getPlayers()) {
+                listener.playSound(dropAt, "minecraft:block.end_portal.spawn",
+                        SoundCategory.MASTER, 100f, 0.8f);
+            }
+        }
 
         world.playSound(center, GravenConfig.REDLINE_ALTAR_COMPLETE_SOUND,
                 GravenConfig.REDLINE_ALTAR_COMPLETE_VOLUME, GravenConfig.REDLINE_ALTAR_COMPLETE_PITCH);

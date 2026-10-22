@@ -22,6 +22,9 @@ public class GravenConfig {
     public static double REDLINE_ATTACK_SPEED;
     public static double REDLINE_LAUNCH_VELOCITY;
     public static boolean REDLINE_PIERCE_BLOCKS;
+    public static String REDLINE_CHARGE_SOUND;
+    public static float REDLINE_CHARGE_VOLUME;
+    public static float REDLINE_CHARGE_PITCH;
 
     // --- REDLINE ALTAR (upgrading) ---
     public static boolean REDLINE_ALTAR_ENABLED;
@@ -32,6 +35,7 @@ public class GravenConfig {
     public static String REDLINE_ALTAR_COMPLETE_SOUND;
     public static float REDLINE_ALTAR_COMPLETE_VOLUME;
     public static float REDLINE_ALTAR_COMPLETE_PITCH;
+    public static boolean REDLINE_ALTAR_SPAWN_SOUND;
 
     // --- DRACULA PLATE ---
     public static long DRACULA_COOLDOWN;
@@ -108,6 +112,11 @@ public class GravenConfig {
         REDLINE_ATTACK_SPEED = config.getDouble("weapons.redline.attack-speed", 0.87);
         REDLINE_LAUNCH_VELOCITY = config.getDouble("weapons.redline.launch-velocity", 2.85);
         REDLINE_PIERCE_BLOCKS = config.getBoolean("weapons.redline.pierce-blocks", true);
+        String[] charge = readSoundList(config, "weapons.redline.sound-effects.charge",
+                "minecraft:block.end_portal_frame.fill", "100.0", "0.9");
+        REDLINE_CHARGE_SOUND = charge[0];
+        REDLINE_CHARGE_VOLUME = Float.parseFloat(charge[1]);
+        REDLINE_CHARGE_PITCH = Float.parseFloat(charge[2]);
         loadRedlineAltar(config);
 
         // 3. DRACULA PLATE
@@ -142,6 +151,7 @@ public class GravenConfig {
         String base = "upgrading.redline-altar";
         REDLINE_ALTAR_ENABLED = config.getBoolean(base + ".enabled", true);
         REDLINE_ALTAR_RITUAL_DURATION = config.getDouble(base + ".ritual-duration", 10.0);
+        REDLINE_ALTAR_SPAWN_SOUND = config.getBoolean(base + ".spawn-sound", true);
         String[] s = readSoundList(config, base + ".sound-effects.start");
         REDLINE_ALTAR_START_SOUND = s[0];
         REDLINE_ALTAR_START_VOLUME = Float.parseFloat(s[1]);
@@ -190,6 +200,11 @@ public class GravenConfig {
 
     /** Reads a [sound-name, volume, pitch] list; falls back to anvil defaults on any problem. */
     private static String[] readSoundList(FileConfiguration config, String path) {
+        return readSoundList(config, path, "minecraft:block.anvil.land", "100.0", "1.9");
+    }
+
+    private static String[] readSoundList(FileConfiguration config, String path,
+                                          String defSound, String defVolume, String defPitch) {
         List<String> list = config.getStringList(path);
         if (list.size() >= 3) {
             try {
@@ -202,7 +217,7 @@ public class GravenConfig {
                 // fall through to defaults
             }
         }
-        return new String[]{"minecraft:block.anvil.land", "100.0", "1.9"};
+        return new String[]{defSound, defVolume, defPitch};
     }
 
     private static void loadMythicalPiece(FileConfiguration config, String id, double defaultDefense) {

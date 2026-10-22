@@ -18,12 +18,12 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   spinning), wrong items are left untouched like any dropper, and locked items
   can be clicked back out. The altar never sends chat messages, and its only
   particles are the enchant sparkles on the pedestal items. When all 9 slots
-  lock, the ritual starts: the pedestal items orbit the center, spiraling in
-  and shrinking into the spear as it spins faster and rises out of the altar,
-  ending in an explosion that is lethal to anyone standing within 8 blocks
-  (a held totem of undying still saves them), and after the ritual
-  (`upgrading.redline-altar` config: enabled, ritual-duration, start/complete sounds)
-  the upgraded spear drops at the center for the player.
+  lock, the ritual starts: the pedestal items orbit the center and spiral
+  into the spear as it spins faster (level throughout — nothing rises,
+  nothing shrinks), ending in an explosion that is lethal to anyone standing within 8 blocks
+  (a held totem of undying still saves them); then lightning strikes the
+  center and the upgraded spear drops there for the player
+  (`upgrading.redline-altar` config: enabled, ritual-duration, start/complete sounds).
 - **Celerity Boots: freeze duration on the action bar + block system (2026-10-19):**
   the freeze duration now shows as `❄ 6s` next to the `⏳` cooldown on the action bar;
   boots also gain the block system (new `armor.mythical-boots.block-rate`/`block-power`
@@ -147,6 +147,13 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
 
 #### Changed
+- **Redline charge-up sound (2026-10-21):** the PulseBeat charge now plays
+  `minecraft:block.end_portal_frame.fill` (config list
+  `weapons.redline.sound-effects.charge`, default 100 / 0.9) at each pulse,
+  heard only by players within 30 blocks; replaces the note-block chime/pling
+  + firecharge layer and its rising-pitch ladder. The altar's spear-spawn
+  sound (`minecraft:block.end_portal.spawn` to everyone) can be toggled with
+  `upgrading.redline-altar.spawn-sound`.
 - **Redline custom model data (2026-10-21):** base spear gets `custom_model_data` 2000,
   upgraded gets 2001 (set in `syncSpearStatsAndLore`, so reloads re-apply it).
 - **Teldaria-style dividers v3 (2026-10-19):** reverted to dashes (the ── character didn't

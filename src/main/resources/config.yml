@@ -1,73 +1,75 @@
-# ==========================================
-#          GravenCore Configuration
-# ==========================================
-# Migrated 2026-10-17 from the old flat "TheRedline" format to the
-# nested structure GravenConfig actually reads (settings.*, weapons.*).
-# Original file preserved as config.yml.backup.
-#
-# NOTE: the old file's values were never live (the code only read
-# nested paths), so the server was running on code defaults. Migrating
-# these values in WILL change behavior - see notes below.
+# ============================================================
+#   GravenCore — Configuration
+# ============================================================
+# Sound effects are written as lists of [sound-name, volume, pitch],
+# the same arguments as /playsound, e.g.:
+#   /playsound minecraft:block.anvil.land player @a ~ ~ ~ 100 1.9
 
+
+# ============================================================
+#   Settings
+# ============================================================
 settings:
-  # Creator name shown at the bottom of item tooltips (<creator> placeholder)
+  # Creator name shown at the bottom of item tooltips (<creator>)
   creator: "Senob"
 
+
+# ============================================================
+#   Weapons — Redline Spear
+# ============================================================
 weapons:
   redline:
-    # Normal Base Melee Damage
+    # Melee damage of a normal hit
     melee-damage:
       base: 5.0
       upgraded: 6.5
 
-    # Spear Ability Damage
+    # Damage of the Crimson Piercer beam
     ability-damage:
       base: 16.0
       upgraded: 200.0
 
-    # Range (in blocks) of the flame beam ability
+    # Range of the beam, in blocks
     ability-range:
       base: 30.0
       upgraded: 30.0
 
-    # Ability cooldown in seconds (old key was "ability-cooldown").
-    # NOTE: old file had base: 30 which was dormant; the server was
-    # actually running on the code default of 20.
+    # Beam cooldown, in seconds
     cooldown:
       base: 30
       upgraded: 16
 
-    # Base attack speed (shown in lore as "X Attack Speed")
+    # Attack speed shown in the tooltip
     attack-speed: 0.87
 
-    # Launch speed multiplier when firing the upgraded spear.
-    # Negative = launches the player backwards (recoil dash) - intentional.
+    # Launch speed when firing the upgraded spear.
+    # Negative is intentional: it launches the player backwards
+    # (recoil dash).
     launch-velocity: -2.85
 
-    # Whether the ability beam passes straight through solid blocks/walls
+    # true = the beam passes straight through solid blocks and walls
     pierce-blocks: true
 
-    # Sound effects as [sound-name, volume, pitch].
-    # charge: /playsound ... player @a[distance=..30] — only players within
-    # 30 blocks of the charging player hear it.
-    # pre-fire / fire: /playsound ... master @a — everyone hears them;
-    # pre-fire plays on the 1st pulse of the charge-up, fire plays at
-    # the end of the charge as the beam shoots.
     sound-effects:
+      # Charge-up layer: only players within 30 blocks hear it
       charge:
         - "minecraft:block.end_portal_frame.fill"
         - 100
         - 0.9
+      # Warden charge: plays on the 1st pulse of the charge-up,
+      # heard by everyone
       pre-fire:
         - "minecraft:entity.warden.sonic_charge"
         - 100
         - 0.6
+      # Warden boom: plays as the beam fires, heard by everyone
       fire:
         - "minecraft:entity.warden.sonic_boom"
         - 100
         - 0.6
 
-    # Spear lore / item description.
+    # NOTE: not read by the plugin — the spear's lore is hardcoded
+    # in RedlineSpear.java. Kept here for reference only.
     # Placeholders: <ability_damage>, <range>, <cooldown>, <creator>
     lore:
       - "<gray>Lunge IV</gray>"
@@ -80,63 +82,66 @@ weapons:
       - "<gray>--------------------</gray>"
       - "<dark_red>✦</dark_red> <gray>Created by</gray> <gradient:#FF3B1F:#FF9E2C><italic><creator></italic></gradient>"
 
+  # ==========================================================
+  #   Weapons — Dracula's Plate
+  # ==========================================================
   dracula:
-    # No dracula section existed in the old file - these are the values
-    # the server was already running on (code defaults).
+    # Vampire's Flight cooldown and duration, in seconds
     cooldown: 30
     duration: 10
+
+    # Defense and armor toughness granted by the plate
     armor: 8.0
     toughness: 3.0
 
-    # Bonus attack damage granted while wearing the plate
+    # Bonus attack damage while wearing the plate
     attack-damage: 2.0
 
-    # Percent of damage dealt returned as health while wearing the plate
+    # Percent of damage dealt returned as health
     lifesteal-percent: 20.0
 
     # Chance (%) for lifesteal to trigger on a hit
     lifesteal-chance: 85.0
 
-    # Item tier (full tier system coming later; only "mythical" for now)
+    # Item tier (only "mythical" exists for now)
     tier: "mythical"
 
-    # Block system: chance (percent, 0-100) to trigger a block on an incoming
-    # attack while wearing the plate, and flat damage subtracted when it triggers
+    # Block system: chance (%) to block an incoming attack, and
+    # flat damage subtracted when a block triggers
     block-rate: 25.0
     block-power: 4.0
 
-    # Sound effects: block proc sound as [sound-name, volume, pitch]
-    # Same args as: /playsound minecraft:block.anvil.land player @a ~ ~ ~ 100 1.9
     sound-effects:
       block:
         - "minecraft:block.anvil.land"
         - 100
         - 1.9
 
-# --- Mythical Armor Set (prototype) ---
-# The default Mythical netherite set. Per-piece defensive stats;
-# knockback-resistance uses vanilla scale (0.1 = 10% per piece).
+
+# ============================================================
+#   Armor — Mythical Set
+# ============================================================
 armor:
   mythical:
-    # Item tier (full tier system coming later; only "mythical" for now)
+    # Item tier (only "mythical" exists for now)
     tier: "mythical"
 
     # Max durability per piece (the set is NOT unbreakable)
     durability: 2096
 
-    # Block system: chance (percent, 0-100) for a worn piece to trigger a block
-    # on an incoming attack, and flat damage subtracted when it triggers
+    # Block system: chance (%) for a worn piece to block an
+    # incoming attack, and flat damage subtracted on a block
     block-rate: 45.0
     block-power: 4.0
 
-    # Sound effects: block proc sound as [sound-name, volume, pitch]
-    # Same args as: /playsound minecraft:block.anvil.land player @a ~ ~ ~ 100 1.9
     sound-effects:
       block:
         - "minecraft:block.anvil.land"
         - 100
         - 1.9
 
+    # Per-piece stats. Knockback resistance uses the vanilla
+    # scale: 0.1 = 10% per piece.
     pieces:
       helmet:
         defense: 3.0
@@ -155,31 +160,31 @@ armor:
         toughness: 3.0
         knockback-resistance: 0.1
 
-  # --- Standalone Celerity Boots (not part of the armor set) ---
+  # ==========================================================
+  #   Armor — Celerity Boots (standalone, not part of the set)
+  # ==========================================================
   mythical-boots:
-    # Item tier (full tier system coming later; only "mythical" for now)
+    # Item tier (only "mythical" exists for now)
     tier: "mythical"
 
     # Max durability (the boots are NOT unbreakable)
     durability: 2096
 
-    # Time Slow: shift + left-click freezes the world for <duration> seconds.
-    # Tick freeze natively exempts players, so the wearer is truly unaffected
-    # (plus a small speed boost) while everything else stops.
+    # Time Slow: shift + left-click freezes the world. Tick freeze
+    # natively exempts players, so the wearer stays unaffected (plus
+    # a speed boost) while everything else stops.
     time-slow:
       enabled: true
-      duration: 6.0        # seconds the world stays frozen
-      cooldown: 45         # seconds between activations
-      speed-boost: 1       # Speed level for the wearer during the freeze (0 = off)
-      freeze-players: true # also pin other players in place (activator exempt)
-      weakness-level: 5    # Weakness level for frozen players (0 = off)
+      duration: 6.0         # seconds the world stays frozen
+      cooldown: 45          # seconds between activations
+      speed-boost: 1        # Speed level for the wearer (0 = off)
+      freeze-players: true  # also pin other players in place
+      weakness-level: 5     # Weakness level for frozen players (0 = off)
 
-    # Block: chance to shave flat damage off incoming attacks (same system
-    # as the Mythical set and Dracula's Plate)
-    block-rate: 25.0      # % chance to block
-    block-power: 4.0      # flat damage blocked
+    # Block system: same as the Mythical set and Dracula's Plate
+    block-rate: 25.0        # % chance to block
+    block-power: 4.0        # flat damage blocked
 
-    # Sound effects: trigger sound as [sound-name, volume, pitch]
     sound-effects:
       time-slow:
         - "minecraft:block.beacon.activate"
@@ -190,21 +195,27 @@ armor:
         - 100
         - 1.9
 
-# --- Upgrading ---
+
+# ============================================================
+#   Upgrading — Redline Altar
+# ============================================================
+# A dropper ringed by 8 lodestone pedestals. Place the recipe in
+# the dropper (it works like a normal dropper) to lock it in and
+# start the ritual.
+# Recipe: 4x Dragon's Breath (corners), Heavy Core (top),
+# 2x Netherite Ingot (sides), Ghast Tear (bottom), base Redline
+# spear (center).
 upgrading:
-  # Redline Altar: a dropper ringed by 8 lodestone pedestals. Place the
-  # recipe in the dropper (it works like a normal dropper) to lock it in
-  # and start the upgrade ritual.
-  # Recipe: 4x Dragon's Breath (corners), Heavy Core (top), 2x Netherite Ingot
-  # (sides), Ghast Tear (bottom), base Redline spear (center).
   redline-altar:
     enabled: true
-    ritual-duration: 10.0   # seconds the ritual takes
-    # Play minecraft:block.end_portal.spawn to everyone when the upgraded
-    # spear spawns at the end of the ritual (same as:
-    # /playsound minecraft:block.end_portal.spawn master @a ~ ~ ~ 100 .8)
+
+    # Seconds the ritual takes
+    ritual-duration: 10.0
+
+    # Play minecraft:block.end_portal.spawn to everyone when the
+    # upgraded spear spawns at the end of the ritual
     spawn-sound: true
-    # Sound effects: [sound-name, volume, pitch]
+
     sound-effects:
       start:
         - "minecraft:block.beacon.activate"
@@ -220,47 +231,54 @@ upgrading:
         - 100
         - 0.8
       # Played to nearby players when an ingredient locks into the altar
-      # (same as: /playsound minecraft:entity.creaking.spawn master @p ~ ~ ~ 100 .1)
       lock-in:
         - "minecraft:entity.creaking.spawn"
         - 100
         - 0.1
 
-# --- Alter of Despair ---
-# Given with /gravencore alter <username> [count]. Placing the dropper
-# spawns the glinting crafting-table display inside its block.
+
+# ============================================================
+#   Alter of Despair
+# ============================================================
+# Given with /gravencore alter <username> [count]. Placing the
+# dropper spawns the glinting block display inside its block.
 alter:
-  # The block the alter shows. Drives BOTH the item's model (item_model,
-  # so the item looks like this block in hand/inventory) and the 3D block
-  # the placed display renders. Any block id works, e.g.
-  # minecraft:enchanting_table
+  # The block the alter shows. Drives BOTH the item's model
+  # (item_model, so the item looks like this block in hand and
+  # inventory) and the 3D block the placed display renders.
   block: "minecraft:crafting_table"
-  # The item's display name and its color as a MiniMessage hex tag.
-  # The exact hex matters if your client animates specific colors —
-  # the default <#F8F854> is the red-shake trigger.
+
+  # The item's display name and its color as a MiniMessage hex
+  # tag. The exact hex matters if your client animates specific
+  # colors — the default <#F8F854> is the red-shake trigger.
   display_name: "Alter of Despair"
   hex_code: "<#F8F854>"
+
   # Scale of the block display (1.0 = exactly one block; 1.01
   # gives it a hair of overhang so it never z-fights the dropper)
   display-scale: 1.01
-  # Forced brightness of the display, 0-15 each. It sits inside a solid
-  # block, so without this it renders at light level 0. Sky-only (block 0)
-  # lights it like an outdoor object.
+
+  # Forced brightness of the display, 0-15 each. It sits inside a
+  # solid block, so without this it renders at light level 0.
+  # Sky-only (block 0) lights it like an outdoor object.
   brightness-block: 0
   brightness-sky: 15
-  # Enchantment glint on the displayed crafting table
+
+  # Enchantment glint on the displayed block
   glint: true
 
-# --- Server resource pack (MinePack) ---
-# /gravencore packreload pushes this pack to every online player, live.
-# After uploading a new pack zip, paste the new sha1 here, then run
-# /gravencore reload followed by /gravencore packreload.
+
+# ============================================================
+#   Server Resource Pack (MinePack)
+# ============================================================
+# /gravencore packreload pushes this pack to every online player,
+# live. After uploading a new pack zip, paste the new sha1 here,
+# then run /gravencore reload followed by /gravencore packreload.
 resource-pack:
   url: "https://cdn.minepack.fr/pack/1ef10c4b-7437-48f6-b8e4-f6fa9c10f096"
   sha1: "c3380d60410150e53fdee12c6b2bcbcbeab835d"
+
   # true = players who decline the pack get disconnected
   required: false
-  prompt: "Pack hosted by minepack.fr for free"
 
-# --- Retired keys (kept for reference, not read by the code) ---
-# use-animation: "spear"   # old first-person right-click animation key
+  prompt: "Pack hosted by minepack.fr for free"

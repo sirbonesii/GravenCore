@@ -193,6 +193,12 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
 
 #### Changed
+- **Sound config format (2026-10-22):** sound effects in config.yml are
+  now written as `sound:` / `volume:` / `pitch:` maps instead of
+  `[name, volume, pitch]` lists (the mixed-type lists tripped IDE type
+  warnings). `GravenConfig.readSoundList` reads the map form first and
+  still accepts the legacy list form, so existing live configs keep
+  working unchanged.
 - **Redline warden fire sounds (2026-10-22):** the charge-up's expanding
   pulse rings stay as they were (a fixed-hoop variant from Aaron's reference
   video was tried and reverted the same day), and the per-beat charge chime

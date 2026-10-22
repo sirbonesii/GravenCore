@@ -1,9 +1,10 @@
 # ============================================================
 #   GravenCore — Configuration
 # ============================================================
-# Sound effects are written as lists of [sound-name, volume, pitch],
+# Sound effects are written with sound:, volume: and pitch: keys,
 # the same arguments as /playsound, e.g.:
 #   /playsound minecraft:block.anvil.land player @a ~ ~ ~ 100 1.9
+# (The old [sound-name, volume, pitch] list form still parses.)
 
 
 # ============================================================
@@ -19,12 +20,12 @@ settings:
 # ============================================================
 weapons:
   redline:
-    # Melee damage of a normal hit
+    # Damage dealt by a normal melee hit
     melee-damage:
       base: 5.0
       upgraded: 6.5
 
-    # Damage of the Crimson Piercer beam
+    # Damage dealt by the Crimson Piercer beam
     ability-damage:
       base: 16.0
       upgraded: 200.0
@@ -53,20 +54,20 @@ weapons:
     sound-effects:
       # Charge-up layer: only players within 30 blocks hear it
       charge:
-        - "minecraft:block.end_portal_frame.fill"
-        - 100
-        - 0.9
+        sound: "minecraft:block.end_portal_frame.fill"
+        volume: 100
+        pitch: 0.9
       # Warden charge: plays on the 1st pulse of the charge-up,
       # heard by everyone
       pre-fire:
-        - "minecraft:entity.warden.sonic_charge"
-        - 100
-        - 0.6
+        sound: "minecraft:entity.warden.sonic_charge"
+        volume: 100
+        pitch: 0.6
       # Warden boom: plays as the beam fires, heard by everyone
       fire:
-        - "minecraft:entity.warden.sonic_boom"
-        - 100
-        - 0.6
+        sound: "minecraft:entity.warden.sonic_boom"
+        volume: 100
+        pitch: 0.6
 
     # NOTE: not read by the plugin — the spear's lore is hardcoded
     # in RedlineSpear.java. Kept here for reference only.
@@ -113,9 +114,9 @@ weapons:
 
     sound-effects:
       block:
-        - "minecraft:block.anvil.land"
-        - 100
-        - 1.9
+        sound: "minecraft:block.anvil.land"
+        volume: 100
+        pitch: 1.9
 
 
 # ============================================================
@@ -136,9 +137,9 @@ armor:
 
     sound-effects:
       block:
-        - "minecraft:block.anvil.land"
-        - 100
-        - 1.9
+        sound: "minecraft:block.anvil.land"
+        volume: 100
+        pitch: 1.9
 
     # Per-piece stats. Knockback resistance uses the vanilla
     # scale: 0.1 = 10% per piece.
@@ -187,13 +188,13 @@ armor:
 
     sound-effects:
       time-slow:
-        - "minecraft:block.beacon.activate"
-        - 100
-        - 0.8
+        sound: "minecraft:block.beacon.activate"
+        volume: 100
+        pitch: 0.8
       block:
-        - "minecraft:block.anvil.land"
-        - 100
-        - 1.9
+        sound: "minecraft:block.anvil.land"
+        volume: 100
+        pitch: 1.9
 
 
 # ============================================================
@@ -218,23 +219,23 @@ upgrading:
 
     sound-effects:
       start:
-        - "minecraft:block.beacon.activate"
-        - 100
-        - 0.8
+        sound: "minecraft:block.beacon.activate"
+        volume: 100
+        pitch: 0.8
       complete:
-        - "minecraft:entity.player.levelup"
-        - 100
-        - 1.0
+        sound: "minecraft:entity.player.levelup"
+        volume: 100
+        pitch: 1.0
       # Played when the upgraded spear lands, 1.5s after the explosion
       anvil:
-        - "minecraft:block.anvil.land"
-        - 100
-        - 0.8
+        sound: "minecraft:block.anvil.land"
+        volume: 100
+        pitch: 0.8
       # Played to nearby players when an ingredient locks into the altar
       lock-in:
-        - "minecraft:entity.creaking.spawn"
-        - 100
-        - 0.1
+        sound: "minecraft:entity.creaking.spawn"
+        volume: 100
+        pitch: 0.1
 
 
 # ============================================================

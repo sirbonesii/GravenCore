@@ -286,6 +286,15 @@ public class GravenConfig {
 
     private static String[] readSoundList(FileConfiguration config, String path,
                                           String defSound, String defVolume, String defPitch) {
+        // Preferred form: a map of sound: / volume: / pitch:
+        org.bukkit.configuration.ConfigurationSection section = config.getConfigurationSection(path);
+        if (section != null) {
+            String sound = section.getString("sound", defSound);
+            double volume = section.getDouble("volume", Double.parseDouble(defVolume));
+            double pitch = section.getDouble("pitch", Double.parseDouble(defPitch));
+            return new String[]{sound, String.valueOf((float) volume), String.valueOf((float) pitch)};
+        }
+        // Legacy form: [sound-name, volume, pitch]
         List<String> list = config.getStringList(path);
         if (list.size() >= 3) {
             try {

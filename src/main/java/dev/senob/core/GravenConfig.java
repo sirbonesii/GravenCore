@@ -66,6 +66,12 @@ public class GravenConfig {
     public static String MYTHICAL_BOOTS_TIMESLOW_SOUND;
     public static float MYTHICAL_BOOTS_TIMESLOW_VOLUME;
     public static float MYTHICAL_BOOTS_TIMESLOW_PITCH;
+    /** Block: chance to shave flat damage off incoming attacks. */
+    public static double MYTHICAL_BOOTS_BLOCK_RATE;
+    public static double MYTHICAL_BOOTS_BLOCK_POWER;
+    public static String MYTHICAL_BOOTS_BLOCK_SOUND;
+    public static float MYTHICAL_BOOTS_BLOCK_VOLUME;
+    public static float MYTHICAL_BOOTS_BLOCK_PITCH;
 
     public static void init(JavaPlugin instance) {
         plugin = instance;
@@ -149,6 +155,12 @@ public class GravenConfig {
         MYTHICAL_BOOTS_TIMESLOW_SOUND = s[0];
         MYTHICAL_BOOTS_TIMESLOW_VOLUME = Float.parseFloat(s[1]);
         MYTHICAL_BOOTS_TIMESLOW_PITCH = Float.parseFloat(s[2]);
+        MYTHICAL_BOOTS_BLOCK_RATE = config.getDouble(base + ".block-rate", 25.0);
+        MYTHICAL_BOOTS_BLOCK_POWER = config.getDouble(base + ".block-power", 4.0);
+        String[] b = readSoundList(config, base + ".sound-effects.block");
+        MYTHICAL_BOOTS_BLOCK_SOUND = b[0];
+        MYTHICAL_BOOTS_BLOCK_VOLUME = Float.parseFloat(b[1]);
+        MYTHICAL_BOOTS_BLOCK_PITCH = Float.parseFloat(b[2]);
     }
 
     /** Reads a [sound-name, volume, pitch] list; falls back to anvil defaults on any problem. */

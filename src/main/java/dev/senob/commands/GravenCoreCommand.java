@@ -294,8 +294,10 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                             case "speedboost" -> pdc.set(new NamespacedKey(plugin, "mythical_boots_speedboost"), PersistentDataType.INTEGER, Integer.parseInt(valueStr));
                             case "freezeplayers" -> pdc.set(new NamespacedKey(plugin, "mythical_boots_freezeplayers"), PersistentDataType.BOOLEAN, Boolean.parseBoolean(valueStr));
                             case "weaknesslevel" -> pdc.set(new NamespacedKey(plugin, "mythical_boots_weakness"), PersistentDataType.INTEGER, Integer.parseInt(valueStr));
+                            case "blockrate" -> pdc.set(new NamespacedKey(plugin, "mythical_boots_blockrate"), PersistentDataType.DOUBLE, Double.parseDouble(valueStr));
+                            case "blockpower" -> pdc.set(new NamespacedKey(plugin, "mythical_boots_blockpower"), PersistentDataType.DOUBLE, Double.parseDouble(valueStr));
                             default -> {
-                                player.sendMessage(GravenTheme.parse("<red>Valid Time Boots settings: duration, cooldown, speedboost, freezeplayers, weaknesslevel</red>"));
+                                player.sendMessage(GravenTheme.parse("<red>Valid Time Boots settings: duration, cooldown, speedboost, freezeplayers, weaknesslevel, blockrate, blockpower</red>"));
                                 return true;
                             }
                         }
@@ -343,7 +345,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                 if (args[1].equalsIgnoreCase("redline")) return List.of("cooldown", "range", "basedamage", "abilitydamage");
                 if (args[1].equalsIgnoreCase("dracula")) return List.of("cooldown", "duration", "blockrate", "blockpower");
                 if (args[1].equalsIgnoreCase("mythical")) return List.of("defense", "toughness", "kbresist", "blockrate", "blockpower");
-                if (args[1].equalsIgnoreCase("time_boots")) return List.of("duration", "cooldown", "speedboost", "freezeplayers", "weaknesslevel");
+                if (args[1].equalsIgnoreCase("time_boots")) return List.of("duration", "cooldown", "speedboost", "freezeplayers", "weaknesslevel", "blockrate", "blockpower");
             }
         }
 

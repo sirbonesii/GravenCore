@@ -15,8 +15,10 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlotGroup;
@@ -35,6 +37,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Celerity Boots — standalone Mythical-tier boots (not part of the Mythical
@@ -53,6 +56,9 @@ public class CelerityBoots implements Listener, CustomItem {
 
     public static final CooldownManager.CooldownType COOLDOWN_TYPE =
             new CooldownManager.CooldownType("mythical-boots-timeslow", "⏳", TextColor.color(0x5EEAD4));
+    /** Display-only countdown for the active freeze duration on the action bar. */
+    public static final CooldownManager.CooldownType ACTIVE_TYPE =
+            new CooldownManager.CooldownType("mythical-boots-timeslow-active", "❄", TextColor.color(0x5EEAD4));
 
     private final NamespacedKey bootsKey;
 
@@ -68,6 +74,7 @@ public class CelerityBoots implements Listener, CustomItem {
         this.plugin = plugin;
         this.cooldownManager = cooldownManager;
         this.cooldownManager.registerType(COOLDOWN_TYPE);
+        this.cooldownManager.registerType(ACTIVE_TYPE);
         this.bootsKey = new NamespacedKey(plugin, "mythical_boots");
         plugin.getLogger().info("Celerity Boots module initialized!");
     }
@@ -112,6 +119,14 @@ public class CelerityBoots implements Listener, CustomItem {
 
     private int slowWeaknessLevel(ItemStack boots) {
         return pdcInt(boots, "mythical_boots_weakness", GravenConfig.MYTHICAL_BOOTS_TIMESLOW_WEAKNESS);
+    }
+
+    private double blockRate(ItemStack boots) {
+        return pdcDouble(boots, "mythical_boots_blockrate", GravenConfig.MYTHICAL_BOOTS_BLOCK_RATE);
+    }
+
+    private double blockPower(ItemStack boots) {
+        return pdcDouble(boots, "mythical_boots_blockpower", GravenConfig.MYTHICAL_BOOTS_BLOCK_POWER);
     }
 
     private double pdcDouble(ItemStack item, String key, double def) {
@@ -193,6 +208,8 @@ public class CelerityBoots implements Listener, CustomItem {
         lore.add(TooltipBuilder.attribute("🛡", "Defense", "#ADD8E6", "3.0"));
         lore.add(TooltipBuilder.attribute("💎", "Armor Tough", "#7DD3FC", "3.0"));
         lore.add(TooltipBuilder.attribute("⚓", "Knockback Res", "#93C5FD", "0.1"));
+        lore.add(TooltipBuilder.attribute("✦", "Block Rate", "#5EEAD4", formatStat(blockRate(item)) + "%", false));
+        lore.add(TooltipBuilder.attribute("🔥", "Block Power", "#FCD34D", formatStat(blockPower(item))));
         if (GravenConfig.MYTHICAL_BOOTS_TIMESLOW_ENABLED) {
             lore.add(TooltipBuilder.section("ABILITY"));
             lore.add(GravenTheme.parse("<aqua>⏳ TIME SLOW</aqua><gray>:</gray> <white>Shift + Left Click</white>"));
@@ -204,6 +221,10 @@ public class CelerityBoots implements Listener, CustomItem {
         TooltipBuilder.fitDividers(lore);
         meta.lore(lore);
         item.setItemMeta(meta);
+    }
+
+    private static String formatStat(double value) {
+        return String.format("%.1f", value);
     }
 
     /**
@@ -265,6 +286,8 @@ public class CelerityBoots implements Listener, CustomItem {
         spawnTimeSlowAura(player, freezeTicks);
 
         cooldownManager.setCooldown(player, COOLDOWN_TYPE, slowCooldown(wornBoots));
+        // Show the freeze duration itself on the action bar (display-only)
+        cooldownManager.setCooldown(player, ACTIVE_TYPE, (long) durationSec);
 
         // Unfreeze even if the wearer logs out mid-freeze
         activeRestoreTask = new BukkitRunnable() {
@@ -289,6 +312,31 @@ public class CelerityBoots implements Listener, CustomItem {
         Player player = event.getPlayer();
         if (timeSlowExempt.contains(player.getUniqueId())) return;
         event.setTo(event.getFrom());
+    }
+
+    /**
+     * Block: while wearing the boots, incoming attacks have a chance to be
+     * reduced by a flat amount (same system as the Mythical set and Dracula's Plate).
+     */
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    public void onAttackBlocked(EntityDamageByEntityEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (player.isDead() || !isWearingMythicalBoots(player)) return;
+
+        ItemStack boots = player.getInventory().getBoots();
+        if (boots == null || !isItem(boots)) return;
+
+        double rate = Math.min(100.0, Math.max(0.0, blockRate(boots)));
+        if (rate <= 0.0) return;
+        if (ThreadLocalRandom.current().nextDouble(100.0) >= rate) return;
+
+        double power = Math.max(0.0, blockPower(boots));
+        event.setDamage(Math.max(0.0, event.getDamage() - power));
+
+        player.getWorld().playSound(player.getLocation(),
+                GravenConfig.MYTHICAL_BOOTS_BLOCK_SOUND, GravenConfig.MYTHICAL_BOOTS_BLOCK_VOLUME, GravenConfig.MYTHICAL_BOOTS_BLOCK_PITCH);
+        player.getWorld().spawnParticle(Particle.CRIT,
+                player.getLocation().add(0.0, 1.2, 0.0), 10, 0.3, 0.3, 0.3, 0.1);
     }
 
     /**

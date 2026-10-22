@@ -8,6 +8,11 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
+- **Celerity Boots: freeze duration on the action bar + block system (2026-10-19):**
+  the freeze duration now shows as `❄ 6s` next to the `⏳` cooldown on the action bar;
+  boots also gain the block system (new `armor.mythical-boots.block-rate`/`block-power`
+  keys, default 25%/4.0, plus `sound-effects.block`; per-item PDC overrides; ✦/🔥 tooltip
+  lines; `blockrate`/`blockpower` added to `/gravencore config time_boots`).
 - **Renamed Mythical Boots → Celerity Boots (2026-10-19):** display name now uses the
   chromatic-aberration text effect (`#F8F8BC`); weapon command key is now `celerity`.
   Still Mythical tier; class/PDC/config identifiers unchanged (existing boots keep working).

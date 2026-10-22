@@ -154,12 +154,21 @@ armor:
       freeze-players: true # also pin other players in place (activator exempt)
       weakness-level: 5    # Weakness level for frozen players (0 = off)
 
+    # Block: chance to shave flat damage off incoming attacks (same system
+    # as the Mythical set and Dracula's Plate)
+    block-rate: 25.0      # % chance to block
+    block-power: 4.0      # flat damage blocked
+
     # Sound effects: trigger sound as [sound-name, volume, pitch]
     sound-effects:
       time-slow:
         - minecraft:block.beacon.activate
         - 100
         - 0.8
+      block:
+        - minecraft:block.anvil.land
+        - 100
+        - 1.9
 
 # --- Retired keys (kept for reference, not read by the code) ---
 # use-animation: "spear"   # old first-person right-click animation key

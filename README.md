@@ -9,9 +9,9 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 
 #### Added
 - **Alter of Despair (2026-10-22):** new placeable altar dropper, given with
-  `/gravencore <username> alter [count]` (username-first form, count defaults
-  to 1, clamped 1–64). The dropper item carries the name in the red shake
-  color (#F8F854) and a PDC marker; placing it spawns the glinting
+  `/gravencore alter <username> [count]` (count defaults to 1, clamped 1–64). The dropper item carries the name in the red shake
+  color (#F8F854) and a PDC marker, and renders as a crafting table via the
+  item_model component (the placed block stays a dropper); placing it spawns the glinting
   crafting-table ItemDisplay inside the dropper's block (enchantment glint
   override, display scale and forced brightness from the new `alter` config
   section), and breaking the dropper removes the display and drops a fresh
@@ -168,6 +168,16 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
 
 #### Changed
+- **Redline charge hoops + warden fire sounds (2026-10-22):** the charge-up
+  rings no longer expand like ripples — each PulseBeat now stamps a fixed
+  flame hoop (radius 1.4) at the aim point that hangs in the air where it
+  spawned, per Aaron's reference video. When the charge completes, the new
+  `weapons.redline.sound-effects.pre-fire` sound (default warden
+  sonic_charge, 100, 0.6) plays to everyone, and the beam fires
+  `weapons.redline.pre-fire-delay-ticks` (default 10) later with the new
+  `weapons.redline.sound-effects.fire` sound (default warden sonic_boom,
+  100, 0.6) ahead of the existing blast sounds. The end-of-beam flame rings
+  still expand as before.
 - **packreload API fix:** the command now calls Paper's `setResourcePack`
   (URL, byte-hash, prompt, force) — the `sendResourcePack` overloads it was
   written against don't exist in the Paper 1.21.4 API, so the first build

@@ -57,16 +57,20 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 0) {
-            sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore <armor|weapon|config|reload|packreload></red>"));
+            sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore <armor|weapon|config|reload|packreload|alter></red>"));
             return true;
         }
 
         // --- ALTER LOGIC ---
-        // Username-first form: /gravencore <username> alter [count]
-        if (args.length >= 2 && args[1].equalsIgnoreCase("alter")) {
-            Player target = Bukkit.getPlayer(args[0]);
+        // /gravencore alter <username> [count]
+        if (args[0].equalsIgnoreCase("alter")) {
+            if (args.length < 2) {
+                sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore alter <username> [count]</red>"));
+                return true;
+            }
+            Player target = Bukkit.getPlayer(args[1]);
             if (target == null) {
-                sender.sendMessage(GravenTheme.parse("<red>Player '" + args[0] + "' is not online.</red>"));
+                sender.sendMessage(GravenTheme.parse("<red>Player '" + args[1] + "' is not online.</red>"));
                 return true;
             }
             int count = 1;
@@ -74,7 +78,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                 try {
                     count = Integer.parseInt(args[2]);
                 } catch (NumberFormatException e) {
-                    sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore <username> alter [count]</red>"));
+                    sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore alter <username> [count]</red>"));
                     return true;
                 }
             }
@@ -377,15 +381,10 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String @NotNull [] args) {
-        if (args.length == 1) return List.of("armor", "weapon", "config", "reload", "packreload");
+        if (args.length == 1) return List.of("armor", "weapon", "config", "reload", "packreload", "alter");
 
         if (args.length == 2) {
-            if (!args[0].equalsIgnoreCase("armor") && !args[0].equalsIgnoreCase("weapon")
-                    && !args[0].equalsIgnoreCase("config") && !args[0].equalsIgnoreCase("reload")
-                    && !args[0].equalsIgnoreCase("packreload")) {
-                return List.of("alter");
-            }
-            if (args[0].equalsIgnoreCase("armor") || args[0].equalsIgnoreCase("weapon")) {
+            if (args[0].equalsIgnoreCase("armor") || args[0].equalsIgnoreCase("weapon") || args[0].equalsIgnoreCase("alter")) {
                 List<String> names = new ArrayList<>();
                 for (Player online : Bukkit.getOnlinePlayers()) names.add(online.getName());
                 return names;
@@ -396,6 +395,9 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 3) {
+            if (args[0].equalsIgnoreCase("alter")) {
+                return List.of("1", "2", "4", "8", "16", "32", "64");
+            }
             if (args[0].equalsIgnoreCase("armor")) {
                 return List.of("mythical");
             }

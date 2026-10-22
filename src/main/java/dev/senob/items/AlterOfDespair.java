@@ -25,7 +25,9 @@ import org.joml.Vector3f;
 
 /**
  * The Alter of Despair: a named dropper given out by
- * {@code /gravencore <username> alter <count>}. Placing it spawns the
+ * {@code /gravencore alter <username> [count]}, rendered as a crafting
+ * table via the item_model component (the placed block stays a
+ * dropper). Placing it spawns the
  * glinting crafting-table ItemDisplay inside the dropper's own block —
  * the same setup as summoning an item_display with the
  * enchantment_glint_override component, a full transformation and a
@@ -50,6 +52,9 @@ public class AlterOfDespair implements Listener {
         if (meta != null) {
             meta.displayName(GravenTheme.parse("<color:#F8F854>Alter of Despair</color>"));
             meta.itemName(GravenTheme.parse("<color:#F8F854>Alter of Despair</color>"));
+            // Render the item as a crafting table (the altar's look); the
+            // base item stays a dropper so it still places the altar block
+            meta.setItemModel(new NamespacedKey(NamespacedKey.MINECRAFT_NAMESPACE, "crafting_table"));
             meta.getPersistentDataContainer().set(alterItemKey, PersistentDataType.INTEGER, 1);
             item.setItemMeta(meta);
         }

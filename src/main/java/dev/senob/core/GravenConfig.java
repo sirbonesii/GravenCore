@@ -25,6 +25,13 @@ public class GravenConfig {
     public static String REDLINE_CHARGE_SOUND;
     public static float REDLINE_CHARGE_VOLUME;
     public static float REDLINE_CHARGE_PITCH;
+    public static String REDLINE_PREFIRE_SOUND;
+    public static float REDLINE_PREFIRE_VOLUME;
+    public static float REDLINE_PREFIRE_PITCH;
+    public static String REDLINE_FIRE_SOUND;
+    public static float REDLINE_FIRE_VOLUME;
+    public static float REDLINE_FIRE_PITCH;
+    public static long REDLINE_PREFIRE_DELAY_TICKS;
 
     // --- REDLINE ALTAR (upgrading) ---
     public static boolean REDLINE_ALTAR_ENABLED;
@@ -135,6 +142,17 @@ public class GravenConfig {
         REDLINE_CHARGE_SOUND = charge[0];
         REDLINE_CHARGE_VOLUME = Float.parseFloat(charge[1]);
         REDLINE_CHARGE_PITCH = Float.parseFloat(charge[2]);
+        String[] preFire = readSoundList(config, "weapons.redline.sound-effects.pre-fire",
+                "minecraft:entity.warden.sonic_charge", "100.0", "0.6");
+        REDLINE_PREFIRE_SOUND = preFire[0];
+        REDLINE_PREFIRE_VOLUME = Float.parseFloat(preFire[1]);
+        REDLINE_PREFIRE_PITCH = Float.parseFloat(preFire[2]);
+        String[] fire = readSoundList(config, "weapons.redline.sound-effects.fire",
+                "minecraft:entity.warden.sonic_boom", "100.0", "0.6");
+        REDLINE_FIRE_SOUND = fire[0];
+        REDLINE_FIRE_VOLUME = Float.parseFloat(fire[1]);
+        REDLINE_FIRE_PITCH = Float.parseFloat(fire[2]);
+        REDLINE_PREFIRE_DELAY_TICKS = config.getLong("weapons.redline.pre-fire-delay-ticks", 10L);
         loadRedlineAltar(config);
         loadResourcePack(config);
         loadAlter(config);

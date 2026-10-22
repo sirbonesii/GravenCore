@@ -74,6 +74,10 @@ public class RedlineSpear implements Listener, CustomItem {
     private static final int CHARGE_TICKS = 60;
     private static final int RING_POINTS = 96;
     private static final int RING_LAYERS = 2;
+    // Charge-up rings are fixed hoops at this radius (Aaron's reference
+    // video, 2026-10-22): full size the moment they appear, hanging in
+    // the air where they spawned instead of expanding like a ripple
+    private static final double CHARGE_HOOP_RADIUS = 1.4;
     private static final int SHIELD_DURABILITY_DAMAGE = 180;
 
     private record PulseBeat(int tick, double startRadius, double expansionSpeed) {}
@@ -273,7 +277,7 @@ public class RedlineSpear implements Listener, CustomItem {
                         }
 
                         Location ringCenter = eye.clone().add(dir.clone().multiply(2.8));
-                        ParticleEngineUtil.spawnExpandingRing(ringCenter, dir, beat.startRadius(), beat.expansionSpeed(), Particle.FLAME, RING_POINTS, RING_LAYERS);
+                        ParticleEngineUtil.spawnCircle(ringCenter, dir, CHARGE_HOOP_RADIUS, Particle.FLAME, RING_POINTS, null);
                     }
                 }
 
@@ -290,8 +294,23 @@ public class RedlineSpear implements Listener, CustomItem {
 
                     cooldownManager.setCooldown(player, COOLDOWN_TYPE, cdSeconds);
 
-                    fireRedlineBlast(player, item, tier);
+                    // Pre-fire sound (config: weapons.redline.sound-effects.pre-fire),
+                    // played to everyone like /playsound ... master @a — then the
+                    // blast fires after pre-fire-delay-ticks so the warden charge
+                    // shriek lands before the boom instead of under it
+                    world.playSound(eye, GravenConfig.REDLINE_PREFIRE_SOUND,
+                            SoundCategory.MASTER, GravenConfig.REDLINE_PREFIRE_VOLUME,
+                            GravenConfig.REDLINE_PREFIRE_PITCH);
                     cancel();
+
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            if (player.isOnline() && !player.isDead()) {
+                                fireRedlineBlast(player, item, tier);
+                            }
+                        }
+                    }.runTaskLater(plugin, Math.max(0L, GravenConfig.REDLINE_PREFIRE_DELAY_TICKS));
                 }
             }
         }.runTaskTimer(plugin, 0L, 1L);
@@ -307,6 +326,11 @@ public class RedlineSpear implements Listener, CustomItem {
         Vector dir = origin.getDirection().normalize();
         World world = origin.getWorld();
 
+        // Fire sound (config: weapons.redline.sound-effects.fire), played
+        // to everyone like /playsound ... master @a
+        world.playSound(origin, GravenConfig.REDLINE_FIRE_SOUND,
+                SoundCategory.MASTER, GravenConfig.REDLINE_FIRE_VOLUME,
+                GravenConfig.REDLINE_FIRE_PITCH);
         world.playSound(origin, Sound.ENTITY_GENERIC_EXPLODE, 1.4f, 0.85f);
         world.playSound(origin, Sound.ITEM_TRIDENT_THUNDER, 1.2f, 1.1f);
         world.playSound(origin, Sound.ITEM_TRIDENT_RIPTIDE_3, 1.2f, 0.9f);

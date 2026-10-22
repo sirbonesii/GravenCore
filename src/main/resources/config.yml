@@ -47,14 +47,30 @@ weapons:
     # Whether the ability beam passes straight through solid blocks/walls
     pierce-blocks: true
 
-    # Sound effects: charge-up sound as [sound-name, volume, pitch]
-    # Same args as: /playsound minecraft:block.end_portal_frame.fill player @a[distance=..30] ~ ~ ~ 100 0.9
-    # (only players within 30 blocks of the charging player hear it)
+    # Ticks between the pre-fire sound playing and the beam actually
+    # firing (20 ticks = 1 second), so the warden charge shriek is heard
+    # before the boom instead of under it
+    pre-fire-delay-ticks: 10
+
+    # Sound effects as [sound-name, volume, pitch].
+    # charge: /playsound ... player @a[distance=..30] — only players within
+    # 30 blocks of the charging player hear it.
+    # pre-fire / fire: /playsound ... master @a — everyone hears them;
+    # pre-fire plays when the charge completes, fire plays as the beam
+    # shoots (pre-fire-delay-ticks later).
     sound-effects:
       charge:
         - minecraft:block.end_portal_frame.fill
         - 100
         - 0.9
+      pre-fire:
+        - minecraft:entity.warden.sonic_charge
+        - 100
+        - 0.6
+      fire:
+        - minecraft:entity.warden.sonic_boom
+        - 100
+        - 0.6
 
     # Spear lore / item description.
     # Placeholders: <ability_damage>, <range>, <cooldown>, <creator>
@@ -216,7 +232,7 @@ upgrading:
         - 0.1
 
 # --- Alter of Despair ---
-# Given with /gravencore <username> alter [count]. Placing the dropper
+# Given with /gravencore alter <username> [count]. Placing the dropper
 # spawns the glinting crafting-table display inside its block.
 alter:
   # Scale of the crafting-table display (1.0 = exactly one block; 1.01

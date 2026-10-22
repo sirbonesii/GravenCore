@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -187,10 +188,10 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
             }
             Component prompt = (GravenConfig.RESOURCE_PACK_PROMPT == null || GravenConfig.RESOURCE_PACK_PROMPT.isBlank())
                     ? null : GravenTheme.parse(GravenConfig.RESOURCE_PACK_PROMPT);
+            byte[] hash = HexFormat.of().parseHex(sha1);
             int sent = 0;
             for (Player online : Bukkit.getOnlinePlayers()) {
-                if (prompt != null) online.sendResourcePack(url, sha1, GravenConfig.RESOURCE_PACK_REQUIRED, prompt);
-                else online.sendResourcePack(url, sha1, GravenConfig.RESOURCE_PACK_REQUIRED);
+                online.setResourcePack(url, hash, prompt, GravenConfig.RESOURCE_PACK_REQUIRED);
                 sent++;
             }
             sender.sendMessage(GravenTheme.prefix().append(GravenTheme.parse(

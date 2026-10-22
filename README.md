@@ -168,6 +168,11 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
 
 #### Changed
+- **packreload API fix:** the command now calls Paper's `setResourcePack`
+  (URL, byte-hash, prompt, force) — the `sendResourcePack` overloads it was
+  written against don't exist in the Paper 1.21.4 API, so the first build
+  failed to compile. The config SHA1 is converted from hex to bytes with
+  `HexFormat`.
 - **Enchantments now apply live (2026-10-22):** the Mythical set, Dracula's
   Plate and Celerity Boots bake their enchantments into the lore's
   Enchantments section, which used to go stale — enchant a piece and the

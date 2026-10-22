@@ -152,6 +152,12 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
 
 #### Changed
+- **Redline blast beam + beam circles (2026-10-21):** the ability beam is now
+  tighter and cleaner (crimson/orange dust spreads cut from 0.35/0.45 to
+  0.10/0.16, smaller dust, finer steps; the mid-beam lava/explosion accents
+  are gone). At the end of the beam, three expanding flame rings ripple
+  outward in sequence toward the tip — each one identical to the first
+  charge-up ring, replayed at the far end.
 - **Redline charge-up sound (2026-10-21):** the PulseBeat charge now plays
   `minecraft:block.end_portal_frame.fill` (config list
   `weapons.redline.sound-effects.charge`, default 100 / 0.9) at each pulse,

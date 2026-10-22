@@ -449,11 +449,6 @@ public class RedlineAltar implements Listener {
                 for (Map.Entry<Integer, ItemDisplay> entry : shown.entrySet()) {
                     ItemDisplay display = entry.getValue();
                     if (!display.isValid()) continue;
-                    // CALIBRATION BUILD: the center spear does not spin — its
-                    // yaw stays at the spawn default (0) so Aaron can measure
-                    // its exact offset from the dropper's center in one
-                    // top-down screenshot. Remove this skip once measured.
-                    if (entry.getKey() == CENTER_KEY) continue;
                     Location l = display.getLocation();
                     l.setYaw(previewYaw);
                     display.teleport(l);
@@ -502,14 +497,15 @@ public class RedlineAltar implements Listener {
             // pose point-down so the spear sticks down into the altar.
             // Scale 1.0 = exactly the size it has in a player's hand.
             // The hand pose renders the spear shifted off the display's
-            // origin — when the display spins, that offset makes the spear
-            // orbit the dropper's center in a ~0.37-block circle (Aaron's
-            // top-down video, 2026-10-21). CALIBRATION BUILD: no counter-
-            // shift at all, so the pure offset can be measured from one
-            // top-down screenshot at yaw 0 and cancelled exactly after.
+            // origin: measured from Aaron's top-down calibration screenshot
+            // (2026-10-21, F3 north / pitch 90, yaw locked at 0), the pose
+            // offset is ~0.12 blocks toward the model's own -Z. The
+            // translation below cancels it — because the shift lives in
+            // the same rotating frame as the hand offset, the spear stays
+            // centered at every spin angle instead of orbiting the dropper.
             disp.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.THIRDPERSON_RIGHTHAND);
             disp.setTransformation(new Transformation(
-                    new Vector3f(0.0f, 0.0f, 0.0f), new Quaternionf().rotateX((float) Math.PI),
+                    new Vector3f(0.0f, 0.0f, 0.12f), new Quaternionf().rotateX((float) Math.PI),
                     new Vector3f(1.0f, 1.0f, 1.0f), new Quaternionf()));
         });
     }

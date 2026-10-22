@@ -324,25 +324,27 @@ public class RedlineSpear implements Listener, CustomItem {
         double abilityDamage = pdc != null ? pdc.getOrDefault(abilityDamageKey, PersistentDataType.DOUBLE, GravenConfig.REDLINE_ABILITY_BASE) : GravenConfig.REDLINE_ABILITY_BASE;
         double maxRange = pdc != null ? pdc.getOrDefault(rangeKey, PersistentDataType.DOUBLE, GravenConfig.REDLINE_RANGE_BASE) : GravenConfig.REDLINE_RANGE_BASE;
 
-        Particle.DustOptions crimsonCore = new Particle.DustOptions(Color.fromRGB(255, 25, 0), 2.2f);
-        Particle.DustOptions orangeGlow = new Particle.DustOptions(Color.fromRGB(255, 120, 20), 1.6f);
+        Particle.DustOptions crimsonCore = new Particle.DustOptions(Color.fromRGB(255, 25, 0), 1.7f);
+        Particle.DustOptions orangeGlow = new Particle.DustOptions(Color.fromRGB(255, 120, 20), 1.3f);
         Set<UUID> hitTargets = new HashSet<>();
 
-        for (double d = 1.0; d <= maxRange; d += 0.75) {
+        // The beam runs until it hits a solid block or reaches max range;
+        // beamDist remembers how far it got, for the beam circles below
+        double beamDist = 0.0;
+
+        for (double d = 1.0; d <= maxRange; d += 0.6) {
             Location point = origin.clone().add(dir.clone().multiply(d));
+            beamDist = d;
 
             if (!GravenConfig.REDLINE_PIERCE_BLOCKS && point.getBlock().getType().isSolid()) {
                 world.spawnParticle(Particle.EXPLOSION_EMITTER, point, 1);
                 break;
             }
 
-            world.spawnParticle(Particle.DUST, point, 10, 0.35, 0.35, 0.35, 0, crimsonCore);
-            world.spawnParticle(Particle.DUST, point, 6, 0.45, 0.45, 0.45, 0, orangeGlow);
-            world.spawnParticle(Particle.FLAME, point, 5, 0.25, 0.25, 0.25, 0.03);
-            if (d % 3.0 == 0) {
-                world.spawnParticle(Particle.LAVA, point, 4, 0.2, 0.2, 0.2, 0);
-                world.spawnParticle(Particle.EXPLOSION, point, 1, 0.1, 0.1, 0.1, 0);
-            }
+            // A tight, clean beam: crimson core, orange glow, a lick of flame
+            world.spawnParticle(Particle.DUST, point, 7, 0.10, 0.10, 0.10, 0, crimsonCore);
+            world.spawnParticle(Particle.DUST, point, 4, 0.16, 0.16, 0.16, 0, orangeGlow);
+            world.spawnParticle(Particle.FLAME, point, 3, 0.07, 0.07, 0.07, 0.02);
 
             for (Entity entity : world.getNearbyEntities(point, 2.2, 2.2, 2.2)) {
                 if (entity instanceof LivingEntity target && !target.equals(player) && hitTargets.add(target.getUniqueId())) {
@@ -362,6 +364,21 @@ public class RedlineSpear implements Listener, CustomItem {
                     world.spawnParticle(Particle.DUST, hitLoc, 30, 0.6, 0.6, 0.6, 0, crimsonCore);
                 }
             }
+        }
+
+        // Beam circles at the end of the beam — the charge-up's expanding
+        // flame rings, replayed at the far end (Aaron's diagram, 2026-10-21):
+        // three of them along the beam's final stretch, crowding together
+        // toward the tip and rippling outward in sequence, each one exactly
+        // the same ring as the first charge-up pulse.
+        double[] circlePositions = {0.74, 0.88, 0.99};
+        PulseBeat startRing = PULSE_BEATS.get(0);
+        for (int i = 0; i < circlePositions.length; i++) {
+            double at = Math.max(1.2, beamDist * circlePositions[i]);
+            Location circleCenter = origin.clone().add(dir.clone().multiply(at));
+            plugin.getServer().getScheduler().runTaskLater(plugin, () ->
+                    ParticleEngineUtil.spawnExpandingRing(circleCenter, dir, startRing.startRadius(), startRing.expansionSpeed(),
+                            Particle.FLAME, RING_POINTS, RING_LAYERS), i * 2L);
         }
     }
 

@@ -12,18 +12,23 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   pedestals is an altar. The bench is the dropper's own vanilla UI (no custom GUI):
   place the recipe (4x Dragon's Breath corners, Heavy Core top, 2x Netherite Ingots
   sides, Ghast Tear bottom, base Redline center) slot by slot like a normal dropper —
-  a correct item locks in (it is stored in the dropper block itself, its slot becomes
+  a correct item locks in — a deep creaking sound plays to nearby players (it is stored in the dropper block itself, its slot becomes
   a green glass pane, and it appears spinning on the matching pedestal — the spear
   itself sticks point-down into the dropper using its big in-hand model, also
   spinning), wrong items are left untouched like any dropper, and locked items
-  can be clicked back out. The altar never sends chat messages, and its only
-  particles are the enchant sparkles on the pedestal items. When all 9 slots
-  lock, the ritual starts: the pedestal items orbit the center and spiral
-  into the spear as it spins faster (level throughout — nothing rises,
-  nothing shrinks), ending in an explosion that is lethal to anyone standing within 8 blocks
-  (a held totem of undying still saves them); then lightning strikes the
-  center and the upgraded spear drops there for the player
-  (`upgrading.redline-altar` config: enabled, ritual-duration, start/complete sounds).
+  can be clicked back out. The altar never sends chat messages. When all 9
+  slots lock, lightning strikes the altar and the ritual starts: the
+  pedestal items orbit the center and spiral into the spear (level
+  throughout — nothing rises, nothing shrinks), easing to a stop as they
+  reach it, ending in an explosion that is lethal to anyone standing within 8 blocks
+  (a held totem of undying still saves them) — a sphere of explosion
+  particles bursting outward with a ring of smoke blasting out at orbit
+  height. After a 1.5-second pause — the planted spear spinning through the
+  blast and the pause, vanishing only as its replacement lands — the
+  upgraded spear drops at the center
+  with a small blood-red poof and an anvil sound (outside that finish burst
+  and the pedestal enchant sparkles, the altar has no particles)
+  (`upgrading.redline-altar` config: enabled, ritual-duration, start/complete/anvil/lock-in sounds).
 - **Celerity Boots: freeze duration on the action bar + block system (2026-10-19):**
   the freeze duration now shows as `❄ 6s` next to the `⏳` cooldown on the action bar;
   boots also gain the block system (new `armor.mythical-boots.block-rate`/`block-power`

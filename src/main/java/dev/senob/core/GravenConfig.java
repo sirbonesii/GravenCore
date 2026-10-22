@@ -35,6 +35,12 @@ public class GravenConfig {
     public static String REDLINE_ALTAR_COMPLETE_SOUND;
     public static float REDLINE_ALTAR_COMPLETE_VOLUME;
     public static float REDLINE_ALTAR_COMPLETE_PITCH;
+    public static String REDLINE_ALTAR_ANVIL_SOUND;
+    public static float REDLINE_ALTAR_ANVIL_VOLUME;
+    public static float REDLINE_ALTAR_ANVIL_PITCH;
+    public static String REDLINE_ALTAR_LOCK_SOUND;
+    public static float REDLINE_ALTAR_LOCK_VOLUME;
+    public static float REDLINE_ALTAR_LOCK_PITCH;
     public static boolean REDLINE_ALTAR_SPAWN_SOUND;
 
     // --- DRACULA PLATE ---
@@ -160,6 +166,16 @@ public class GravenConfig {
         REDLINE_ALTAR_COMPLETE_SOUND = c[0];
         REDLINE_ALTAR_COMPLETE_VOLUME = Float.parseFloat(c[1]);
         REDLINE_ALTAR_COMPLETE_PITCH = Float.parseFloat(c[2]);
+        String[] a = readSoundList(config, base + ".sound-effects.anvil",
+                "minecraft:block.anvil.land", "100.0", "0.8");
+        REDLINE_ALTAR_ANVIL_SOUND = a[0];
+        REDLINE_ALTAR_ANVIL_VOLUME = Float.parseFloat(a[1]);
+        REDLINE_ALTAR_ANVIL_PITCH = Float.parseFloat(a[2]);
+        String[] l = readSoundList(config, base + ".sound-effects.lock-in",
+                "minecraft:entity.creaking.spawn", "100.0", "0.1");
+        REDLINE_ALTAR_LOCK_SOUND = l[0];
+        REDLINE_ALTAR_LOCK_VOLUME = Float.parseFloat(l[1]);
+        REDLINE_ALTAR_LOCK_PITCH = Float.parseFloat(l[2]);
     }
 
     private static void loadDraculaBlockSound(FileConfiguration config) {

@@ -203,6 +203,17 @@ upgrading:
         - minecraft:entity.player.levelup
         - 100
         - 1.0
+      # Played when the upgraded spear lands, 1.5s after the explosion
+      anvil:
+        - minecraft:block.anvil.land
+        - 100
+        - 0.8
+      # Played to nearby players when an ingredient locks into the altar
+      # (same as: /playsound minecraft:entity.creaking.spawn master @p ~ ~ ~ 100 .1)
+      lock-in:
+        - minecraft:entity.creaking.spawn
+        - 100
+        - 0.1
 
 # --- Retired keys (kept for reference, not read by the code) ---
 # use-animation: "spear"   # old first-person right-click animation key

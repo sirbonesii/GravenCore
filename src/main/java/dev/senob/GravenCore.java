@@ -90,6 +90,12 @@ public class GravenCore extends JavaPlugin {
         Objects.requireNonNull(getCommand("unvanish")).setExecutor(vanishCmd);
         Objects.requireNonNull(getCommand("unvanish")).setTabCompleter(vanishCmd);
 
+        // PlaceholderAPI hook (%gravencore_vanish%) — only when installed
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new dev.senob.core.GravenPlaceholders(this).register();
+            getLogger().info("PlaceholderAPI found — registered %gravencore_...% placeholders.");
+        }
+
         getLogger().info("GravenCore enabled!");
     }
 

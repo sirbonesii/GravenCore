@@ -32,10 +32,11 @@ import java.util.UUID;
  * <p>A vanished player is hidden from every online player who lacks
  * the admin permission (entity and player-list entry), and new joiners
  * get the same treatment. Admins keep seeing the vanished player,
- * whose nameplate and player-list name gain a green
- * {@code [👻] Vanished} tag. The vanished player gets a repeating
- * action-bar reminder so they know they're hidden. The state is
- * stored in the player's own PDC, so it survives relogs.</p>
+ * whose nameplate gains a green {@code [👻] Vanished} tag and whose
+ * player-list name gains a short green {@code [👻]} after the name.
+ * The vanished player gets a repeating action-bar reminder so they
+ * know they're hidden. The state is stored in the player's own PDC,
+ * so it survives relogs.</p>
  */
 public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
 
@@ -44,7 +45,12 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
 
     private final GravenCore plugin;
     private final NamespacedKey vanishedKey;
-    private final Set<UUID> vanished = new HashSet<>();
+    private static final Set<UUID> vanished = new HashSet<>();
+
+    /** Shared lookup for the PlaceholderAPI expansion. */
+    public static boolean isVanishedId(UUID id) {
+        return vanished.contains(id);
+    }
 
     public VanishCommand(GravenCore plugin) {
         this.plugin = plugin;
@@ -65,7 +71,7 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
     }
 
     public boolean isVanished(Player player) {
-        return vanished.contains(player.getUniqueId());
+        return isVanishedId(player.getUniqueId());
     }
 
     @Override
@@ -165,7 +171,8 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
             }
         }
         vanishTeam().addEntry(target.getName());
-        target.playerListName(GravenTheme.parse(target.getName() + " <green>" + TAG + "</green>"));
+        // TAB list gets the short tag only: green [👻] after the name
+        target.playerListName(GravenTheme.parse(target.getName() + " <green>[👻]</green>"));
     }
 
     private Team vanishTeam() {

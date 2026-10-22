@@ -12,10 +12,13 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   commands (permission gravencore.admin, player-name tab completion). A
   vanished player is hidden from every non-admin player (entity and
   player-list entry, including later joiners) while admins keep seeing
-  them with a green `[👻] Vanished` tag on their nameplate and
-  player-list name. The vanished player gets a repeating green action-bar
+  them with a green `[👻] Vanished` tag on their nameplate and a short
+  green `[👻]` after their name in the TAB list. The vanished player gets a repeating green action-bar
   reminder ("You are [👻] Vanished"). State is stored in the player's PDC
-  so it survives relogs.
+  so it survives relogs. For the TAB plugin (which formats the list
+  itself), GravenCore registers a PlaceholderAPI expansion when PAPI is
+  installed: `%gravencore_vanish%` returns `&a[👻]` while vanished and
+  nothing otherwise — append it to the name format in TAB's config.
 - **InvSee (2026-10-22):** new `/invsee <player>` command (permission
   gravencore.admin) opening a live, editable 54-slot view of the target's
   inventory, laid out per Aaron's diagram: armor (purple placeholders when

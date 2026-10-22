@@ -172,8 +172,8 @@ armor:
 
 # --- Upgrading ---
 upgrading:
-  # Redline Altar: put the upgrade recipe in a dropper ringed by 8 chiseled
-  # stone bricks pedestals, then close the dropper to start the ritual.
+  # Redline Altar: put the upgrade recipe in a dropper ringed by 8 lodestone
+  # pedestals, then close the dropper to start the ritual.
   # Recipe: 4x Dragon's Breath (corners), Heavy Core (top), 2x Netherite Ingot
   # (sides), Ghast Tear (bottom), base Redline spear (center).
   redline-altar:

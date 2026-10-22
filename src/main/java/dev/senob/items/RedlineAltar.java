@@ -14,25 +14,35 @@ import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * Redline Altar — upgrades a base Redline spear to the upgraded version.
  *
- * A dropper ringed by 8 chiseled-stone-bricks pedestals is an altar. The
- * player loads the upgrade recipe into the dropper (layout below) and closes
- * it: the ingredients appear on the pedestals, the spear in the center, and
- * after the ritual the upgraded spear drops at the center.
+ * A dropper ringed by 8 lodestone pedestals is an altar. As the player loads
+ * items into the dropper, each one appears live on the pedestal matching its
+ * recipe position, and the spear appears in the center. Closing the dropper
+ * with the full recipe starts the ritual: red beams stream from the pedestal
+ * items into the center spear, and when it finishes the upgraded spear drops
+ * at the center.
  *
  * Recipe layout (dropper slots):
  *   [dragon breath] [heavy core]   [dragon breath]
@@ -48,17 +58,117 @@ public class RedlineAltar implements Listener {
     };
     /** Dropper slot for each compass sector (0=N, 1=NE, 2=E, ... 7=NW). */
     private static final int[] SLOT_BY_COMPASS = {1, 2, 5, 8, 7, 6, 3, 0};
-    private static final Material PEDESTAL_BLOCK = Material.CHISELED_STONE_BRICKS;
+    private static final Material PEDESTAL_BLOCK = Material.LODESTONE;
+    /** Preview/ritual display key for the center spear (pedestals use compass 0-7). */
+    private static final int CENTER_KEY = 8;
 
     private final GravenCore plugin;
     private final RedlineSpear redlineSpear;
     private final Set<Location> activeAltars = new HashSet<>();
+    /** Live pedestal previews per altar center, keyed by compass sector / CENTER_KEY. */
+    private final Map<Location, Map<Integer, ItemDisplay>> previews = new HashMap<>();
+    private final Map<Location, List<Location>> pedestalCache = new HashMap<>();
 
     public RedlineAltar(GravenCore plugin, RedlineSpear redlineSpear) {
         this.plugin = plugin;
         this.redlineSpear = redlineSpear;
         plugin.getLogger().info("Redline Altar module initialized!");
     }
+
+    // --- Live pedestal preview -------------------------------------------------
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        schedulePreviewSync(event.getView().getTopInventory());
+    }
+
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        schedulePreviewSync(event.getView().getTopInventory());
+    }
+
+    private void schedulePreviewSync(Inventory topInventory) {
+        if (!GravenConfig.REDLINE_ALTAR_ENABLED) return;
+        if (topInventory.getType() != InventoryType.DROPPER) return;
+        Location loc = topInventory.getLocation();
+        if (loc == null) return;
+        Location center = loc.getBlock().getLocation();
+        // Sync a tick later, once the click/drag has actually moved the items
+        plugin.getServer().getScheduler().runTask(plugin, () -> syncPreview(center));
+    }
+
+    /** Mirrors the dropper's contents onto the pedestals around it. */
+    private void syncPreview(Location center) {
+        if (activeAltars.contains(center)) return;
+        if (center.getBlock().getType() != Material.DROPPER) {
+            clearPreviews(center);
+            return;
+        }
+        List<Location> pedestals = pedestalCache.computeIfAbsent(center, this::findPedestals);
+        if (pedestals.isEmpty()) return;
+
+        Inventory inv = dropperInventory(center);
+        if (inv == null) return;
+
+        Map<Integer, ItemDisplay> shown = previews.computeIfAbsent(center, k -> new HashMap<>());
+        World world = center.getWorld();
+        if (world == null) return;
+
+        for (int compass = 0; compass < 8; compass++) {
+            ItemStack item = inv.getItem(SLOT_BY_COMPASS[compass]);
+            Location at = pedestals.get(compass).clone().add(0.5, 1.7, 0.5);
+            reconcile(world, shown, compass, at, item);
+        }
+        ItemStack spear = inv.getItem(4);
+        ItemStack spearShown = (spear != null && redlineSpear.getRedlineTier(spear) >= 1) ? spear : null;
+        reconcile(world, shown, CENTER_KEY, center.clone().add(0.5, 2.0, 0.5), spearShown);
+    }
+
+    /** Shows the item on a display, replacing or removing the display as needed. */
+    private void reconcile(World world, Map<Integer, ItemDisplay> shown, int key, Location at, ItemStack item) {
+        ItemDisplay existing = shown.get(key);
+        if (item == null || item.getType() == Material.AIR) {
+            if (existing != null) {
+                existing.remove();
+                shown.remove(key);
+            }
+            return;
+        }
+        if (existing != null && existing.isValid() && item.isSimilar(existing.getItemStack())) return;
+        if (existing != null) existing.remove();
+        shown.put(key, spawnDisplay(world, at, item));
+    }
+
+    /** Spawns an item display at normal dropped-item size (0.5 scale). */
+    private static ItemDisplay spawnDisplay(World world, Location at, ItemStack item) {
+        ItemStack shownItem = item.clone();
+        shownItem.setAmount(1);
+        return world.spawn(at, ItemDisplay.class, disp -> {
+            disp.setItemStack(shownItem);
+            disp.setPersistent(false);
+            disp.setBillboard(Display.Billboard.FIXED);
+            disp.setTransformation(new Transformation(
+                    new Vector3f(), new Quaternionf(),
+                    new Vector3f(0.5f, 0.5f, 0.5f), new Quaternionf()));
+        });
+    }
+
+    private void clearPreviews(Location center) {
+        Map<Integer, ItemDisplay> shown = previews.remove(center);
+        if (shown == null) return;
+        for (ItemDisplay display : shown.values()) {
+            if (display.isValid()) display.remove();
+        }
+    }
+
+    private Inventory dropperInventory(Location center) {
+        if (center.getBlock().getState() instanceof InventoryHolder holder) {
+            return holder.getInventory();
+        }
+        return null;
+    }
+
+    // --- Ritual ----------------------------------------------------------------
 
     @EventHandler
     public void onDropperClose(InventoryCloseEvent event) {
@@ -74,18 +184,27 @@ public class RedlineAltar implements Listener {
 
         ItemStack centerItem = inv.getItem(4);
         int tier = (centerItem != null) ? redlineSpear.getRedlineTier(centerItem) : 0;
-        if (tier == 0 || !ingredientsMatch(inv)) return;
+        if (tier == 0 || !ingredientsMatch(inv)) {
+            clearPreviews(center);
+            pedestalCache.remove(center);
+            return;
+        }
 
         if (tier >= 2) {
             player.sendMessage(GravenTheme.prefix().append(
                     GravenTheme.parse("<red>That Redline is already upgraded.</red>")));
+            clearPreviews(center);
+            pedestalCache.remove(center);
             return;
         }
 
-        List<Location> pedestals = findPedestals(center);
+        List<Location> pedestals = pedestalCache.getOrDefault(center, List.of());
+        if (pedestals.isEmpty()) pedestals = findPedestals(center);
         if (pedestals.isEmpty()) {
             player.sendMessage(GravenTheme.prefix().append(
-                    GravenTheme.parse("<red>The altar is incomplete — the dropper needs exactly 8 chiseled stone bricks pedestals around it.</red>")));
+                    GravenTheme.parse("<red>The altar is incomplete — the dropper needs exactly 8 lodestone pedestals around it.</red>")));
+            clearPreviews(center);
+            pedestalCache.remove(center);
             return;
         }
 
@@ -103,7 +222,10 @@ public class RedlineAltar implements Listener {
             else it.setAmount(it.getAmount() - 1);
         }
 
-        startRitual(player, center, pedestals, ringItems, spearItem);
+        // The ritual takes over the live preview displays
+        Map<Integer, ItemDisplay> adopted = previews.remove(center);
+        pedestalCache.remove(center);
+        startRitual(player, center, pedestals, ringItems, spearItem, adopted);
     }
 
     private boolean ingredientsMatch(Inventory inv) {
@@ -116,18 +238,18 @@ public class RedlineAltar implements Listener {
     }
 
     /**
-     * Finds the 8 pedestals around the center: chiseled stone bricks at the
-     * same height, 2–4 blocks out, exactly one per compass sector.
+     * Finds the 8 pedestals around the center: lodestones at the
+     * same height, 2–6 blocks out, exactly one per compass sector.
      * Returns them sorted by compass sector, or empty if the ring is invalid.
      */
     private List<Location> findPedestals(Location center) {
         World world = center.getWorld();
         if (world == null) return List.of();
         Location[] byCompass = new Location[8];
-        for (int dx = -4; dx <= 4; dx++) {
-            for (int dz = -4; dz <= 4; dz++) {
+        for (int dx = -6; dx <= 6; dx++) {
+            for (int dz = -6; dz <= 6; dz++) {
                 int chebyshev = Math.max(Math.abs(dx), Math.abs(dz));
-                if (chebyshev < 2 || chebyshev > 4) continue;
+                if (chebyshev < 2 || chebyshev > 6) continue;
                 Block b = world.getBlockAt(center.getBlockX() + dx, center.getBlockY(), center.getBlockZ() + dz);
                 if (b.getType() != PEDESTAL_BLOCK) continue;
                 int sector = compassIndex(dx, dz);
@@ -150,7 +272,8 @@ public class RedlineAltar implements Listener {
     }
 
     private void startRitual(Player player, Location center, List<Location> pedestals,
-                             List<ItemStack> ringItems, ItemStack spearItem) {
+                             List<ItemStack> ringItems, ItemStack spearItem,
+                             Map<Integer, ItemDisplay> adopted) {
         World world = center.getWorld();
         if (world == null) return;
         activeAltars.add(center);
@@ -162,23 +285,25 @@ public class RedlineAltar implements Listener {
                     GravenTheme.parse("<aqua>The altar awakens — the ritual begins!</aqua>")));
         }
 
+        // Adopt the live preview displays where they exist; spawn any missing ones
         List<ItemDisplay> displays = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
-            Location at = pedestals.get(i).clone().add(0.5, 1.7, 0.5);
-            ItemStack shown = ringItems.get(i).clone();
-            shown.setAmount(1);
-            displays.add(world.spawn(at, ItemDisplay.class, disp -> {
-                disp.setItemStack(shown);
-                disp.setPersistent(false);
-                disp.setBillboard(Display.Billboard.FIXED);
-            }));
+            ItemDisplay display = (adopted != null) ? adopted.remove(i) : null;
+            if (display == null || !display.isValid()) {
+                Location at = pedestals.get(i).clone().add(0.5, 1.7, 0.5);
+                display = spawnDisplay(world, at, ringItems.get(i));
+            }
+            displays.add(display);
         }
-        Location spearAt = center.clone().add(0.5, 2.0, 0.5);
-        ItemDisplay spearDisplay = world.spawn(spearAt, ItemDisplay.class, disp -> {
-            disp.setItemStack(spearItem.clone());
-            disp.setPersistent(false);
-            disp.setBillboard(Display.Billboard.FIXED);
-        });
+        ItemDisplay spearDisplay = (adopted != null) ? adopted.remove(CENTER_KEY) : null;
+        if (spearDisplay == null || !spearDisplay.isValid()) {
+            Location spearAt = center.clone().add(0.5, 2.0, 0.5);
+            spearDisplay = spawnDisplay(world, spearAt, spearItem);
+        }
+        if (adopted != null) {
+            for (ItemDisplay leftover : adopted.values()) leftover.remove();
+        }
+        final ItemDisplay centerDisplay = spearDisplay;
 
         long totalTicks = Math.max(20L, (long) (GravenConfig.REDLINE_ALTAR_RITUAL_DURATION * 20.0));
         new BukkitRunnable() {
@@ -188,12 +313,12 @@ public class RedlineAltar implements Listener {
             @Override
             public void run() {
                 if (elapsed >= totalTicks) {
-                    finishRitual(player, center, displays, spearDisplay);
+                    finishRitual(player, center, displays, centerDisplay);
                     cancel();
                     return;
                 }
                 yaw += 9f;
-                Location spearLoc = spearDisplay.isValid() ? spearDisplay.getLocation() : center.clone().add(0.5, 2.0, 0.5);
+                Location spearLoc = centerDisplay.isValid() ? centerDisplay.getLocation() : center.clone().add(0.5, 2.0, 0.5);
                 for (ItemDisplay display : displays) {
                     if (!display.isValid()) continue;
                     Location l = display.getLocation();
@@ -202,10 +327,10 @@ public class RedlineAltar implements Listener {
                     world.spawnParticle(Particle.ENCHANT, display.getLocation(), 2, 0.2, 0.2, 0.2, 0.5);
                     drawBeam(world, display.getLocation(), spearLoc, elapsed);
                 }
-                if (spearDisplay.isValid()) {
-                    Location l = spearDisplay.getLocation();
+                if (centerDisplay.isValid()) {
+                    Location l = centerDisplay.getLocation();
                     l.setYaw(yaw * 1.5f);
-                    spearDisplay.teleport(l);
+                    centerDisplay.teleport(l);
                 }
                 // Portal particles spiral inward as the ritual progresses
                 double progress = (double) elapsed / totalTicks;

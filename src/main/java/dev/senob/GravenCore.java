@@ -2,6 +2,7 @@ package dev.senob;
 
 import dev.senob.commands.BountyCommand;
 import dev.senob.commands.GravenCoreCommand;
+import dev.senob.commands.InvSeeCommand;
 import dev.senob.core.CooldownManager;
 import dev.senob.core.GravenConfig;
 import dev.senob.guis.GUIManager;
@@ -75,6 +76,11 @@ public class GravenCore extends JavaPlugin {
         GravenCoreCommand gravencoreCmd = new GravenCoreCommand(this, redlineSpear, draculaPlate, mythicalArmorSet, celerityBoots, alterOfDespair);
         Objects.requireNonNull(getCommand("gravencore")).setExecutor(gravencoreCmd);
         Objects.requireNonNull(getCommand("gravencore")).setTabCompleter(gravencoreCmd);
+
+        InvSeeCommand invseeCmd = new InvSeeCommand(this);
+        Bukkit.getPluginManager().registerEvents(invseeCmd, this);
+        Objects.requireNonNull(getCommand("invsee")).setExecutor(invseeCmd);
+        Objects.requireNonNull(getCommand("invsee")).setTabCompleter(invseeCmd);
 
         getLogger().info("GravenCore enabled!");
     }

@@ -8,6 +8,18 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
+- **InvSee (2026-10-22):** new `/invsee <player>` command (permission
+  gravencore.admin) opening a live, editable 54-slot view of the target's
+  inventory, laid out per Aaron's diagram: armor (purple placeholders when
+  empty), main hand (lime) and off hand (orange) across the top, a full
+  gray-pane divider row, then the 27 main inventory slots and the hotbar.
+  Admins can take items out and put items in — a reconcile pass twice a
+  second pushes admin edits into the target's real inventory and pulls
+  the target's own changes into the view; divider panes and the labeled
+  placeholder panes (PDC-marked) can never enter the real inventory,
+  shift-clicking from the admin's own inventory into the view is blocked,
+  and the view closes itself if the target logs out. Tab completion
+  offers online player names.
 - **Alter of Despair (2026-10-22):** new placeable altar dropper, given with
   `/gravencore alter <username> [count]` (count defaults to 1, clamped 1–64). The dropper item carries the name in the red shake
   color (#F8F854) and a PDC marker, and renders as a crafting table via the

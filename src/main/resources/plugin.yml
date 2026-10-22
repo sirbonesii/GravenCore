@@ -36,3 +36,7 @@ commands:
     usage: /gravencore <give|config|reload> ...
     permission: gravencore.admin
     aliases: [gc]
+  invsee:
+    description: View another player's inventory
+    usage: /invsee <player>
+    permission: gravencore.admin

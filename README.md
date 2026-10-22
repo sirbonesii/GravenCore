@@ -153,6 +153,14 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
 
 #### Changed
+- **Enchantments now apply live (2026-10-22):** the Mythical set, Dracula's
+  Plate and Celerity Boots bake their enchantments into the lore's
+  Enchantments section, which used to go stale — enchant a piece and the
+  tooltip only caught up after a `/gravencore reload`. A new
+  `EnchantSyncListener` refreshes the piece the moment its enchantments
+  change (enchanting table, anvil, grindstone, plus a click/pickup
+  backstop), re-running its sync only when the section is actually stale
+  and preserving anvil renames.
 - **Redline blast beam + beam circles (2026-10-21):** the ability beam is now
   tighter and cleaner (crimson/orange dust spreads cut from 0.35/0.45 to
   0.10/0.16, smaller dust, finer steps; the mid-beam lava/explosion accents

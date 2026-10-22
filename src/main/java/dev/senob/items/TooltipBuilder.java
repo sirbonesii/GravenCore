@@ -178,6 +178,40 @@ public final class TooltipBuilder {
     }
 
     /**
+     * True if the lore's Enchantments section no longer matches the item's
+     * actual enchantments. The section is baked into the lore when the item
+     * is synced, so enchanting (or disenchanting) the item afterwards leaves
+     * it stale — the tooltip keeps showing the old enchantments, or none,
+     * until something re-syncs the item. EnchantSyncListener uses this to
+     * refresh only the pieces that actually changed.
+     */
+    public static boolean enchantSectionStale(ItemMeta meta) {
+        List<Component> lore = meta.lore();
+        if (lore == null) lore = List.of();
+
+        // The enchant names the lore currently shows: the lines under the
+        // Enchantments header, up to the next divider or section header
+        // (enchantment names never contain dashes, headers/dividers do)
+        List<String> shown = new ArrayList<>();
+        boolean inSection = false;
+        for (Component line : lore) {
+            String plain = PlainTextComponentSerializer.plainText().serialize(line).trim();
+            if (!inSection) {
+                if (plain.contains("Enchantments")) inSection = true;
+                continue;
+            }
+            if (plain.contains("-") || plain.contains("—")) break;
+            shown.add(plain);
+        }
+
+        List<String> actual = new ArrayList<>();
+        for (Component line : enchantLines(meta)) {
+            actual.add(PlainTextComponentSerializer.plainText().serialize(line).trim());
+        }
+        return !shown.equals(actual);
+    }
+
+    /**
      * The standard "Created by" footer.
      */
     public static Component creatorFooter() {

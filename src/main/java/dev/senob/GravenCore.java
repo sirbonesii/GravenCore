@@ -13,6 +13,7 @@ import dev.senob.items.CelerityBoots;
 import dev.senob.items.RedlineAltar;
 import dev.senob.items.RedlineSpear;
 import dev.senob.listeners.AttributeHider;
+import dev.senob.listeners.EnchantSyncListener;
 import dev.senob.listeners.CombatLogger;
 import dev.senob.listeners.DurabilityLoreListener;
 import dev.senob.listeners.EnderChestEx;
@@ -65,6 +66,7 @@ public class GravenCore extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(mythicalArmorSet, this);
         Bukkit.getPluginManager().registerEvents(celerityBoots, this);
         Bukkit.getPluginManager().registerEvents(new RedlineAltar(this, redlineSpear), this);
+        Bukkit.getPluginManager().registerEvents(new EnchantSyncListener(this, draculaPlate, mythicalArmorSet, celerityBoots), this);
 
         // 4. Register Command Router
         GravenCoreCommand gravencoreCmd = new GravenCoreCommand(this, redlineSpear, draculaPlate, mythicalArmorSet, celerityBoots);

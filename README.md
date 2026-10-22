@@ -14,13 +14,14 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   sides, Ghast Tear bottom, base Redline center) slot by slot like a normal dropper —
   a correct item locks in (it is stored in the dropper block itself, its slot becomes
   a green glass pane, and it appears spinning on the matching pedestal — the spear
-  itself stands planted point-down into the dropper at hand-held size, also
+  itself sticks point-down into the dropper using its big in-hand model, also
   spinning), wrong items are left untouched like any dropper, and locked items
-  can be clicked back out. The altar never sends chat messages. When all 9 slots
-  lock, the ritual starts: the pedestal items orbit the center, spiraling in and
-  shrinking into the spear as it spins faster and rises out of the altar under a
-  tall vertical beam, ending in an explosion that is lethal to anyone standing
-  within 8 blocks (a held totem of undying still saves them), and after the ritual
+  can be clicked back out. The altar never sends chat messages, and its only
+  particles are the enchant sparkles on the pedestal items. When all 9 slots
+  lock, the ritual starts: the pedestal items orbit the center, spiraling in
+  and shrinking into the spear as it spins faster and rises out of the altar,
+  ending in an explosion that is lethal to anyone standing within 8 blocks
+  (a held totem of undying still saves them), and after the ritual
   (`upgrading.redline-altar` config: enabled, ritual-duration, start/complete sounds)
   the upgraded spear drops at the center for the player.
 - **Celerity Boots: freeze duration on the action bar + block system (2026-10-19):**

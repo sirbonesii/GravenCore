@@ -140,6 +140,8 @@ public class RedlineSpear implements Listener, CustomItem {
         if (!meta.hasEnchant(Enchantment.SHARPNESS)) meta.addEnchant(Enchantment.SHARPNESS, 5, true);
         if (!meta.hasEnchant(Enchantment.FIRE_ASPECT)) meta.addEnchant(Enchantment.FIRE_ASPECT, 2, true);
         meta.setUnbreakable(true);
+        // Resource-pack models: base spear = 2000, upgraded = 2001
+        meta.setCustomModelData(tier >= 2 ? 2001 : 2000);
         pdc.set(redlineTierKey, PersistentDataType.INTEGER, tier);
 
         double baseMelee = tier >= 2 ? GravenConfig.REDLINE_MELEE_UPGRADED : GravenConfig.REDLINE_MELEE_BASE;

@@ -131,6 +131,8 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
 
 #### Changed
+- **Redline custom model data (2026-10-21):** base spear gets `custom_model_data` 2000,
+  upgraded gets 2001 (set in `syncSpearStatsAndLore`, so reloads re-apply it).
 - **Teldaria-style dividers v3 (2026-10-19):** reverted to dashes (the ── character didn't
   render in-game) sized to content width instead of full-bleed; kept the section colors
   (white ATTRIBUTES, aqua EFFECTS, gold ENCHANTMENTS) with centered non-bold titles.

@@ -58,14 +58,16 @@ import java.util.Set;
  * that slot, the altar locks it in: the item itself is stored in the dropper
  * block's persistent data (so it survives restarts) and the slot shows a
  * green glass pane in its place, with the ingredient appearing — spinning —
- * on the matching pedestal. The spear itself stands planted upright into
- * the dropper, also spinning. Wrong items are left completely untouched,
- * like any dropper. Clicking a green pane with an empty hand takes the
- * stored item back out. When all 9 slots are locked, the ritual starts:
- * red beams stream from the pedestal items into the center spear as it
- * spins faster and rises out of the altar under a tall vertical beam, and
- * the ritual ends in an explosion, after which the upgraded spear drops
- * at the center.
+ * on the matching pedestal. The spear itself stands planted point-down
+ * into the dropper, also spinning. Wrong items are left completely
+ * untouched, like any dropper. Clicking a green pane with an empty hand
+ * takes the stored item back out. When all 9 slots are locked, the ritual
+ * starts: the pedestal items orbit the center, spiraling in and shrinking
+ * into the spear as it spins faster and rises out of the altar under a
+ * tall vertical beam, and the ritual ends in an explosion — lethal to
+ * anyone standing in it, unless a totem of undying saves them — after
+ * which the upgraded spear drops at the center. The altar never sends
+ * chat messages.
  *
  * Recipe layout:
  *   [dragon breath] [heavy core]   [dragon breath]
@@ -404,8 +406,8 @@ public class RedlineAltar implements Listener {
         }
         ItemStack spear = stored.get(4);
         ItemStack spearShown = (spear != null && redlineSpear.getRedlineTier(spear) >= 1) ? spear : null;
-        // The spear stands planted into the dropper, tip sunk into the block
-        reconcile(shown, CENTER_KEY, center.clone().add(0.5, 1.25, 0.5), spearShown);
+        // The spear stands planted into the dropper, point sunk into the block
+        reconcile(shown, CENTER_KEY, center.clone().add(0.5, 1.5, 0.5), spearShown);
         ensureSpinTask();
     }
 
@@ -448,7 +450,7 @@ public class RedlineAltar implements Listener {
         shown.put(key, key == CENTER_KEY ? spawnPlantedSpear(world, at, item) : spawnDisplay(world, at, item));
     }
 
-    /** Spawns the center spear standing upright, planted into the altar. */
+    /** Spawns the center spear planted point-down into the altar, at hand-held size. */
     private static ItemDisplay spawnPlantedSpear(World world, Location at, ItemStack item) {
         ItemStack shownItem = item.clone();
         shownItem.setAmount(1);
@@ -457,11 +459,13 @@ public class RedlineAltar implements Listener {
             disp.setPersistent(false);
             disp.setBillboard(Display.Billboard.FIXED);
             // FIXED renders the item upright (like an item frame) instead of
-            // lying flat like a dropped item — so the spear stands in the altar
+            // lying flat like a dropped item; the half-turn around X flips it
+            // point-down so it looks stabbed into the altar, at 0.8 scale —
+            // the size the spear has in a player's hand
             disp.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.FIXED);
             disp.setTransformation(new Transformation(
-                    new Vector3f(), new Quaternionf(),
-                    new Vector3f(0.5f, 0.5f, 0.5f), new Quaternionf()));
+                    new Vector3f(), new Quaternionf().rotateX((float) Math.PI),
+                    new Vector3f(0.8f, 0.8f, 0.8f), new Quaternionf()));
         });
     }
 
@@ -542,13 +546,7 @@ public class RedlineAltar implements Listener {
         Map<Integer, ItemStack> stored = readStored(center);
         if (stored.size() < 9) return;
         List<Location> pedestals = pedestalsFor(center);
-        if (pedestals.isEmpty()) {
-            if (player != null) {
-                player.sendMessage(GravenTheme.prefix().append(
-                        GravenTheme.parse("<red>The altar is incomplete — the dropper needs exactly 8 lodestone pedestals around it.</red>")));
-            }
-            return;
-        }
+        if (pedestals.isEmpty()) return; // the altar never speaks in chat
 
         // Snapshot the ring items in compass order so each ingredient appears
         // on the pedestal matching its recipe position
@@ -609,10 +607,6 @@ public class RedlineAltar implements Listener {
 
         world.playSound(center, GravenConfig.REDLINE_ALTAR_START_SOUND,
                 GravenConfig.REDLINE_ALTAR_START_VOLUME, GravenConfig.REDLINE_ALTAR_START_PITCH);
-        if (player != null && player.isOnline()) {
-            player.sendMessage(GravenTheme.prefix().append(
-                    GravenTheme.parse("<aqua>The altar awakens — the ritual begins!</aqua>")));
-        }
 
         // Adopt the live preview displays where they exist; spawn any missing ones
         List<ItemDisplay> displays = new ArrayList<>();
@@ -626,7 +620,7 @@ public class RedlineAltar implements Listener {
         }
         ItemDisplay spearDisplay = (adopted != null) ? adopted.remove(CENTER_KEY) : null;
         if (spearDisplay == null || !spearDisplay.isValid()) {
-            Location spearAt = center.clone().add(0.5, 1.25, 0.5);
+            Location spearAt = center.clone().add(0.5, 1.5, 0.5);
             spearDisplay = spawnPlantedSpear(world, spearAt, spearItem);
         }
         if (adopted != null) {
@@ -634,6 +628,20 @@ public class RedlineAltar implements Listener {
         }
         final ItemDisplay centerDisplay = spearDisplay;
         final double spearStartY = centerDisplay.getLocation().getY();
+
+        // Orbit paths for the pedestal items: each starts above its pedestal,
+        // then circles the center while spiraling in and shrinking toward the spear
+        List<Double> orbitAngles = new ArrayList<>();
+        List<Double> orbitRadii = new ArrayList<>();
+        List<Double> orbitY = new ArrayList<>();
+        for (ItemDisplay display : displays) {
+            Location l = display.getLocation();
+            double dx = l.getX() - (center.getX() + 0.5);
+            double dz = l.getZ() - (center.getZ() + 0.5);
+            orbitAngles.add(Math.atan2(dz, dx));
+            orbitRadii.add(Math.hypot(dx, dz));
+            orbitY.add(l.getY());
+        }
 
         long totalTicks = Math.max(20L, (long) (GravenConfig.REDLINE_ALTAR_RITUAL_DURATION * 20.0));
         new BukkitRunnable() {
@@ -658,12 +666,25 @@ public class RedlineAltar implements Listener {
                     l.setYaw(spearYaw);
                     centerDisplay.teleport(l);
                 }
-                Location spearLoc = centerDisplay.isValid() ? centerDisplay.getLocation() : center.clone().add(0.5, 2.55, 0.5);
-                for (ItemDisplay display : displays) {
+                Location spearLoc = centerDisplay.isValid() ? centerDisplay.getLocation() : center.clone().add(0.5, 2.8, 0.5);
+                for (int i = 0; i < displays.size(); i++) {
+                    ItemDisplay display = displays.get(i);
                     if (!display.isValid()) continue;
-                    Location l = display.getLocation();
+                    // Circular motion: two full revolutions while the radius
+                    // collapses toward the spear and the item shrinks away
+                    double angle = orbitAngles.get(i) + progress * Math.PI * 4.0;
+                    double radius = orbitRadii.get(i) * (1.0 - progress) + 0.35 * progress;
+                    double oy = orbitY.get(i) + ((spearStartY + 1.0) - orbitY.get(i)) * progress;
+                    Location l = new Location(world,
+                            center.getX() + 0.5 + Math.cos(angle) * radius,
+                            oy,
+                            center.getZ() + 0.5 + Math.sin(angle) * radius);
                     l.setYaw(yaw);
                     display.teleport(l);
+                    float s = (float) (0.5 * (1.0 - progress * 0.92));
+                    display.setTransformation(new Transformation(
+                            new Vector3f(), new Quaternionf(),
+                            new Vector3f(s, s, s), new Quaternionf()));
                     world.spawnParticle(Particle.ENCHANT, display.getLocation(), 2, 0.2, 0.2, 0.2, 0.5);
                     drawBeam(world, display.getLocation(), spearLoc, elapsed);
                 }
@@ -708,10 +729,18 @@ public class RedlineAltar implements Listener {
         World world = center.getWorld();
         if (world == null) return;
 
-        // The ritual ends in an explosion at the spear (purely visual —
-        // no block or player damage), with a red shockwave rolling outward
-        Location boomAt = spearDisplay.isValid() ? spearDisplay.getLocation() : center.clone().add(0.5, 2.55, 0.5);
+        // The ritual ends in an explosion at the spear, with a red shockwave
+        // rolling outward. The blast breaks no blocks, but it is lethal to
+        // anyone standing in it — a held totem of undying still pops and
+        // saves them, as vanilla intends
+        Location boomAt = spearDisplay.isValid() ? spearDisplay.getLocation() : center.clone().add(0.5, 2.8, 0.5);
         world.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 2.0f, 0.9f);
+        Location blast = center.clone().add(0.5, 1.0, 0.5);
+        for (Player nearby : world.getPlayers()) {
+            if (nearby.getLocation().distanceSquared(blast) <= 64.0) { // within 8 blocks
+                nearby.damage(1000.0);
+            }
+        }
         world.spawnParticle(Particle.EXPLOSION_EMITTER, boomAt, 6, 0.4, 0.4, 0.4, 0.0);
         world.spawnParticle(Particle.EXPLOSION, boomAt, 20, 0.6, 0.6, 0.6, 0.0);
         world.spawnParticle(Particle.FLAME, boomAt, 40, 0.5, 0.5, 0.5, 0.05);
@@ -753,10 +782,6 @@ public class RedlineAltar implements Listener {
                 GravenConfig.REDLINE_ALTAR_COMPLETE_VOLUME, GravenConfig.REDLINE_ALTAR_COMPLETE_PITCH);
         world.spawnParticle(Particle.FIREWORK, dropAt, 30, 0.4, 0.4, 0.4, 0.15);
 
-        if (player != null && player.isOnline()) {
-            player.sendMessage(GravenTheme.prefix().append(
-                    GravenTheme.parse("<green>Your Redline has ascended to the <bold>Upgraded</bold> version!</green>")));
-        }
         activeAltars.remove(center);
     }
 }

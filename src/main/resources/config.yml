@@ -47,17 +47,12 @@ weapons:
     # Whether the ability beam passes straight through solid blocks/walls
     pierce-blocks: true
 
-    # Ticks between the pre-fire sound playing and the beam actually
-    # firing (20 ticks = 1 second), so the warden charge shriek is heard
-    # before the boom instead of under it
-    pre-fire-delay-ticks: 10
-
     # Sound effects as [sound-name, volume, pitch].
     # charge: /playsound ... player @a[distance=..30] — only players within
     # 30 blocks of the charging player hear it.
     # pre-fire / fire: /playsound ... master @a — everyone hears them;
-    # pre-fire plays when the charge completes, fire plays as the beam
-    # shoots (pre-fire-delay-ticks later).
+    # pre-fire plays on the last two pulses of the charge-up, fire plays
+    # at the end of the charge as the beam shoots.
     sound-effects:
       charge:
         - minecraft:block.end_portal_frame.fill

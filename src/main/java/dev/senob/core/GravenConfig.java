@@ -31,7 +31,6 @@ public class GravenConfig {
     public static String REDLINE_FIRE_SOUND;
     public static float REDLINE_FIRE_VOLUME;
     public static float REDLINE_FIRE_PITCH;
-    public static long REDLINE_PREFIRE_DELAY_TICKS;
 
     // --- REDLINE ALTAR (upgrading) ---
     public static boolean REDLINE_ALTAR_ENABLED;
@@ -152,7 +151,6 @@ public class GravenConfig {
         REDLINE_FIRE_SOUND = fire[0];
         REDLINE_FIRE_VOLUME = Float.parseFloat(fire[1]);
         REDLINE_FIRE_PITCH = Float.parseFloat(fire[2]);
-        REDLINE_PREFIRE_DELAY_TICKS = config.getLong("weapons.redline.pre-fire-delay-ticks", 10L);
         loadRedlineAltar(config);
         loadResourcePack(config);
         loadAlter(config);

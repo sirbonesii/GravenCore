@@ -168,16 +168,15 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
 
 #### Changed
-- **Redline charge hoops + warden fire sounds (2026-10-22):** the charge-up
-  rings no longer expand like ripples — each PulseBeat now stamps a fixed
-  flame hoop (radius 1.4) at the aim point that hangs in the air where it
-  spawned, per Aaron's reference video. When the charge completes, the new
-  `weapons.redline.sound-effects.pre-fire` sound (default warden
-  sonic_charge, 100, 0.6) plays to everyone, and the beam fires
-  `weapons.redline.pre-fire-delay-ticks` (default 10) later with the new
-  `weapons.redline.sound-effects.fire` sound (default warden sonic_boom,
-  100, 0.6) ahead of the existing blast sounds. The end-of-beam flame rings
-  still expand as before.
+- **Redline warden fire sounds (2026-10-22):** the charge-up's expanding
+  pulse rings stay as they were (a fixed-hoop variant from Aaron's reference
+  video was tried and reverted the same day), and the per-beat charge chime
+  is unchanged. The new `weapons.redline.sound-effects.pre-fire` sound
+  (default warden sonic_charge, 100, 0.6) plays to everyone on the last
+  two pulses of the charge-up, and at the end of the charge the beam fires
+  with the new `weapons.redline.sound-effects.fire` sound (default warden
+  sonic_boom, 100, 0.6) ahead of the existing blast sounds. The end-of-beam
+  flame rings still expand as before.
 - **packreload API fix:** the command now calls Paper's `setResourcePack`
   (URL, byte-hash, prompt, force) — the `sendResourcePack` overloads it was
   written against don't exist in the Paper 1.21.4 API, so the first build

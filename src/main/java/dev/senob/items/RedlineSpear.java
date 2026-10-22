@@ -74,10 +74,6 @@ public class RedlineSpear implements Listener, CustomItem {
     private static final int CHARGE_TICKS = 60;
     private static final int RING_POINTS = 96;
     private static final int RING_LAYERS = 2;
-    // Charge-up rings are fixed hoops at this radius (Aaron's reference
-    // video, 2026-10-22): full size the moment they appear, hanging in
-    // the air where they spawned instead of expanding like a ripple
-    private static final double CHARGE_HOOP_RADIUS = 1.4;
     private static final int SHIELD_DURABILITY_DAMAGE = 180;
 
     private record PulseBeat(int tick, double startRadius, double expansionSpeed) {}
@@ -276,8 +272,17 @@ public class RedlineSpear implements Listener, CustomItem {
                             }
                         }
 
+                        // Pre-fire sound (config: weapons.redline.sound-effects.pre-fire):
+                        // Aaron (2026-10-22) — the warden sonic charge plays on
+                        // the LAST TWO pulses, to everyone (master @a style)
+                        if (beat.tick() >= PULSE_BEATS.get(PULSE_BEATS.size() - 2).tick()) {
+                            world.playSound(eye, GravenConfig.REDLINE_PREFIRE_SOUND,
+                                    SoundCategory.MASTER, GravenConfig.REDLINE_PREFIRE_VOLUME,
+                                    GravenConfig.REDLINE_PREFIRE_PITCH);
+                        }
+
                         Location ringCenter = eye.clone().add(dir.clone().multiply(2.8));
-                        ParticleEngineUtil.spawnCircle(ringCenter, dir, CHARGE_HOOP_RADIUS, Particle.FLAME, RING_POINTS, null);
+                        ParticleEngineUtil.spawnExpandingRing(ringCenter, dir, beat.startRadius(), beat.expansionSpeed(), Particle.FLAME, RING_POINTS, RING_LAYERS);
                     }
                 }
 
@@ -294,23 +299,11 @@ public class RedlineSpear implements Listener, CustomItem {
 
                     cooldownManager.setCooldown(player, COOLDOWN_TYPE, cdSeconds);
 
-                    // Pre-fire sound (config: weapons.redline.sound-effects.pre-fire),
-                    // played to everyone like /playsound ... master @a — then the
-                    // blast fires after pre-fire-delay-ticks so the warden charge
-                    // shriek lands before the boom instead of under it
-                    world.playSound(eye, GravenConfig.REDLINE_PREFIRE_SOUND,
-                            SoundCategory.MASTER, GravenConfig.REDLINE_PREFIRE_VOLUME,
-                            GravenConfig.REDLINE_PREFIRE_PITCH);
+                    // The pre-fire sound played on the last two pulses; the
+                    // blast fires right at the end of the charge, and the
+                    // fire sound (sonic_boom) plays inside fireRedlineBlast
+                    fireRedlineBlast(player, item, tier);
                     cancel();
-
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            if (player.isOnline() && !player.isDead()) {
-                                fireRedlineBlast(player, item, tier);
-                            }
-                        }
-                    }.runTaskLater(plugin, Math.max(0L, GravenConfig.REDLINE_PREFIRE_DELAY_TICKS));
                 }
             }
         }.runTaskTimer(plugin, 0L, 1L);

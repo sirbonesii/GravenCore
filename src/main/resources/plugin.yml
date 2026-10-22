@@ -40,3 +40,11 @@ commands:
     description: View another player's inventory
     usage: /invsee <player>
     permission: gravencore.admin
+  vanish:
+    description: Make a player invisible to non-admin players
+    usage: /vanish [player]
+    permission: gravencore.admin
+  unvanish:
+    description: Make a vanished player visible again
+    usage: /unvanish [player]
+    permission: gravencore.admin

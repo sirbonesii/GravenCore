@@ -3,6 +3,7 @@ package dev.senob;
 import dev.senob.commands.BountyCommand;
 import dev.senob.commands.GravenCoreCommand;
 import dev.senob.commands.InvSeeCommand;
+import dev.senob.commands.VanishCommand;
 import dev.senob.core.CooldownManager;
 import dev.senob.core.GravenConfig;
 import dev.senob.guis.GUIManager;
@@ -81,6 +82,13 @@ public class GravenCore extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(invseeCmd, this);
         Objects.requireNonNull(getCommand("invsee")).setExecutor(invseeCmd);
         Objects.requireNonNull(getCommand("invsee")).setTabCompleter(invseeCmd);
+
+        VanishCommand vanishCmd = new VanishCommand(this);
+        Bukkit.getPluginManager().registerEvents(vanishCmd, this);
+        Objects.requireNonNull(getCommand("vanish")).setExecutor(vanishCmd);
+        Objects.requireNonNull(getCommand("vanish")).setTabCompleter(vanishCmd);
+        Objects.requireNonNull(getCommand("unvanish")).setExecutor(vanishCmd);
+        Objects.requireNonNull(getCommand("unvanish")).setTabCompleter(vanishCmd);
 
         getLogger().info("GravenCore enabled!");
     }

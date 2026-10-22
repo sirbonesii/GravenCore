@@ -35,6 +35,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.joml.Quaternionf;
@@ -56,12 +57,15 @@ import java.util.Set;
  * dropper. Whenever an item sitting in a slot is the correct ingredient for
  * that slot, the altar locks it in: the item itself is stored in the dropper
  * block's persistent data (so it survives restarts) and the slot shows a
- * green glass pane in its place, with the ingredient appearing on the
- * matching pedestal. Wrong items are left completely untouched, like any
- * dropper. Clicking a green pane with an empty hand takes the stored item
- * back out. When all 9 slots are locked, the ritual starts: red beams stream
- * from the pedestal items into the center spear, a beam shoots skyward, and
- * the upgraded spear drops at the center.
+ * green glass pane in its place, with the ingredient appearing — spinning —
+ * on the matching pedestal. The spear itself stands planted upright into
+ * the dropper, also spinning. Wrong items are left completely untouched,
+ * like any dropper. Clicking a green pane with an empty hand takes the
+ * stored item back out. When all 9 slots are locked, the ritual starts:
+ * red beams stream from the pedestal items into the center spear as it
+ * spins faster and rises out of the altar under a tall vertical beam, and
+ * the ritual ends in an explosion, after which the upgraded spear drops
+ * at the center.
  *
  * Recipe layout:
  *   [dragon breath] [heavy core]   [dragon breath]
@@ -88,6 +92,9 @@ public class RedlineAltar implements Listener {
     private final Map<Location, Map<Integer, ItemDisplay>> previews = new HashMap<>();
     private final Map<Location, List<Location>> pedestalCache = new HashMap<>();
     private final Set<Location> reconcilePending = new HashSet<>();
+    /** Continuously spins every preview display (pedestal items + planted spear). */
+    private BukkitTask previewSpinTask;
+    private float previewYaw = 0f;
 
     public RedlineAltar(GravenCore plugin, RedlineSpear redlineSpear) {
         this.plugin = plugin;
@@ -397,7 +404,31 @@ public class RedlineAltar implements Listener {
         }
         ItemStack spear = stored.get(4);
         ItemStack spearShown = (spear != null && redlineSpear.getRedlineTier(spear) >= 1) ? spear : null;
-        reconcile(shown, CENTER_KEY, center.clone().add(0.5, 2.0, 0.5), spearShown);
+        // The spear stands planted into the dropper, tip sunk into the block
+        reconcile(shown, CENTER_KEY, center.clone().add(0.5, 1.25, 0.5), spearShown);
+        ensureSpinTask();
+    }
+
+    /** Starts the shared preview spin loop if it is not already running. */
+    private void ensureSpinTask() {
+        if (previewSpinTask != null) return;
+        previewSpinTask = plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+            boolean anyShown = previews.values().stream().anyMatch(m -> !m.isEmpty());
+            if (!anyShown) {
+                previewSpinTask.cancel();
+                previewSpinTask = null;
+                return;
+            }
+            previewYaw += 10f;
+            for (Map<Integer, ItemDisplay> shown : previews.values()) {
+                for (ItemDisplay display : shown.values()) {
+                    if (!display.isValid()) continue;
+                    Location l = display.getLocation();
+                    l.setYaw(previewYaw);
+                    display.teleport(l);
+                }
+            }
+        }, 2L, 2L);
     }
 
     /** Shows the item on a display, replacing or removing the display as needed. */
@@ -414,7 +445,24 @@ public class RedlineAltar implements Listener {
         if (existing != null) existing.remove();
         World world = at.getWorld();
         if (world == null) return;
-        shown.put(key, spawnDisplay(world, at, item));
+        shown.put(key, key == CENTER_KEY ? spawnPlantedSpear(world, at, item) : spawnDisplay(world, at, item));
+    }
+
+    /** Spawns the center spear standing upright, planted into the altar. */
+    private static ItemDisplay spawnPlantedSpear(World world, Location at, ItemStack item) {
+        ItemStack shownItem = item.clone();
+        shownItem.setAmount(1);
+        return world.spawn(at, ItemDisplay.class, disp -> {
+            disp.setItemStack(shownItem);
+            disp.setPersistent(false);
+            disp.setBillboard(Display.Billboard.FIXED);
+            // FIXED renders the item upright (like an item frame) instead of
+            // lying flat like a dropped item — so the spear stands in the altar
+            disp.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.FIXED);
+            disp.setTransformation(new Transformation(
+                    new Vector3f(), new Quaternionf(),
+                    new Vector3f(0.5f, 0.5f, 0.5f), new Quaternionf()));
+        });
     }
 
     /** Spawns an item display at normal dropped-item size (0.5 scale). */
@@ -578,18 +626,20 @@ public class RedlineAltar implements Listener {
         }
         ItemDisplay spearDisplay = (adopted != null) ? adopted.remove(CENTER_KEY) : null;
         if (spearDisplay == null || !spearDisplay.isValid()) {
-            Location spearAt = center.clone().add(0.5, 2.0, 0.5);
-            spearDisplay = spawnDisplay(world, spearAt, spearItem);
+            Location spearAt = center.clone().add(0.5, 1.25, 0.5);
+            spearDisplay = spawnPlantedSpear(world, spearAt, spearItem);
         }
         if (adopted != null) {
             for (ItemDisplay leftover : adopted.values()) leftover.remove();
         }
         final ItemDisplay centerDisplay = spearDisplay;
+        final double spearStartY = centerDisplay.getLocation().getY();
 
         long totalTicks = Math.max(20L, (long) (GravenConfig.REDLINE_ALTAR_RITUAL_DURATION * 20.0));
         new BukkitRunnable() {
             long elapsed = 0;
             float yaw = 0f;
+            float spearYaw = 0f;
 
             @Override
             public void run() {
@@ -598,8 +648,17 @@ public class RedlineAltar implements Listener {
                     cancel();
                     return;
                 }
-                yaw += 9f;
-                Location spearLoc = centerDisplay.isValid() ? centerDisplay.getLocation() : center.clone().add(0.5, 2.0, 0.5);
+                double progress = (double) elapsed / totalTicks;
+                yaw += 9f + (float) (progress * 9.0);
+                // The planted spear spins faster and faster and rises out of the altar
+                if (centerDisplay.isValid()) {
+                    spearYaw += 9f + (float) (progress * 27.0);
+                    Location l = centerDisplay.getLocation();
+                    l.setY(spearStartY + progress * 1.3);
+                    l.setYaw(spearYaw);
+                    centerDisplay.teleport(l);
+                }
+                Location spearLoc = centerDisplay.isValid() ? centerDisplay.getLocation() : center.clone().add(0.5, 2.55, 0.5);
                 for (ItemDisplay display : displays) {
                     if (!display.isValid()) continue;
                     Location l = display.getLocation();
@@ -608,13 +667,7 @@ public class RedlineAltar implements Listener {
                     world.spawnParticle(Particle.ENCHANT, display.getLocation(), 2, 0.2, 0.2, 0.2, 0.5);
                     drawBeam(world, display.getLocation(), spearLoc, elapsed);
                 }
-                if (centerDisplay.isValid()) {
-                    Location l = centerDisplay.getLocation();
-                    l.setYaw(yaw * 1.5f);
-                    centerDisplay.teleport(l);
-                }
                 // Portal particles spiral inward as the ritual progresses
-                double progress = (double) elapsed / totalTicks;
                 double radius = 3.5 * (1.0 - progress) + 0.5;
                 for (int i = 0; i < 8; i++) {
                     double angle = (Math.PI * 2 * i / 8.0) + (elapsed * 0.08);
@@ -655,9 +708,36 @@ public class RedlineAltar implements Listener {
         World world = center.getWorld();
         if (world == null) return;
 
+        // The ritual ends in an explosion at the spear (purely visual —
+        // no block or player damage), with a red shockwave rolling outward
+        Location boomAt = spearDisplay.isValid() ? spearDisplay.getLocation() : center.clone().add(0.5, 2.55, 0.5);
+        world.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 2.0f, 0.9f);
+        world.spawnParticle(Particle.EXPLOSION_EMITTER, boomAt, 6, 0.4, 0.4, 0.4, 0.0);
+        world.spawnParticle(Particle.EXPLOSION, boomAt, 20, 0.6, 0.6, 0.6, 0.0);
+        world.spawnParticle(Particle.FLAME, boomAt, 40, 0.5, 0.5, 0.5, 0.05);
+        new BukkitRunnable() {
+            int step = 0;
+
+            @Override
+            public void run() {
+                double radius = 0.6 + step * 0.9;
+                if (radius > 6.0) {
+                    cancel();
+                    return;
+                }
+                for (int i = 0; i < 28; i++) {
+                    double angle = Math.PI * 2 * i / 28.0;
+                    Location p = center.clone().add(0.5 + Math.cos(angle) * radius, 1.1, 0.5 + Math.sin(angle) * radius);
+                    world.spawnParticle(Particle.DUST, p, 1, 0.0, 0.0, 0.0, 0.0, BEAM_DUST);
+                }
+                step++;
+            }
+        }.runTaskTimer(plugin, 0L, 2L);
+
         for (ItemDisplay display : displays) {
             if (!display.isValid()) continue;
             world.spawnParticle(Particle.POOF, display.getLocation(), 6, 0.2, 0.2, 0.2, 0.02);
+            world.spawnParticle(Particle.EXPLOSION, display.getLocation(), 2, 0.15, 0.15, 0.15, 0.0);
             display.remove();
         }
         if (spearDisplay.isValid()) spearDisplay.remove();

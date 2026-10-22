@@ -8,6 +8,12 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
+- **Redline Altar upgrade ritual (2026-10-21):** a dropper ringed by exactly 8 chiseled
+  stone bricks pedestals is an altar. Load the recipe (4x Dragon's Breath corners, Heavy
+  Core top, 2x Netherite Ingots sides, Ghast Tear bottom, base Redline center) and close
+  the dropper: items appear on the pedestals, red beams stream into the center spear,
+  and after the ritual (`upgrading.redline-altar` config: enabled, ritual-duration,
+  start/complete sounds) the upgraded spear drops at the center for the player.
 - **Celerity Boots: freeze duration on the action bar + block system (2026-10-19):**
   the freeze duration now shows as `❄ 6s` next to the `⏳` cooldown on the action bar;
   boots also gain the block system (new `armor.mythical-boots.block-rate`/`block-power`

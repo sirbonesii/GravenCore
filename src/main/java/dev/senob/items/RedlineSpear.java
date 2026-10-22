@@ -206,7 +206,7 @@ public class RedlineSpear implements Listener, CustomItem {
         return Material.NETHERITE_SWORD;
     }
 
-    private int getRedlineTier(ItemStack item) {
+    public int getRedlineTier(ItemStack item) {
         if (item == null || !item.hasItemMeta()) return 0;
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return 0;

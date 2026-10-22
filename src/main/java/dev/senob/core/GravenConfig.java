@@ -23,6 +23,16 @@ public class GravenConfig {
     public static double REDLINE_LAUNCH_VELOCITY;
     public static boolean REDLINE_PIERCE_BLOCKS;
 
+    // --- REDLINE ALTAR (upgrading) ---
+    public static boolean REDLINE_ALTAR_ENABLED;
+    public static double REDLINE_ALTAR_RITUAL_DURATION;
+    public static String REDLINE_ALTAR_START_SOUND;
+    public static float REDLINE_ALTAR_START_VOLUME;
+    public static float REDLINE_ALTAR_START_PITCH;
+    public static String REDLINE_ALTAR_COMPLETE_SOUND;
+    public static float REDLINE_ALTAR_COMPLETE_VOLUME;
+    public static float REDLINE_ALTAR_COMPLETE_PITCH;
+
     // --- DRACULA PLATE ---
     public static long DRACULA_COOLDOWN;
     public static long DRACULA_DURATION;
@@ -98,6 +108,7 @@ public class GravenConfig {
         REDLINE_ATTACK_SPEED = config.getDouble("weapons.redline.attack-speed", 0.87);
         REDLINE_LAUNCH_VELOCITY = config.getDouble("weapons.redline.launch-velocity", 2.85);
         REDLINE_PIERCE_BLOCKS = config.getBoolean("weapons.redline.pierce-blocks", true);
+        loadRedlineAltar(config);
 
         // 3. DRACULA PLATE
         DRACULA_COOLDOWN = config.getLong("weapons.dracula.cooldown", 30L);
@@ -125,6 +136,20 @@ public class GravenConfig {
         loadMythicalPiece(config, "chestplate", 8.0);
         loadMythicalPiece(config, "leggings", 6.0);
         loadMythicalPiece(config, "boots", 3.0);
+    }
+
+    private static void loadRedlineAltar(FileConfiguration config) {
+        String base = "upgrading.redline-altar";
+        REDLINE_ALTAR_ENABLED = config.getBoolean(base + ".enabled", true);
+        REDLINE_ALTAR_RITUAL_DURATION = config.getDouble(base + ".ritual-duration", 5.0);
+        String[] s = readSoundList(config, base + ".sound-effects.start");
+        REDLINE_ALTAR_START_SOUND = s[0];
+        REDLINE_ALTAR_START_VOLUME = Float.parseFloat(s[1]);
+        REDLINE_ALTAR_START_PITCH = Float.parseFloat(s[2]);
+        String[] c = readSoundList(config, base + ".sound-effects.complete");
+        REDLINE_ALTAR_COMPLETE_SOUND = c[0];
+        REDLINE_ALTAR_COMPLETE_VOLUME = Float.parseFloat(c[1]);
+        REDLINE_ALTAR_COMPLETE_PITCH = Float.parseFloat(c[2]);
     }
 
     private static void loadDraculaBlockSound(FileConfiguration config) {

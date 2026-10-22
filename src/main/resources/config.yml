@@ -170,5 +170,25 @@ armor:
         - 100
         - 1.9
 
+# --- Upgrading ---
+upgrading:
+  # Redline Altar: put the upgrade recipe in a dropper ringed by 8 chiseled
+  # stone bricks pedestals, then close the dropper to start the ritual.
+  # Recipe: 4x Dragon's Breath (corners), Heavy Core (top), 2x Netherite Ingot
+  # (sides), Ghast Tear (bottom), base Redline spear (center).
+  redline-altar:
+    enabled: true
+    ritual-duration: 5.0   # seconds the ritual takes
+    # Sound effects: [sound-name, volume, pitch]
+    sound-effects:
+      start:
+        - minecraft:block.beacon.activate
+        - 100
+        - 0.8
+      complete:
+        - minecraft:entity.player.levelup
+        - 100
+        - 1.0
+
 # --- Retired keys (kept for reference, not read by the code) ---
 # use-animation: "spear"   # old first-person right-click animation key

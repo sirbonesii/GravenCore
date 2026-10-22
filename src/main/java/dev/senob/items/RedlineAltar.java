@@ -3,14 +3,17 @@ package dev.senob.items;
 import dev.senob.GravenCore;
 import dev.senob.core.GravenConfig;
 import dev.senob.core.GravenTheme;
-import dev.senob.guis.CustomGUI;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.TileState;
 import org.bukkit.entity.Display;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
@@ -18,13 +21,19 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
@@ -41,14 +50,18 @@ import java.util.Set;
 /**
  * Redline Altar — upgrades a base Redline spear to the upgraded version.
  *
- * A dropper ringed by 8 lodestone pedestals is an altar. Right-clicking the
- * dropper opens the REDLINE bench GUI: placing the correct ingredient in a
- * slot locks it in (lime pane, and the item appears on the matching
- * pedestal); a wrong item flashes the slot red and is not taken. Locked
- * items are stored in the dropper itself and can be clicked back out. When
- * all 9 slots are locked, the ritual starts: red beams stream from the
- * pedestal items into the center spear, a beam shoots skyward, and the
- * upgraded spear drops at the center.
+ * A dropper ringed by 8 lodestone pedestals is an altar. The bench is the
+ * dropper's own vanilla UI — no custom inventory, no custom title — so items
+ * are placed, shift-clicked, dragged and taken out exactly like a normal
+ * dropper. Whenever an item sitting in a slot is the correct ingredient for
+ * that slot, the altar locks it in: the item itself is stored in the dropper
+ * block's persistent data (so it survives restarts) and the slot shows a
+ * green glass pane in its place, with the ingredient appearing on the
+ * matching pedestal. Wrong items are left completely untouched, like any
+ * dropper. Clicking a green pane with an empty hand takes the stored item
+ * back out. When all 9 slots are locked, the ritual starts: red beams stream
+ * from the pedestal items into the center spear, a beam shoots skyward, and
+ * the upgraded spear drops at the center.
  *
  * Recipe layout:
  *   [dragon breath] [heavy core]   [dragon breath]
@@ -64,8 +77,6 @@ public class RedlineAltar implements Listener {
     };
     /** Dropper slot for each compass sector (0=N, 1=NE, 2=E, ... 7=NW). */
     private static final int[] SLOT_BY_COMPASS = {1, 2, 5, 8, 7, 6, 3, 0};
-    /** GUI slot for each recipe slot (3x3 centered in a 27-slot inventory). */
-    private static final int[] GUI_SLOTS = {3, 4, 5, 12, 13, 14, 21, 22, 23};
     private static final Material PEDESTAL_BLOCK = Material.LODESTONE;
     /** Preview/ritual display key for the center spear (pedestals use compass 0-7). */
     private static final int CENTER_KEY = 8;
@@ -76,6 +87,7 @@ public class RedlineAltar implements Listener {
     /** Live pedestal displays per altar center, keyed by compass sector / CENTER_KEY. */
     private final Map<Location, Map<Integer, ItemDisplay>> previews = new HashMap<>();
     private final Map<Location, List<Location>> pedestalCache = new HashMap<>();
+    private final Set<Location> reconcilePending = new HashSet<>();
 
     public RedlineAltar(GravenCore plugin, RedlineSpear redlineSpear) {
         this.plugin = plugin;
@@ -83,10 +95,10 @@ public class RedlineAltar implements Listener {
         plugin.getLogger().info("Redline Altar module initialized!");
     }
 
-    // --- Bench GUI ---------------------------------------------------------------
+    // --- Bench (the dropper's own vanilla inventory) ------------------------------
 
     @EventHandler
-    public void onBenchInteract(PlayerInteractEvent event) {
+    public void onAltarInteract(PlayerInteractEvent event) {
         if (!GravenConfig.REDLINE_ALTAR_ENABLED) return;
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         if (event.getHand() != EquipmentSlot.HAND) return;
@@ -97,103 +109,225 @@ public class RedlineAltar implements Listener {
             event.setCancelled(true);
             return;
         }
-        List<Location> pedestals = findPedestals(center);
-        if (pedestals.isEmpty()) return; // not an altar: vanilla dropper behavior
-        pedestalCache.put(center, pedestals);
-        event.setCancelled(true);
-
-        Player player = event.getPlayer();
+        if (pedestalsFor(center).isEmpty()) return; // not an altar: vanilla dropper behavior
         syncPreview(center);
-        if (isRecipeComplete(center)) {
-            startRitualFromBench(player, center);
-            return;
+        if (readStored(center).size() == 9) {
+            // Recipe already complete (e.g. finished before a restart):
+            // right-clicking starts the ritual instead of opening the dropper
+            event.setCancelled(true);
+            startRitualFromDropper(event.getPlayer(), center);
         }
-        openBench(player, center);
+        // Otherwise do nothing: the vanilla dropper opens, with its default title
     }
 
-    private void openBench(Player player, Location center) {
-        CustomGUI gui = new CustomGUI(27, GravenTheme.parse("<dark_red><bold>REDLINE</bold></dark_red>"));
-        gui.fillBackground(makePane(Material.BLACK_STAINED_GLASS_PANE, " "));
+    @EventHandler
+    public void onDropperOpen(InventoryOpenEvent event) {
+        if (!GravenConfig.REDLINE_ALTAR_ENABLED) return;
+        Location center = altarLocation(event.getInventory());
+        if (center == null || pedestalsFor(center).isEmpty()) return;
+        // Lock in anything already sitting in the right slots
+        if (event.getPlayer() instanceof Player player) scheduleReconcile(center, player);
+    }
+
+    @EventHandler
+    public void onDropperClick(InventoryClickEvent event) {
+        if (!GravenConfig.REDLINE_ALTAR_ENABLED) return;
+        Inventory top = event.getView().getTopInventory();
+        Location center = altarLocation(top);
+        if (center == null || pedestalsFor(center).isEmpty()) return;
+        if (activeAltars.contains(center)) {
+            event.setCancelled(true);
+            return;
+        }
+        Player player = (event.getWhoClicked() instanceof Player p) ? p : null;
+
+        if (event.getClick() == ClickType.DOUBLE_CLICK) {
+            // A double-click could collect the green lock panes like real items
+            if (!readStored(center).isEmpty()) event.setCancelled(true);
+            return;
+        }
+
+        Inventory clicked = event.getClickedInventory();
+        if (clicked != null && clicked.equals(top)) {
+            int slot = event.getSlot();
+            Map<Integer, ItemStack> stored = readStored(center);
+            if (stored.containsKey(slot)) {
+                // Locked slot: the green pane is a marker, not an item.
+                // An empty-hand click takes the stored ingredient back out;
+                // anything else is blocked so the pane can't be moved.
+                event.setCancelled(true);
+                ItemStack cursor = (player != null) ? player.getItemOnCursor() : null;
+                if (player != null && (cursor == null || cursor.getType() == Material.AIR)) {
+                    unlock(center, slot, player, stored);
+                }
+                return;
+            }
+            // Any other change to the dropper contents: check for lock-ins after it lands
+            scheduleReconcile(center, player);
+        } else if (event.isShiftClick() && clicked != null) {
+            // Shift-clicking from the player's inventory moves items into the dropper
+            scheduleReconcile(center, player);
+        }
+    }
+
+    @EventHandler
+    public void onDropperDrag(InventoryDragEvent event) {
+        if (!GravenConfig.REDLINE_ALTAR_ENABLED) return;
+        Inventory top = event.getView().getTopInventory();
+        Location center = altarLocation(top);
+        if (center == null || pedestalsFor(center).isEmpty()) return;
+        if (activeAltars.contains(center)) {
+            event.setCancelled(true);
+            return;
+        }
+        Map<Integer, ItemStack> stored = readStored(center);
+        boolean touchesTop = false;
+        for (int raw : event.getRawSlots()) {
+            if (raw < top.getSize()) {
+                touchesTop = true;
+                if (stored.containsKey(raw)) {
+                    event.setCancelled(true); // never drag across a locked pane
+                    return;
+                }
+            }
+        }
+        if (touchesTop) {
+            scheduleReconcile(center, (event.getWhoClicked() instanceof Player p) ? p : null);
+        }
+    }
+
+    @EventHandler
+    public void onHopperMove(InventoryMoveItemEvent event) {
+        if (!GravenConfig.REDLINE_ALTAR_ENABLED) return;
+        Location dest = altarLocation(event.getDestination());
+        if (dest != null && !pedestalsFor(dest).isEmpty() && !activeAltars.contains(dest)) {
+            scheduleReconcile(dest, null);
+        }
+        Location src = altarLocation(event.getSource());
+        if (src != null && !pedestalsFor(src).isEmpty()
+                && event.getItem().getType() == Material.GREEN_STAINED_GLASS_PANE
+                && !readStored(src).isEmpty()) {
+            event.setCancelled(true); // hoppers can't pull the lock panes out
+        }
+    }
+
+    /** Schedules a one-tick-later check of the dropper contents (once per altar). */
+    private void scheduleReconcile(Location center, Player player) {
+        if (!reconcilePending.add(center)) return;
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            reconcilePending.remove(center);
+            reconcile(center, player);
+        }, 1L);
+    }
+
+    /**
+     * Locks in every correct ingredient currently sitting in the dropper:
+     * one of the item is stored in the altar and its slot becomes a green
+     * pane (any excess of a stack is dropped back out at the altar). Wrong
+     * items are left exactly as they are. Starts the ritual on the 9th lock.
+     */
+    private void reconcile(Location center, Player player) {
+        if (activeAltars.contains(center)) return;
+        Inventory inv = dropperInventory(center);
+        if (inv == null) return;
+        Map<Integer, ItemStack> stored = readStored(center);
+        boolean lockedAny = false;
         for (int r = 0; r < 9; r++) {
-            renderSlot(gui, center, r);
-        }
-        gui.open(player);
-    }
-
-    /** Renders a recipe slot as an empty (green), locked (lime), or stored-junk slot. */
-    private void renderSlot(CustomGUI gui, Location center, int recipeSlot) {
-        Inventory dropper = dropperInventory(center);
-        ItemStack stored = (dropper != null) ? dropper.getItem(recipeSlot) : null;
-        ItemStack display;
-        if (stored == null) {
-            display = makePane(Material.GREEN_STAINED_GLASS_PANE,
-                    "<gray>Place: </gray><white>" + ingredientName(recipeSlot) + "</white>");
-        } else if (isCorrectForSlot(recipeSlot, stored)) {
-            display = makePane(Material.LIME_STAINED_GLASS_PANE,
-                    "<green>✔ " + ingredientName(recipeSlot) + "</green>");
-        } else {
-            display = stored.clone(); // junk stored before it was an altar: show it, click to reclaim
-        }
-        final int slot = recipeSlot;
-        gui.setItem(GUI_SLOTS[recipeSlot], display, event -> handleRecipeClick(event, center, gui, slot));
-    }
-
-    private void handleRecipeClick(InventoryClickEvent event, Location center, CustomGUI gui, int recipeSlot) {
-        if (!(event.getWhoClicked() instanceof Player player)) return;
-        Inventory dropper = dropperInventory(center);
-        if (dropper == null) return;
-        ItemStack stored = dropper.getItem(recipeSlot);
-        ItemStack cursor = player.getItemOnCursor();
-
-        if (stored != null) {
-            // Occupied slot: empty hand takes the item back out
-            if (cursor == null || cursor.getType() == Material.AIR) {
-                dropper.setItem(recipeSlot, null);
-                Map<Integer, ItemStack> leftover = player.getInventory().addItem(stored);
-                for (ItemStack extra : leftover.values()) {
-                    player.getWorld().dropItemNaturally(player.getLocation(), extra);
+            if (stored.containsKey(r)) {
+                ItemStack cur = inv.getItem(r);
+                if (cur == null || cur.getType() != Material.GREEN_STAINED_GLASS_PANE) {
+                    inv.setItem(r, lockPane(r)); // pane went missing: restore the marker
                 }
-                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
-                renderSlot(gui, center, recipeSlot);
-                syncPreview(center);
+                continue;
             }
-            return;
+            ItemStack item = inv.getItem(r);
+            if (item == null || item.getType() == Material.AIR) continue;
+            if (!isCorrectForSlot(r, item)) continue; // wrong item: vanilla, left alone
+            ItemStack one = item.clone();
+            one.setAmount(1);
+            stored.put(r, one);
+            if (item.getAmount() > 1) {
+                ItemStack excess = item.clone();
+                excess.setAmount(item.getAmount() - 1);
+                World world = center.getWorld();
+                if (world != null) world.dropItemNaturally(center.clone().add(0.5, 1.2, 0.5), excess);
+            }
+            inv.setItem(r, lockPane(r));
+            lockedAny = true;
         }
-
-        if (cursor == null || cursor.getType() == Material.AIR) return;
-
-        if (isCorrectForSlot(recipeSlot, cursor)) {
-            // Lock one of the item into the bench (the rest stay on the cursor)
-            ItemStack locked = cursor.clone();
-            locked.setAmount(1);
-            dropper.setItem(recipeSlot, locked);
-            if (cursor.getAmount() <= 1) player.setItemOnCursor(null);
-            else cursor.setAmount(cursor.getAmount() - 1);
-            player.playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f, 1.4f);
-            renderSlot(gui, center, recipeSlot);
+        if (lockedAny) {
+            writeStored(center, stored);
+            World world = center.getWorld();
+            if (world != null) world.playSound(center, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f, 1.4f);
             syncPreview(center);
-            if (isRecipeComplete(center)) {
-                player.closeInventory();
-                startRitualFromBench(player, center);
-            }
-        } else {
-            // Wrong item: red flash, and the item is never taken
-            if (recipeSlot == 4 && redlineSpear.getRedlineTier(cursor) >= 2) {
-                player.sendMessage(GravenTheme.prefix().append(
-                        GravenTheme.parse("<red>That Redline is already upgraded.</red>")));
-            }
-            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-            gui.setItem(GUI_SLOTS[recipeSlot],
-                    makePane(Material.RED_STAINED_GLASS_PANE, "<red>✗ Wrong item</red>"),
-                    click -> handleRecipeClick(click, center, gui, recipeSlot));
-            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                Inventory d = dropperInventory(center);
-                if (d != null && d.getItem(recipeSlot) == null) {
-                    renderSlot(gui, center, recipeSlot);
-                }
-            }, 20L);
+        }
+        if (stored.size() == 9) {
+            Player starter = (player != null) ? player : firstViewer(inv);
+            for (HumanEntity viewer : new ArrayList<>(inv.getViewers())) viewer.closeInventory();
+            startRitualFromDropper(starter, center);
         }
     }
+
+    /** Takes a locked ingredient back out of the altar and returns it to the player. */
+    private void unlock(Location center, int slot, Player player, Map<Integer, ItemStack> stored) {
+        ItemStack item = stored.remove(slot);
+        if (item == null) return;
+        Inventory inv = dropperInventory(center);
+        if (inv != null) inv.setItem(slot, null);
+        writeStored(center, stored);
+        Map<Integer, ItemStack> leftover = player.getInventory().addItem(item);
+        for (ItemStack extra : leftover.values()) {
+            player.getWorld().dropItemNaturally(player.getLocation(), extra);
+        }
+        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
+        syncPreview(center);
+    }
+
+    private static Player firstViewer(Inventory inv) {
+        for (HumanEntity viewer : inv.getViewers()) {
+            if (viewer instanceof Player player) return player;
+        }
+        return null;
+    }
+
+    // --- Locked-item storage (in the dropper block's persistent data) ---------------
+
+    private NamespacedKey slotKey(int recipeSlot) {
+        return new NamespacedKey(plugin, "altar_slot_" + recipeSlot);
+    }
+
+    /** Reads the ingredients locked into the altar, keyed by recipe slot. */
+    private Map<Integer, ItemStack> readStored(Location center) {
+        Map<Integer, ItemStack> stored = new HashMap<>();
+        if (center.getBlock().getState() instanceof TileState tile) {
+            PersistentDataContainer pdc = tile.getPersistentDataContainer();
+            for (int r = 0; r < 9; r++) {
+                byte[] bytes = pdc.get(slotKey(r), PersistentDataType.BYTE_ARRAY);
+                if (bytes == null) continue;
+                try {
+                    stored.put(r, ItemStack.deserializeBytes(bytes));
+                } catch (Exception ignored) {
+                    // Corrupt entry: treat the slot as unlocked
+                }
+            }
+        }
+        return stored;
+    }
+
+    /** Persists the locked ingredients. Call after the inventory edits they belong to. */
+    private void writeStored(Location center, Map<Integer, ItemStack> stored) {
+        if (center.getBlock().getState() instanceof TileState tile) {
+            PersistentDataContainer pdc = tile.getPersistentDataContainer();
+            for (int r = 0; r < 9; r++) {
+                ItemStack item = stored.get(r);
+                if (item == null) pdc.remove(slotKey(r));
+                else pdc.set(slotKey(r), PersistentDataType.BYTE_ARRAY, item.serializeAsBytes());
+            }
+            tile.update(true);
+        }
+    }
+
+    // --- Recipe helpers ---------------------------------------------------------------
 
     private static String ingredientName(int recipeSlot) {
         return switch (recipeSlot) {
@@ -206,11 +340,12 @@ public class RedlineAltar implements Listener {
         };
     }
 
-    private static ItemStack makePane(Material material, String name) {
-        ItemStack pane = new ItemStack(material);
+    /** The green pane that replaces a locked-in ingredient in the dropper. */
+    private static ItemStack lockPane(int recipeSlot) {
+        ItemStack pane = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
         ItemMeta meta = pane.getItemMeta();
         if (meta != null) {
-            meta.displayName(GravenTheme.parse(name));
+            meta.displayName(GravenTheme.parse("<green>✔ " + ingredientName(recipeSlot) + "</green>"));
             pane.setItemMeta(meta);
         }
         return pane;
@@ -222,18 +357,25 @@ public class RedlineAltar implements Listener {
         return item.getType() == SLOT_MATERIALS[recipeSlot];
     }
 
-    private boolean isRecipeComplete(Location center) {
-        Inventory dropper = dropperInventory(center);
-        if (dropper == null) return false;
-        for (int r = 0; r < 9; r++) {
-            if (!isCorrectForSlot(r, dropper.getItem(r))) return false;
+    private List<Location> pedestalsFor(Location center) {
+        List<Location> cached = pedestalCache.get(center);
+        if (cached != null && !cached.isEmpty()) return cached;
+        List<Location> found = findPedestals(center);
+        if (!found.isEmpty()) pedestalCache.put(center, found);
+        return found;
+    }
+
+    /** The altar location behind a block inventory, or null for other inventories. */
+    private static Location altarLocation(Inventory inv) {
+        if (inv.getHolder() instanceof BlockState state && state.getType() == Material.DROPPER) {
+            return state.getLocation();
         }
-        return true;
+        return null;
     }
 
     // --- Pedestal preview ----------------------------------------------------------
 
-    /** Mirrors the bench's stored items onto the pedestals around it. */
+    /** Mirrors the altar's locked-in items onto the pedestals around it. */
     private void syncPreview(Location center) {
         if (activeAltars.contains(center)) return;
         if (center.getBlock().getType() != Material.DROPPER) {
@@ -243,19 +385,17 @@ public class RedlineAltar implements Listener {
         List<Location> pedestals = pedestalCache.computeIfAbsent(center, this::findPedestals);
         if (pedestals.isEmpty()) return;
 
-        Inventory inv = dropperInventory(center);
-        if (inv == null) return;
-
+        Map<Integer, ItemStack> stored = readStored(center);
         Map<Integer, ItemDisplay> shown = previews.computeIfAbsent(center, k -> new HashMap<>());
         World world = center.getWorld();
         if (world == null) return;
 
         for (int compass = 0; compass < 8; compass++) {
-            ItemStack item = inv.getItem(SLOT_BY_COMPASS[compass]);
+            ItemStack item = stored.get(SLOT_BY_COMPASS[compass]);
             Location at = pedestals.get(compass).clone().add(0.5, 1.7, 0.5);
             reconcile(shown, compass, at, item);
         }
-        ItemStack spear = inv.getItem(4);
+        ItemStack spear = stored.get(4);
         ItemStack spearShown = (spear != null && redlineSpear.getRedlineTier(spear) >= 1) ? spear : null;
         reconcile(shown, CENTER_KEY, center.clone().add(0.5, 2.0, 0.5), spearShown);
     }
@@ -311,6 +451,30 @@ public class RedlineAltar implements Listener {
         Block block = event.getBlock();
         if (block.getType() == Material.DROPPER) {
             Location center = block.getLocation();
+            // Drop the real contents — locked ingredients and any loose items —
+            // and clear the inventory so the green lock panes never drop as items
+            Map<Integer, ItemStack> stored = readStored(center);
+            Inventory inv = dropperInventory(center);
+            List<ItemStack> drops = new ArrayList<>();
+            if (inv != null) {
+                for (int r = 0; r < 9; r++) {
+                    ItemStack locked = stored.get(r);
+                    if (locked != null) drops.add(locked.clone());
+                    ItemStack cur = inv.getItem(r);
+                    boolean isPane = locked != null && cur != null
+                            && cur.getType() == Material.GREEN_STAINED_GLASS_PANE;
+                    if (cur != null && !isPane) drops.add(cur);
+                }
+                inv.clear();
+            } else {
+                for (ItemStack locked : stored.values()) drops.add(locked.clone());
+            }
+            World world = center.getWorld();
+            if (world != null) {
+                for (ItemStack drop : drops) {
+                    world.dropItemNaturally(center.clone().add(0.5, 0.5, 0.5), drop);
+                }
+            }
             clearPreviews(center);
             pedestalCache.remove(center);
         } else if (block.getType() == PEDESTAL_BLOCK) {
@@ -325,24 +489,28 @@ public class RedlineAltar implements Listener {
 
     // --- Ritual ----------------------------------------------------------------------
 
-    /** Consumes the completed recipe from the bench and starts the ritual. */
-    private void startRitualFromBench(Player player, Location center) {
-        Inventory dropper = dropperInventory(center);
-        if (dropper == null) return;
-        List<Location> pedestals = pedestalCache.getOrDefault(center, List.of());
-        if (pedestals.isEmpty()) pedestals = findPedestals(center);
+    /** Consumes the completed recipe from the altar and starts the ritual. */
+    private void startRitualFromDropper(Player player, Location center) {
+        Map<Integer, ItemStack> stored = readStored(center);
+        if (stored.size() < 9) return;
+        List<Location> pedestals = pedestalsFor(center);
         if (pedestals.isEmpty()) {
-            player.sendMessage(GravenTheme.prefix().append(
-                    GravenTheme.parse("<red>The altar is incomplete — the dropper needs exactly 8 lodestone pedestals around it.</red>")));
+            if (player != null) {
+                player.sendMessage(GravenTheme.prefix().append(
+                        GravenTheme.parse("<red>The altar is incomplete — the dropper needs exactly 8 lodestone pedestals around it.</red>")));
+            }
             return;
         }
 
         // Snapshot the ring items in compass order so each ingredient appears
         // on the pedestal matching its recipe position
         List<ItemStack> ringItems = new ArrayList<>();
-        for (int slot : SLOT_BY_COMPASS) ringItems.add(dropper.getItem(slot).clone());
-        ItemStack spearItem = dropper.getItem(4).clone();
-        dropper.clear();
+        for (int slot : SLOT_BY_COMPASS) ringItems.add(stored.get(slot).clone());
+        ItemStack spearItem = stored.get(4).clone();
+
+        Inventory dropper = dropperInventory(center);
+        if (dropper != null) dropper.clear(); // removes the green lock panes
+        writeStored(center, Map.of());
 
         // The ritual takes over the live preview displays
         Map<Integer, ItemDisplay> adopted = previews.remove(center);
@@ -393,7 +561,7 @@ public class RedlineAltar implements Listener {
 
         world.playSound(center, GravenConfig.REDLINE_ALTAR_START_SOUND,
                 GravenConfig.REDLINE_ALTAR_START_VOLUME, GravenConfig.REDLINE_ALTAR_START_PITCH);
-        if (player.isOnline()) {
+        if (player != null && player.isOnline()) {
             player.sendMessage(GravenTheme.prefix().append(
                     GravenTheme.parse("<aqua>The altar awakens — the ritual begins!</aqua>")));
         }
@@ -498,14 +666,14 @@ public class RedlineAltar implements Listener {
         Item dropped = world.dropItem(dropAt, redlineSpear.createRedlineSpear(2));
         dropped.setVelocity(new Vector(0, 0, 0));
         dropped.setGlowing(true);
-        dropped.setOwner(player.getUniqueId());
+        dropped.setOwner(player != null ? player.getUniqueId() : null);
         dropped.setPickupDelay(10);
 
         world.playSound(center, GravenConfig.REDLINE_ALTAR_COMPLETE_SOUND,
                 GravenConfig.REDLINE_ALTAR_COMPLETE_VOLUME, GravenConfig.REDLINE_ALTAR_COMPLETE_PITCH);
         world.spawnParticle(Particle.FIREWORK, dropAt, 30, 0.4, 0.4, 0.4, 0.15);
 
-        if (player.isOnline()) {
+        if (player != null && player.isOnline()) {
             player.sendMessage(GravenTheme.prefix().append(
                     GravenTheme.parse("<green>Your Redline has ascended to the <bold>Upgraded</bold> version!</green>")));
         }

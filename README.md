@@ -9,13 +9,14 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 
 #### Added
 - **Redline Altar upgrade ritual (2026-10-21):** a dropper ringed by exactly 8 lodestone
-  pedestals is an altar. Right-clicking the dropper opens the REDLINE bench GUI: place
-  the recipe (4x Dragon's Breath corners, Heavy Core top, 2x Netherite Ingots sides,
-  Ghast Tear bottom, base Redline center) slot by slot — a correct item locks in (lime
-  pane) and appears on the matching pedestal, a wrong item flashes the slot red and is
-  not taken, and locked items can be clicked back out (they are stored in the dropper
-  itself). When all 9 slots lock, the ritual starts: red beams stream from the pedestal
-  items into the center spear under a tall vertical beam, and after the ritual
+  pedestals is an altar. The bench is the dropper's own vanilla UI (no custom GUI):
+  place the recipe (4x Dragon's Breath corners, Heavy Core top, 2x Netherite Ingots
+  sides, Ghast Tear bottom, base Redline center) slot by slot like a normal dropper —
+  a correct item locks in (it is stored in the dropper block itself, its slot becomes
+  a green glass pane, and it appears on the matching pedestal), wrong items are left
+  untouched like any dropper, and locked items can be clicked back out. When all 9
+  slots lock, the ritual starts: red beams stream from the pedestal items into the
+  center spear under a tall vertical beam, and after the ritual
   (`upgrading.redline-altar` config: enabled, ritual-duration, start/complete sounds)
   the upgraded spear drops at the center for the player.
 - **Celerity Boots: freeze duration on the action bar + block system (2026-10-19):**

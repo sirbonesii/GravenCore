@@ -500,12 +500,16 @@ public class RedlineAltar implements Listener {
             // planted on the altar. Scale 1.0 = exactly the size it has in
             // a player's hand. The old point-down pose carried a +0.12 Z
             // counter-translation measured for the flipped frame; that
-            // offset does not carry over to the upright pose, so the
-            // translation starts at zero and gets re-measured from a
-            // screenshot of the upright spear (judged by its base).
+            // offset does not carry over to the upright pose.
+            // Upright-pose offset (Aaron, 2026-10-22): shift the spear
+            // 0.125 (2 model pixels) toward its ribbon side. The shift
+            // lives in the display's local frame, so it follows the
+            // spear as it spins — it stays ribbon-side at every angle.
+            // Ribbon side measured as local -Z from his screenshot; if
+            // it lands mirrored, flip the sign.
             disp.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.THIRDPERSON_RIGHTHAND);
             disp.setTransformation(new Transformation(
-                    new Vector3f(0.0f, 0.0f, 0.0f), new Quaternionf(),
+                    new Vector3f(0.0f, 0.0f, -0.125f), new Quaternionf(),
                     new Vector3f(1.0f, 1.0f, 1.0f), new Quaternionf()));
         });
     }

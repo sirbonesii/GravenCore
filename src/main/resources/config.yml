@@ -217,6 +217,15 @@ upgrading:
     # upgraded spear spawns at the end of the ritual
     spawn-sound: true
 
+    # Position offset of the planted spear display, in blocks
+    # (16 model pixels = 1 block, so 0.125 = 2 pixels). The axes
+    # are relative to the spear's own facing — the offset turns
+    # with it as it spins: x sideways, y up/down, z forward/back.
+    spear-offset:
+      x: -0.125
+      y: 0.0
+      z: 0.0
+
     sound-effects:
       start:
         sound: "minecraft:block.beacon.activate"

@@ -500,11 +500,15 @@ public class RedlineAltar implements Listener {
             // planted on the altar. Scale 1.0 = exactly the size it has in
             // a player's hand. The old point-down pose carried a +0.12 Z
             // counter-translation measured for the flipped frame; that
-            // offset does not carry over to the upright pose. Aaron's
-            // offset for the upright pose: -0.125 on X (2 model pixels).
+            // offset does not carry over to the upright pose. The
+            // upright offset comes from config
+            // (upgrading.redline-altar.spear-offset; default -0.125 on
+            // X = 2 model pixels sideways).
             disp.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.THIRDPERSON_RIGHTHAND);
             disp.setTransformation(new Transformation(
-                    new Vector3f(-0.125f, 0.0f, 0.0f), new Quaternionf(),
+                    new Vector3f((float) GravenConfig.REDLINE_ALTAR_SPEAR_OFFSET_X,
+                            (float) GravenConfig.REDLINE_ALTAR_SPEAR_OFFSET_Y,
+                            (float) GravenConfig.REDLINE_ALTAR_SPEAR_OFFSET_Z), new Quaternionf(),
                     new Vector3f(1.0f, 1.0f, 1.0f), new Quaternionf()));
         });
     }

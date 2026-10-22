@@ -35,6 +35,9 @@ public class GravenConfig {
     // --- REDLINE ALTAR (upgrading) ---
     public static boolean REDLINE_ALTAR_ENABLED;
     public static double REDLINE_ALTAR_RITUAL_DURATION;
+    public static double REDLINE_ALTAR_SPEAR_OFFSET_X;
+    public static double REDLINE_ALTAR_SPEAR_OFFSET_Y;
+    public static double REDLINE_ALTAR_SPEAR_OFFSET_Z;
     public static String REDLINE_ALTAR_START_SOUND;
     public static float REDLINE_ALTAR_START_VOLUME;
     public static float REDLINE_ALTAR_START_PITCH;
@@ -190,6 +193,9 @@ public class GravenConfig {
         String base = "upgrading.redline-altar";
         REDLINE_ALTAR_ENABLED = config.getBoolean(base + ".enabled", true);
         REDLINE_ALTAR_RITUAL_DURATION = config.getDouble(base + ".ritual-duration", 10.0);
+        REDLINE_ALTAR_SPEAR_OFFSET_X = config.getDouble(base + ".spear-offset.x", -0.125);
+        REDLINE_ALTAR_SPEAR_OFFSET_Y = config.getDouble(base + ".spear-offset.y", 0.0);
+        REDLINE_ALTAR_SPEAR_OFFSET_Z = config.getDouble(base + ".spear-offset.z", 0.0);
         REDLINE_ALTAR_SPAWN_SOUND = config.getBoolean(base + ".spawn-sound", true);
         String[] s = readSoundList(config, base + ".sound-effects.start");
         REDLINE_ALTAR_START_SOUND = s[0];

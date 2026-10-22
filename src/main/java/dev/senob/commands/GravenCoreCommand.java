@@ -3,10 +3,12 @@ package dev.senob.commands;
 import dev.senob.GravenCore;
 import dev.senob.core.GravenConfig;
 import dev.senob.core.GravenTheme;
+import dev.senob.items.AlterOfDespair;
 import dev.senob.items.DraculaPlate;
 import dev.senob.items.MythicalArmorSet;
 import dev.senob.items.CelerityBoots;
 import dev.senob.items.RedlineSpear;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -35,13 +37,15 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
     private final DraculaPlate draculaPlate;
     private final MythicalArmorSet mythicalArmorSet;
     private final CelerityBoots celerityBoots;
+    private final AlterOfDespair alterOfDespair;
 
-    public GravenCoreCommand(GravenCore plugin, RedlineSpear redlineSpear, DraculaPlate draculaPlate, MythicalArmorSet mythicalArmorSet, CelerityBoots celerityBoots) {
+    public GravenCoreCommand(GravenCore plugin, RedlineSpear redlineSpear, DraculaPlate draculaPlate, MythicalArmorSet mythicalArmorSet, CelerityBoots celerityBoots, AlterOfDespair alterOfDespair) {
         this.plugin = plugin;
         this.redlineSpear = redlineSpear;
         this.draculaPlate = draculaPlate;
         this.mythicalArmorSet = mythicalArmorSet;
         this.celerityBoots = celerityBoots;
+        this.alterOfDespair = alterOfDespair;
     }
 
     @Override
@@ -52,7 +56,36 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 0) {
-            sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore <armor|weapon|config|reload></red>"));
+            sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore <armor|weapon|config|reload|packreload></red>"));
+            return true;
+        }
+
+        // --- ALTER LOGIC ---
+        // Username-first form: /gravencore <username> alter [count]
+        if (args.length >= 2 && args[1].equalsIgnoreCase("alter")) {
+            Player target = Bukkit.getPlayer(args[0]);
+            if (target == null) {
+                sender.sendMessage(GravenTheme.parse("<red>Player '" + args[0] + "' is not online.</red>"));
+                return true;
+            }
+            int count = 1;
+            if (args.length >= 3) {
+                try {
+                    count = Integer.parseInt(args[2]);
+                } catch (NumberFormatException e) {
+                    sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore <username> alter [count]</red>"));
+                    return true;
+                }
+            }
+            count = Math.max(1, Math.min(64, count));
+            Map<Integer, ItemStack> leftover =
+                    target.getInventory().addItem(alterOfDespair.createAlterItem(count));
+            for (ItemStack drop : leftover.values()) {
+                target.getWorld().dropItemNaturally(target.getLocation(), drop);
+            }
+            sender.sendMessage(GravenTheme.parse("<green>You have given <white>" + target.getName()
+                    + "</white> a <color:#F8F854>Alter of Despair</color> x" + count + ".</green>"));
+            target.sendMessage(GravenTheme.parse("<green>You have received a <color:#F8F854>Alter of Despair</color> x" + count + ".</green>"));
             return true;
         }
 
@@ -140,6 +173,28 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                     + "</white> a <color:" + weaponColor + "><italic>" + weaponLabel + "</italic></color>.</green>"));
             target.sendMessage(GravenTheme.parse("<green>You have received a <color:" + weaponColor + "><italic>"
                     + weaponLabel + "</italic></color>.</green>"));
+            return true;
+        }
+
+        // --- PACK RELOAD LOGIC ---
+        if (args[0].equalsIgnoreCase("packreload")) {
+            String url = GravenConfig.RESOURCE_PACK_URL;
+            String sha1 = GravenConfig.RESOURCE_PACK_SHA1;
+            if (url == null || url.isBlank() || sha1 == null || !sha1.matches("[0-9a-fA-F]{40}")) {
+                sender.sendMessage(GravenTheme.prefix().append(GravenTheme.parse(
+                        "<red>Resource pack isn't configured — set resource-pack.url and a valid 40-character resource-pack.sha1 in the config, then /gravencore reload.</red>")));
+                return true;
+            }
+            Component prompt = (GravenConfig.RESOURCE_PACK_PROMPT == null || GravenConfig.RESOURCE_PACK_PROMPT.isBlank())
+                    ? null : GravenTheme.parse(GravenConfig.RESOURCE_PACK_PROMPT);
+            int sent = 0;
+            for (Player online : Bukkit.getOnlinePlayers()) {
+                if (prompt != null) online.sendResourcePack(url, sha1, GravenConfig.RESOURCE_PACK_REQUIRED, prompt);
+                else online.sendResourcePack(url, sha1, GravenConfig.RESOURCE_PACK_REQUIRED);
+                sent++;
+            }
+            sender.sendMessage(GravenTheme.prefix().append(GravenTheme.parse(
+                    "<green>Resource pack sent to " + sent + " player(s) — they'll download and apply it now.</green>")));
             return true;
         }
 
@@ -321,9 +376,14 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String @NotNull [] args) {
-        if (args.length == 1) return List.of("armor", "weapon", "config", "reload");
+        if (args.length == 1) return List.of("armor", "weapon", "config", "reload", "packreload");
 
         if (args.length == 2) {
+            if (!args[0].equalsIgnoreCase("armor") && !args[0].equalsIgnoreCase("weapon")
+                    && !args[0].equalsIgnoreCase("config") && !args[0].equalsIgnoreCase("reload")
+                    && !args[0].equalsIgnoreCase("packreload")) {
+                return List.of("alter");
+            }
             if (args[0].equalsIgnoreCase("armor") || args[0].equalsIgnoreCase("weapon")) {
                 List<String> names = new ArrayList<>();
                 for (Player online : Bukkit.getOnlinePlayers()) names.add(online.getName());

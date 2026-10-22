@@ -8,14 +8,29 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
+- **Alter of Despair (2026-10-22):** new placeable altar dropper, given with
+  `/gravencore <username> alter [count]` (username-first form, count defaults
+  to 1, clamped 1–64). The dropper item carries the name in the red shake
+  color (#F8F854) and a PDC marker; placing it spawns the glinting
+  crafting-table ItemDisplay inside the dropper's block (enchantment glint
+  override, display scale and forced brightness from the new `alter` config
+  section), and breaking the dropper removes the display and drops a fresh
+  alter item so the cycle survives. It composes with the Redline Altar: the
+  dropper is still the ritual bench, just with the display over it.
+- **`/gravencore packreload` (2026-10-22):** pushes the server resource pack to
+  every online player live — no server restart, no relog. The pack URL, SHA1,
+  required flag and prompt text live in the new `resource-pack` config section
+  (update the SHA1 after each MinePack upload, `/gravencore reload`, then
+  `/gravencore packreload`). The command refuses to send when the URL is unset
+  or the SHA1 isn't a valid 40-character hash.
 - **Redline Altar upgrade ritual (2026-10-21):** a dropper ringed by exactly 8 lodestone
   pedestals is an altar. The bench is the dropper's own vanilla UI (no custom GUI):
   place the recipe (4x Dragon's Breath corners, Heavy Core top, 2x Netherite Ingots
   sides, Ghast Tear bottom, base Redline center) slot by slot like a normal dropper —
   a correct item locks in — a deep creaking sound plays to nearby players (it is stored in the dropper block itself, its slot becomes
   a green glass pane, and it appears spinning on the matching pedestal — the spear
-  itself sticks point-down into the dropper using its big in-hand model, also
-  spinning), wrong items are left untouched like any dropper, and locked items
+  itself stands on the dropper using its big in-hand model, tip to the sky,
+  also spinning), wrong items are left untouched like any dropper, and locked items
   can be clicked back out. The altar never sends chat messages. When all 9
   slots lock, lightning strikes the altar, a flame circle bursts from the
   spear and expands outward across the ground, and the ritual starts: the

@@ -215,5 +215,31 @@ upgrading:
         - 100
         - 0.1
 
+# --- Alter of Despair ---
+# Given with /gravencore <username> alter [count]. Placing the dropper
+# spawns the glinting crafting-table display inside its block.
+alter:
+  # Scale of the crafting-table display (1.0 = exactly one block; 1.01
+  # gives it a hair of overhang so it never z-fights the dropper)
+  display-scale: 1.01
+  # Forced brightness of the display, 0-15 each. It sits inside a solid
+  # block, so without this it renders at light level 0. Sky-only (block 0)
+  # lights it like an outdoor object.
+  brightness-block: 0
+  brightness-sky: 15
+  # Enchantment glint on the displayed crafting table
+  glint: true
+
+# --- Server resource pack (MinePack) ---
+# /gravencore packreload pushes this pack to every online player, live.
+# After uploading a new pack zip, paste the new sha1 here, then run
+# /gravencore reload followed by /gravencore packreload.
+resource-pack:
+  url: "https://cdn.minepack.fr/pack/1ef10c4b-7437-48f6-b8e4-f6fa9c10f096"
+  sha1: "c3380d60410150e53fdee12c6b2bcbcbeab835d"
+  # true = players who decline the pack get disconnected
+  required: false
+  prompt: "Pack hosted by minepack.fr for free"
+
 # --- Retired keys (kept for reference, not read by the code) ---
 # use-animation: "spear"   # old first-person right-click animation key

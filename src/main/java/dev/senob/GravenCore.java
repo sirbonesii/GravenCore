@@ -6,6 +6,7 @@ import dev.senob.core.CooldownManager;
 import dev.senob.core.GravenConfig;
 import dev.senob.guis.GUIManager;
 import dev.senob.home_system.HomeSystem;
+import dev.senob.items.AlterOfDespair;
 import dev.senob.items.DraculaPlate;
 import dev.senob.items.ItemManager;
 import dev.senob.items.MythicalArmorSet;
@@ -50,6 +51,7 @@ public class GravenCore extends JavaPlugin {
         DraculaPlate draculaPlate = new DraculaPlate(this, cooldownManager);
         MythicalArmorSet mythicalArmorSet = new MythicalArmorSet(this);
         CelerityBoots celerityBoots = new CelerityBoots(this, cooldownManager);
+        AlterOfDespair alterOfDespair = new AlterOfDespair(this);
 
         itemManager.registerItem(redlineSpear);
         itemManager.registerItem(draculaPlate);
@@ -67,9 +69,10 @@ public class GravenCore extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(celerityBoots, this);
         Bukkit.getPluginManager().registerEvents(new RedlineAltar(this, redlineSpear), this);
         Bukkit.getPluginManager().registerEvents(new EnchantSyncListener(this, draculaPlate, mythicalArmorSet, celerityBoots), this);
+        Bukkit.getPluginManager().registerEvents(alterOfDespair, this);
 
         // 4. Register Command Router
-        GravenCoreCommand gravencoreCmd = new GravenCoreCommand(this, redlineSpear, draculaPlate, mythicalArmorSet, celerityBoots);
+        GravenCoreCommand gravencoreCmd = new GravenCoreCommand(this, redlineSpear, draculaPlate, mythicalArmorSet, celerityBoots, alterOfDespair);
         Objects.requireNonNull(getCommand("gravencore")).setExecutor(gravencoreCmd);
         Objects.requireNonNull(getCommand("gravencore")).setTabCompleter(gravencoreCmd);
 

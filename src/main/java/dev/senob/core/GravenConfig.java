@@ -43,6 +43,18 @@ public class GravenConfig {
     public static float REDLINE_ALTAR_LOCK_PITCH;
     public static boolean REDLINE_ALTAR_SPAWN_SOUND;
 
+    // Resource pack (/gravencore packreload)
+    public static String RESOURCE_PACK_URL;
+    public static String RESOURCE_PACK_SHA1;
+    public static boolean RESOURCE_PACK_REQUIRED;
+    public static String RESOURCE_PACK_PROMPT;
+
+    // Alter of Despair (placeable altar dropper)
+    public static double ALTER_DISPLAY_SCALE;
+    public static int ALTER_BRIGHTNESS_BLOCK;
+    public static int ALTER_BRIGHTNESS_SKY;
+    public static boolean ALTER_GLINT;
+
     // --- DRACULA PLATE ---
     public static long DRACULA_COOLDOWN;
     public static long DRACULA_DURATION;
@@ -124,6 +136,8 @@ public class GravenConfig {
         REDLINE_CHARGE_VOLUME = Float.parseFloat(charge[1]);
         REDLINE_CHARGE_PITCH = Float.parseFloat(charge[2]);
         loadRedlineAltar(config);
+        loadResourcePack(config);
+        loadAlter(config);
 
         // 3. DRACULA PLATE
         DRACULA_COOLDOWN = config.getLong("weapons.dracula.cooldown", 30L);
@@ -176,6 +190,20 @@ public class GravenConfig {
         REDLINE_ALTAR_LOCK_SOUND = l[0];
         REDLINE_ALTAR_LOCK_VOLUME = Float.parseFloat(l[1]);
         REDLINE_ALTAR_LOCK_PITCH = Float.parseFloat(l[2]);
+    }
+
+    private static void loadAlter(FileConfiguration config) {
+        ALTER_DISPLAY_SCALE = config.getDouble("alter.display-scale", 1.01);
+        ALTER_BRIGHTNESS_BLOCK = config.getInt("alter.brightness-block", 0);
+        ALTER_BRIGHTNESS_SKY = config.getInt("alter.brightness-sky", 15);
+        ALTER_GLINT = config.getBoolean("alter.glint", true);
+    }
+
+    private static void loadResourcePack(FileConfiguration config) {
+        RESOURCE_PACK_URL = config.getString("resource-pack.url", "");
+        RESOURCE_PACK_SHA1 = config.getString("resource-pack.sha1", "");
+        RESOURCE_PACK_REQUIRED = config.getBoolean("resource-pack.required", false);
+        RESOURCE_PACK_PROMPT = config.getString("resource-pack.prompt", "");
     }
 
     private static void loadDraculaBlockSound(FileConfiguration config) {

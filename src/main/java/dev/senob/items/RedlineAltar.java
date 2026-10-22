@@ -495,19 +495,17 @@ public class RedlineAltar implements Listener {
             disp.setTeleportDuration(2);
             // THIRDPERSON_RIGHTHAND renders the spear's big in-hand 3D model
             // (the one an armor stand or player holds) instead of the flat
-            // frame/dropped model; the half-turn around X flips that held
-            // pose point-down so the spear sticks down into the altar.
-            // Scale 1.0 = exactly the size it has in a player's hand.
-            // The hand pose renders the spear shifted off the display's
-            // origin: measured from Aaron's top-down calibration screenshot
-            // (2026-10-21, F3 north / pitch 90, yaw locked at 0), the pose
-            // offset is ~0.12 blocks toward the model's own -Z. The
-            // translation below cancels it — because the shift lives in
-            // the same rotating frame as the hand offset, the spear stays
-            // centered at every spin angle instead of orbiting the dropper.
+            // frame/dropped model. No flip (Aaron, 2026-10-22): the spear
+            // stands in its natural held orientation, tip to the sky, butt
+            // planted on the altar. Scale 1.0 = exactly the size it has in
+            // a player's hand. The old point-down pose carried a +0.12 Z
+            // counter-translation measured for the flipped frame; that
+            // offset does not carry over to the upright pose, so the
+            // translation starts at zero and gets re-measured from a
+            // screenshot of the upright spear (judged by its base).
             disp.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.THIRDPERSON_RIGHTHAND);
             disp.setTransformation(new Transformation(
-                    new Vector3f(0.0f, 0.0f, 0.12f), new Quaternionf().rotateX((float) Math.PI),
+                    new Vector3f(0.0f, 0.0f, 0.0f), new Quaternionf(),
                     new Vector3f(1.0f, 1.0f, 1.0f), new Quaternionf()));
         });
     }

@@ -172,13 +172,13 @@ armor:
 
 # --- Upgrading ---
 upgrading:
-  # Redline Altar: put the upgrade recipe in a dropper ringed by 8 lodestone
-  # pedestals, then close the dropper to start the ritual.
+  # Redline Altar: right-click a dropper ringed by 8 lodestone pedestals to
+  # open the REDLINE bench GUI and lock in the upgrade recipe.
   # Recipe: 4x Dragon's Breath (corners), Heavy Core (top), 2x Netherite Ingot
   # (sides), Ghast Tear (bottom), base Redline spear (center).
   redline-altar:
     enabled: true
-    ritual-duration: 5.0   # seconds the ritual takes
+    ritual-duration: 10.0   # seconds the ritual takes
     # Sound effects: [sound-name, volume, pitch]
     sound-effects:
       start:

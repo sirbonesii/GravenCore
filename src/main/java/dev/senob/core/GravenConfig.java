@@ -141,7 +141,7 @@ public class GravenConfig {
     private static void loadRedlineAltar(FileConfiguration config) {
         String base = "upgrading.redline-altar";
         REDLINE_ALTAR_ENABLED = config.getBoolean(base + ".enabled", true);
-        REDLINE_ALTAR_RITUAL_DURATION = config.getDouble(base + ".ritual-duration", 5.0);
+        REDLINE_ALTAR_RITUAL_DURATION = config.getDouble(base + ".ritual-duration", 10.0);
         String[] s = readSoundList(config, base + ".sound-effects.start");
         REDLINE_ALTAR_START_SOUND = s[0];
         REDLINE_ALTAR_START_VOLUME = Float.parseFloat(s[1]);

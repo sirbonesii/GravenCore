@@ -15,7 +15,10 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   them with a green `[👻] Vanished` tag on their nameplate and a short
   green `[👻]` after their name in the TAB list. The vanished player gets a repeating green action-bar
   reminder ("You are [👻] Vanished"). State is stored in the player's PDC
-  so it survives relogs. For the TAB plugin (which formats the list
+  so it survives relogs. Advancement announcements are suppressed while
+  vanished — the broadcast would name the player (with the team-suffix
+  tag rendered in chat). Mobs never target a vanished player (any mob
+  already chasing them drops the target the moment they vanish). For the TAB plugin (which formats the list
   itself), GravenCore registers a PlaceholderAPI expansion when PAPI is
   installed: `%gravencore_vanish%` returns `&a[👻]` while vanished and
   nothing otherwise — append it to the name format in TAB's config.

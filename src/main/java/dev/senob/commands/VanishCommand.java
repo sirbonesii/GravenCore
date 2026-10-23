@@ -11,6 +11,8 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -131,6 +133,24 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
     }
 
     @EventHandler
+    public void onEntityTarget(EntityTargetEvent event) {
+        // Mobs never acquire a vanished player as their target — for
+        // any reason, including retaliation if the player hits them
+        if (event.getTarget() instanceof Player target && isVanished(target)) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onAdvancementDone(PlayerAdvancementDoneEvent event) {
+        // A vanished player's advancements are not announced: the
+        // broadcast would give them away, and it renders their name
+        // with the vanish team's suffix — the [👻] Vanished tag —
+        // included. Setting the message to null suppresses it.
+        if (isVanished(event.getPlayer())) event.message(null);
+    }
+
+    @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player joiner = event.getPlayer();
         // Re-apply the joiner's own vanish if it persisted from last session
@@ -165,6 +185,14 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
 
     private void applyVanish(Player target) {
         vanished.add(target.getUniqueId());
+        // Anything already chasing the player drops them immediately
+        for (org.bukkit.World world : Bukkit.getWorlds()) {
+            for (org.bukkit.entity.LivingEntity entity : world.getLivingEntities()) {
+                if (entity instanceof org.bukkit.entity.Mob mob && target.equals(mob.getTarget())) {
+                    mob.setTarget(null);
+                }
+            }
+        }
         for (Player viewer : Bukkit.getOnlinePlayers()) {
             if (viewer != target && !viewer.hasPermission("gravencore.admin")) {
                 viewer.hidePlayer(plugin, target);

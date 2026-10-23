@@ -193,9 +193,9 @@ public class GravenConfig {
         String base = "upgrading.redline-altar";
         REDLINE_ALTAR_ENABLED = config.getBoolean(base + ".enabled", true);
         REDLINE_ALTAR_RITUAL_DURATION = config.getDouble(base + ".ritual-duration", 10.0);
-        REDLINE_ALTAR_SPEAR_OFFSET_X = config.getDouble(base + ".spear-offset.x", -0.125);
+        REDLINE_ALTAR_SPEAR_OFFSET_X = config.getDouble(base + ".spear-offset.x", 0.0);
         REDLINE_ALTAR_SPEAR_OFFSET_Y = config.getDouble(base + ".spear-offset.y", 0.0);
-        REDLINE_ALTAR_SPEAR_OFFSET_Z = config.getDouble(base + ".spear-offset.z", 0.0);
+        REDLINE_ALTAR_SPEAR_OFFSET_Z = config.getDouble(base + ".spear-offset.z", 0.120);
         REDLINE_ALTAR_SPAWN_SOUND = config.getBoolean(base + ".spawn-sound", true);
         String[] s = readSoundList(config, base + ".sound-effects.start");
         REDLINE_ALTAR_START_SOUND = s[0];

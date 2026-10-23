@@ -222,9 +222,9 @@ upgrading:
     # are relative to the spear's own facing — the offset turns
     # with it as it spins: x sideways, y up/down, z forward/back.
     spear-offset:
-      x: -0.125
+      x: 0.0
       y: 0.0
-      z: 0.0
+      z: 0.120
 
     sound-effects:
       start:

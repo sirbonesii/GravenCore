@@ -502,8 +502,8 @@ public class RedlineAltar implements Listener {
             // counter-translation measured for the flipped frame; that
             // offset does not carry over to the upright pose. The
             // upright offset comes from config
-            // (upgrading.redline-altar.spear-offset; default -0.125 on
-            // X = 2 model pixels sideways).
+            // (upgrading.redline-altar.spear-offset; Aaron's measured
+            // default is 0.120 on Z, x/y at 0).
             disp.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.THIRDPERSON_RIGHTHAND);
             disp.setTransformation(new Transformation(
                     new Vector3f((float) GravenConfig.REDLINE_ALTAR_SPEAR_OFFSET_X,

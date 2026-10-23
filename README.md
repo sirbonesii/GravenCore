@@ -196,8 +196,8 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - **Altar spear position is configurable (2026-10-22):** the planted
   spear's display offset on the Redline Altar is now
   `upgrading.redline-altar.spear-offset` (x / y / z, in blocks, relative
-  to the spear's own facing; defaults -0.125 / 0 / 0), so its position
-  can be tuned live without a code change.
+  to the spear's own facing; defaults 0 / 0 / 0.120, Aaron's measured
+  values), so its position can be tuned live without a code change.
 - **Sound config format (2026-10-22):** sound effects in config.yml are
   now written as `sound:` / `volume:` / `pitch:` maps instead of
   `[name, volume, pitch]` lists (the mixed-type lists tripped IDE type

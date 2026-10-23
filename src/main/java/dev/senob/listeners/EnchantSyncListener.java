@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.inventory.PrepareGrindstoneEvent;
@@ -35,6 +36,13 @@ import org.bukkit.persistence.PersistentDataType;
  * the moment its enchantments change instead: it re-runs the piece's own
  * sync, but only when the section is actually stale, and it preserves a
  * player-given display name (anvil rename) across the re-sync.
+ *
+ * The /enchant command fires no Bukkit event at all, so two extra nets
+ * cover it: a command hook refreshes the sender's held piece a tick after
+ * an /enchant command, and a slow sweep (every 2 seconds) re-checks every
+ * online player's inventory and armor, catching console-issued commands
+ * and any other path that changes enchantments silently. The sweep is
+ * cheap: refresh() no-ops unless a custom piece's section is stale.
  */
 public class EnchantSyncListener implements Listener {
 
@@ -55,6 +63,27 @@ public class EnchantSyncListener implements Listener {
         this.draculaKey = new NamespacedKey(plugin, "dracula_plate");
         this.mythicalKey = new NamespacedKey(plugin, "mythical_armor");
         this.bootsKey = new NamespacedKey(plugin, "mythical_boots");
+
+        // Catch-all sweep for the paths with no event (see class docs)
+        plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+            for (Player player : plugin.getServer().getOnlinePlayers()) {
+                for (ItemStack item : player.getInventory().getContents()) {
+                    refresh(item);
+                }
+            }
+        }, 40L, 40L);
+    }
+
+    @EventHandler
+    public void onCommand(PlayerCommandPreprocessEvent event) {
+        // /enchant changes the held item silently; refresh it a tick
+        // later, once the command has applied the enchantment
+        String message = event.getMessage().toLowerCase(java.util.Locale.ROOT);
+        if (message.startsWith("/enchant ") || message.startsWith("/minecraft:enchant ")) {
+            Player player = event.getPlayer();
+            plugin.getServer().getScheduler().runTaskLater(plugin,
+                    () -> refresh(player.getInventory().getItemInMainHand()), 1L);
+        }
     }
 
     @EventHandler

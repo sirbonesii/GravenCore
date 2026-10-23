@@ -194,6 +194,13 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
 
 #### Changed
+- **Enchantments section stays live after /enchant (2026-10-22):** the
+  vanilla /enchant command fires no Bukkit event, so a piece enchanted
+  that way kept its old tooltip until a /gravencore reload. The enchant
+  sync listener now also refreshes the sender's held piece a tick after
+  an /enchant command, and sweeps every online player's inventory and
+  armor every 2 seconds for stale sections (console commands and any
+  other silent path included).
 - **Altar spear position is configurable (2026-10-22):** the planted
   spear's display offset on the Redline Altar is now
   `upgrading.redline-altar.spear-offset` (x / y / z, in blocks, relative

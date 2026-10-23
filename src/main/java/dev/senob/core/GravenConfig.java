@@ -102,6 +102,23 @@ public class GravenConfig {
     /** Piece id -> [defense, toughness, knockback-resistance]. */
     public static Map<String, double[]> MYTHICAL_PIECES;
 
+    // --- TIERED ARMOR SETS (Legendary / Epic / Rare / Uncommon / Common) ---
+    /** Stats for one tiered armor set, loaded from armor.<tierId>.*. */
+    public static class ArmorTierStats {
+        public String tier;
+        public int durability;
+        public double blockRate;
+        public double blockPower;
+        public String blockSound;
+        public float blockVolume;
+        public float blockPitch;
+        /** Piece id -> [defense, toughness, knockback-resistance]. */
+        public final Map<String, double[]> pieces = new LinkedHashMap<>();
+    }
+
+    /** Tier id -> stats, for the five TieredArmorSet tiers. */
+    public static final Map<String, ArmorTierStats> ARMOR_TIERS = new LinkedHashMap<>();
+
     // --- MYTHICAL BOOTS (standalone item, not part of the set) ---
     public static String MYTHICAL_BOOTS_TIER;
     public static int MYTHICAL_BOOTS_DURABILITY;
@@ -192,6 +209,52 @@ public class GravenConfig {
         loadMythicalPiece(config, "chestplate", 8.0);
         loadMythicalPiece(config, "leggings", 6.0);
         loadMythicalPiece(config, "boots", 3.0);
+
+        // 5. TIERED ARMOR SETS — the ladder under Mythical (45% block):
+        // Legendary 35, Epic 25, Rare 15, Uncommon 10, Common 5.
+        // Piece defaults are [defense (per piece), toughness, kb-resist].
+        loadArmorTier(config, "legendary", 1024, 35.0, 3.0,
+                new double[]{3.0, 2.0, 0.0}, new double[]{8.0, 2.0, 0.0},
+                new double[]{6.0, 2.0, 0.0}, new double[]{3.0, 2.0, 0.0});
+        loadArmorTier(config, "epic", 512, 25.0, 2.0,
+                new double[]{2.0, 1.0, 0.0}, new double[]{6.0, 1.0, 0.0},
+                new double[]{5.0, 1.0, 0.0}, new double[]{2.0, 1.0, 0.0});
+        loadArmorTier(config, "rare", 256, 15.0, 1.5,
+                new double[]{2.0, 0.0, 0.0}, new double[]{5.0, 0.0, 0.0},
+                new double[]{4.0, 0.0, 0.0}, new double[]{1.0, 0.0, 0.0});
+        loadArmorTier(config, "uncommon", 128, 10.0, 1.0,
+                new double[]{2.0, 0.0, 0.0}, new double[]{5.0, 0.0, 0.0},
+                new double[]{3.0, 0.0, 0.0}, new double[]{1.0, 0.0, 0.0});
+        loadArmorTier(config, "common", 64, 5.0, 0.5,
+                new double[]{1.0, 0.0, 0.0}, new double[]{3.0, 0.0, 0.0},
+                new double[]{2.0, 0.0, 0.0}, new double[]{1.0, 0.0, 0.0});
+    }
+
+    private static void loadArmorTier(FileConfiguration config, String id,
+                                      int durability, double blockRate, double blockPower,
+                                      double[] helmet, double[] chestplate,
+                                      double[] leggings, double[] boots) {
+        String base = "armor." + id;
+        ArmorTierStats stats = new ArmorTierStats();
+        stats.tier = config.getString(base + ".tier", id);
+        stats.durability = config.getInt(base + ".durability", durability);
+        stats.blockRate = config.getDouble(base + ".block-rate", blockRate);
+        stats.blockPower = config.getDouble(base + ".block-power", blockPower);
+        String[] s = readSoundList(config, base + ".sound-effects.block");
+        stats.blockSound = s[0];
+        stats.blockVolume = Float.parseFloat(s[1]);
+        stats.blockPitch = Float.parseFloat(s[2]);
+        String[] pieceIds = {"helmet", "chestplate", "leggings", "boots"};
+        double[][] defaults = {helmet, chestplate, leggings, boots};
+        for (int i = 0; i < pieceIds.length; i++) {
+            String pieceBase = base + ".pieces." + pieceIds[i];
+            stats.pieces.put(pieceIds[i], new double[]{
+                    config.getDouble(pieceBase + ".defense", defaults[i][0]),
+                    config.getDouble(pieceBase + ".toughness", defaults[i][1]),
+                    config.getDouble(pieceBase + ".knockback-resistance", defaults[i][2])
+            });
+        }
+        ARMOR_TIERS.put(id, stats);
     }
 
     private static void loadRedlineAltar(FileConfiguration config) {

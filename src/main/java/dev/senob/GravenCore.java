@@ -12,12 +12,14 @@ import dev.senob.items.AlterOfDespair;
 import dev.senob.items.DraculaPlate;
 import dev.senob.items.ItemManager;
 import dev.senob.items.MythicalArmorSet;
+import dev.senob.items.TieredArmorSet;
 import dev.senob.items.CelerityBoots;
 import dev.senob.items.RedlineAltar;
 import dev.senob.items.RedlineSpear;
 import dev.senob.listeners.AttributeHider;
 import dev.senob.listeners.EnchantSyncListener;
 import dev.senob.listeners.CombatLogger;
+import dev.senob.listeners.ArmorCraftListener;
 import dev.senob.listeners.DurabilityLoreListener;
 import dev.senob.listeners.EnderChestEx;
 import org.bukkit.Bukkit;
@@ -52,29 +54,36 @@ public class GravenCore extends JavaPlugin {
         RedlineSpear redlineSpear = new RedlineSpear(this, cooldownManager);
         DraculaPlate draculaPlate = new DraculaPlate(this, cooldownManager);
         MythicalArmorSet mythicalArmorSet = new MythicalArmorSet(this);
+        TieredArmorSet tieredArmorSet = new TieredArmorSet(this);
         CelerityBoots celerityBoots = new CelerityBoots(this, cooldownManager);
         AlterOfDespair alterOfDespair = new AlterOfDespair(this);
 
         itemManager.registerItem(redlineSpear);
         itemManager.registerItem(draculaPlate);
         itemManager.registerItem(mythicalArmorSet);
+        itemManager.registerItem(tieredArmorSet);
         itemManager.registerItem(celerityBoots);
 
         DurabilityLoreListener durabilityLore = new DurabilityLoreListener(this);
         durabilityLore.track(mythicalArmorSet.idKey());
+        for (TieredArmorSet.Tier tier : TieredArmorSet.Tier.values()) {
+            durabilityLore.track(tieredArmorSet.idKey(tier.id()));
+        }
         durabilityLore.track(celerityBoots.idKey());
         Bukkit.getPluginManager().registerEvents(durabilityLore, this);
 
         // Internal standard listeners for items
         Bukkit.getPluginManager().registerEvents(redlineSpear, this);
         Bukkit.getPluginManager().registerEvents(mythicalArmorSet, this);
+        Bukkit.getPluginManager().registerEvents(tieredArmorSet, this);
         Bukkit.getPluginManager().registerEvents(celerityBoots, this);
         Bukkit.getPluginManager().registerEvents(new RedlineAltar(this, redlineSpear), this);
-        Bukkit.getPluginManager().registerEvents(new EnchantSyncListener(this, draculaPlate, mythicalArmorSet, celerityBoots), this);
+        Bukkit.getPluginManager().registerEvents(new EnchantSyncListener(this, draculaPlate, mythicalArmorSet, celerityBoots, tieredArmorSet), this);
+        Bukkit.getPluginManager().registerEvents(new ArmorCraftListener(tieredArmorSet), this);
         Bukkit.getPluginManager().registerEvents(alterOfDespair, this);
 
         // 4. Register Command Router
-        GravenCoreCommand gravencoreCmd = new GravenCoreCommand(this, redlineSpear, draculaPlate, mythicalArmorSet, celerityBoots, alterOfDespair);
+        GravenCoreCommand gravencoreCmd = new GravenCoreCommand(this, redlineSpear, draculaPlate, mythicalArmorSet, celerityBoots, alterOfDespair, tieredArmorSet);
         Objects.requireNonNull(getCommand("gravencore")).setExecutor(gravencoreCmd);
         Objects.requireNonNull(getCommand("gravencore")).setTabCompleter(gravencoreCmd);
 

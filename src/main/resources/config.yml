@@ -113,6 +113,161 @@ armor:
         toughness: 3.0
         knockback-resistance: 0.1
 
+  legendary:
+    tier: "legendary"
+
+    durability: 1024
+    block-rate: 35.0
+    block-power: 3.0
+
+    sound-effects:
+      block:
+        sound: "minecraft:block.anvil.land"
+        volume: 100
+        pitch: 1.9
+
+    pieces:
+      helmet:
+        defense: 3.0
+        toughness: 2.0
+        knockback-resistance: 0.0
+      chestplate:
+        defense: 8.0
+        toughness: 2.0
+        knockback-resistance: 0.0
+      leggings:
+        defense: 6.0
+        toughness: 2.0
+        knockback-resistance: 0.0
+      boots:
+        defense: 3.0
+        toughness: 2.0
+        knockback-resistance: 0.0
+
+  epic:
+    tier: "epic"
+
+    durability: 512
+    block-rate: 25.0
+    block-power: 2.0
+
+    sound-effects:
+      block:
+        sound: "minecraft:block.anvil.land"
+        volume: 100
+        pitch: 1.9
+
+    pieces:
+      helmet:
+        defense: 2.0
+        toughness: 1.0
+        knockback-resistance: 0.0
+      chestplate:
+        defense: 6.0
+        toughness: 1.0
+        knockback-resistance: 0.0
+      leggings:
+        defense: 5.0
+        toughness: 1.0
+        knockback-resistance: 0.0
+      boots:
+        defense: 2.0
+        toughness: 1.0
+        knockback-resistance: 0.0
+
+  rare:
+    tier: "rare"
+
+    durability: 256
+    block-rate: 15.0
+    block-power: 1.5
+
+    sound-effects:
+      block:
+        sound: "minecraft:block.anvil.land"
+        volume: 100
+        pitch: 1.9
+
+    pieces:
+      helmet:
+        defense: 2.0
+        toughness: 0.0
+        knockback-resistance: 0.0
+      chestplate:
+        defense: 5.0
+        toughness: 0.0
+        knockback-resistance: 0.0
+      leggings:
+        defense: 4.0
+        toughness: 0.0
+        knockback-resistance: 0.0
+      boots:
+        defense: 1.0
+        toughness: 0.0
+        knockback-resistance: 0.0
+
+  uncommon:
+    tier: "uncommon"
+
+    durability: 128
+    block-rate: 10.0
+    block-power: 1.0
+
+    sound-effects:
+      block:
+        sound: "minecraft:block.anvil.land"
+        volume: 100
+        pitch: 1.9
+
+    pieces:
+      helmet:
+        defense: 2.0
+        toughness: 0.0
+        knockback-resistance: 0.0
+      chestplate:
+        defense: 5.0
+        toughness: 0.0
+        knockback-resistance: 0.0
+      leggings:
+        defense: 3.0
+        toughness: 0.0
+        knockback-resistance: 0.0
+      boots:
+        defense: 1.0
+        toughness: 0.0
+        knockback-resistance: 0.0
+
+  common:
+    tier: "common"
+
+    durability: 64
+    block-rate: 5.0
+    block-power: 0.5
+
+    sound-effects:
+      block:
+        sound: "minecraft:block.anvil.land"
+        volume: 100
+        pitch: 1.9
+
+    pieces:
+      helmet:
+        defense: 1.0
+        toughness: 0.0
+        knockback-resistance: 0.0
+      chestplate:
+        defense: 3.0
+        toughness: 0.0
+        knockback-resistance: 0.0
+      leggings:
+        defense: 2.0
+        toughness: 0.0
+        knockback-resistance: 0.0
+      boots:
+        defense: 1.0
+        toughness: 0.0
+        knockback-resistance: 0.0
+
   # ==========================================================
   #   Armor — Celerity Boots (standalone, not part of the set)
   # ==========================================================

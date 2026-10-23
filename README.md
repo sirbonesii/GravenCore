@@ -8,6 +8,25 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
+- **Tiered armor sets (2026-10-22):** five new armor tiers under Mythical,
+  all sharing its exact mechanics (Mythical tooltip chrome, real attribute
+  modifiers with per-item PDC overrides, Enchantments section, live
+  durability lore, enchant sync, and the block system with the best worn
+  piece proccing — pieces from different tiers can be mixed): **Legendary**
+  (diamond, 35% block / 3.0 power, toughness 2.0, 1024 durability),
+  **Epic** (iron, 25% / 2.0, toughness 1.0, 512), **Rare** (chainmail,
+  15% / 1.5, 256), **Uncommon** (gold, 10% / 1.0, 128) and **Common**
+  (leather, 5% / 0.5, 64); each set uses its material's vanilla defense
+  spread. Each tier's tooltip line uses its own client text-effect color
+  (lava, iterating jump, blinking, green-yellow gradient, sequential
+  spin). Given with `/gravencore armor <username>
+  <legendary|epic|rare|uncommon|common>`, tuned globally under
+  `armor.<tier>.*` and per piece with `/gravencore config <tier>
+  <defense|toughness|kbresist|blockrate|blockpower> <value>` on the
+  held piece. Crafting a vanilla armor piece of a tiered material
+  produces the tiered piece directly (diamond crafts as Legendary, iron
+  as Epic, gold as Uncommon, leather as Common); any enchantments and
+  damage on the crafting result carry over to the converted piece.
 - **Vanish (2026-10-22):** new `/vanish [player]` and `/unvanish [player]`
   commands (permission gravencore.admin, player-name tab completion). A
   vanished player is hidden from every non-admin player (entity and

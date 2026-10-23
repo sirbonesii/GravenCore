@@ -1,5 +1,5 @@
 name: GravenCore
-version: 1.5.5
+version: 1.7.5
 main: dev.senob.GravenCore
 api-version: '1.21'
 description: Core server plugin including the Modules.
@@ -45,7 +45,9 @@ commands:
     description: Make a player invisible to non-admin players
     usage: /vanish [player]
     permission: gravencore.admin
+    aliases: [v]
   unvanish:
     description: Make a vanished player visible again
     usage: /unvanish [player]
     permission: gravencore.admin
+    aliases: [uv]

@@ -69,20 +69,6 @@ weapons:
         volume: 100
         pitch: 0.6
 
-    # NOTE: not read by the plugin — the spear's lore is hardcoded
-    # in RedlineSpear.java. Kept here for reference only.
-    # Placeholders: <ability_damage>, <range>, <cooldown>, <creator>
-    lore:
-      - "<gray>Lunge IV</gray>"
-      - "<gray>--------------------</gray>"
-      - "<gold><bold>ABILITY</gold><gray>:</gray> <gold><bold>CRIMSON PIERCER</bold></gold>"
-      - "<gray>--------------------</gray>"
-      - "<dark_gray>• <green>Ability Damage</green><gray>:</gray> <red><ability_damage> ❤</red>"
-      - "<dark_gray>• <blue>Ability Range</blue><gray>:</gray> <yellow><range> Blocks</yellow>"
-      - "<dark_gray>• <yellow>Cooldown</yellow><gray>:</gray> <gold><cooldown>s 🔥</gold>"
-      - "<gray>--------------------</gray>"
-      - "<dark_red>✦</dark_red> <gray>Created by</gray> <gradient:#FF3B1F:#FF9E2C><italic><creator></italic></gradient>"
-
   # ==========================================================
   #   Weapons — Dracula's Plate
   # ==========================================================
@@ -256,7 +242,7 @@ alter:
   # The block the alter shows. Drives BOTH the item's model
   # (item_model, so the item looks like this block in hand and
   # inventory) and the 3D block the placed display renders.
-  block: "minecraft:crafting_table"
+  block: "minecraft:respawn_anchor"
 
   # The item's display name and its color as a MiniMessage hex
   # tag. The exact hex matters if your client animates specific
@@ -289,6 +275,6 @@ resource-pack:
   sha1: "c3380d60410150e53fdee12c6b2bcbcbeab835d"
 
   # true = players who decline the pack get disconnected
-  required: false
+  required: true
 
-  prompt: "Pack hosted by minepack.fr for free"
+  prompt: "Pack hosted by Senob"

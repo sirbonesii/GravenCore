@@ -35,7 +35,7 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   `/gravencore alter <username> [count]` (count defaults to 1, clamped 1–64). The dropper item carries the configured name and color
   (`alter.display_name` / `alter.hex_code`, default "Alter of Despair" in
   the red shake color #F8F854) and a PDC marker, and renders as the configured block
-  (`alter.block`, default `minecraft:crafting_table`) via the item_model
+  (`alter.block`, default `minecraft:respawn_anchor`) via the item_model
   component (the placed block stays a dropper); placing it spawns the glinting
   ItemDisplay of that block inside the dropper's block (enchantment glint
   override, display scale and forced brightness from the new `alter` config

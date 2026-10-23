@@ -1,10 +1,7 @@
 # ============================================================
 #   GravenCore — Configuration
 # ============================================================
-# Sound effects are written with sound:, volume: and pitch: keys,
-# the same arguments as /playsound, e.g.:
-#   /playsound minecraft:block.anvil.land player @a ~ ~ ~ 100 1.9
-# (The old [sound-name, volume, pitch] list form still parses.)
+
 
 
 # ============================================================
@@ -20,50 +17,37 @@ settings:
 # ============================================================
 weapons:
   redline:
-    # Damage dealt by a normal melee hit
     melee-damage:
       base: 5.0
       upgraded: 6.5
 
-    # Damage dealt by the Crimson Piercer beam
     ability-damage:
       base: 16.0
       upgraded: 200.0
 
-    # Range of the beam, in blocks
     ability-range:
       base: 30.0
       upgraded: 30.0
 
-    # Beam cooldown, in seconds
     cooldown:
       base: 30
       upgraded: 16
 
-    # Attack speed shown in the tooltip
     attack-speed: 0.87
-
-    # Launch speed when firing the upgraded spear.
-    # Negative is intentional: it launches the player backwards
-    # (recoil dash).
     launch-velocity: -2.85
-
-    # true = the beam passes straight through solid blocks and walls
     pierce-blocks: true
 
     sound-effects:
-      # Charge-up layer: only players within 30 blocks hear it
       charge:
         sound: "minecraft:block.end_portal_frame.fill"
         volume: 100
         pitch: 0.9
-      # Warden charge: plays on the 1st pulse of the charge-up,
-      # heard by everyone
+
       pre-fire:
         sound: "minecraft:entity.warden.sonic_charge"
         volume: 100
         pitch: 0.6
-      # Warden boom: plays as the beam fires, heard by everyone
+
       fire:
         sound: "minecraft:entity.warden.sonic_boom"
         volume: 100
@@ -73,28 +57,15 @@ weapons:
   #   Weapons — Dracula's Plate
   # ==========================================================
   dracula:
-    # Vampire's Flight cooldown and duration, in seconds
+    tier: "mythical"
     cooldown: 30
     duration: 10
 
-    # Defense and armor toughness granted by the plate
     armor: 8.0
     toughness: 3.0
-
-    # Bonus attack damage while wearing the plate
     attack-damage: 2.0
-
-    # Percent of damage dealt returned as health
     lifesteal-percent: 20.0
-
-    # Chance (%) for lifesteal to trigger on a hit
     lifesteal-chance: 85.0
-
-    # Item tier (only "mythical" exists for now)
-    tier: "mythical"
-
-    # Block system: chance (%) to block an incoming attack, and
-    # flat damage subtracted when a block triggers
     block-rate: 25.0
     block-power: 4.0
 
@@ -110,14 +81,9 @@ weapons:
 # ============================================================
 armor:
   mythical:
-    # Item tier (only "mythical" exists for now)
     tier: "mythical"
 
-    # Max durability per piece (the set is NOT unbreakable)
     durability: 2096
-
-    # Block system: chance (%) for a worn piece to block an
-    # incoming attack, and flat damage subtracted on a block
     block-rate: 45.0
     block-power: 4.0
 
@@ -151,10 +117,8 @@ armor:
   #   Armor — Celerity Boots (standalone, not part of the set)
   # ==========================================================
   mythical-boots:
-    # Item tier (only "mythical" exists for now)
     tier: "mythical"
 
-    # Max durability (the boots are NOT unbreakable)
     durability: 2096
 
     # Time Slow: shift + left-click freezes the world. Tick freeze
@@ -162,15 +126,14 @@ armor:
     # a speed boost) while everything else stops.
     time-slow:
       enabled: true
-      duration: 6.0         # seconds the world stays frozen
-      cooldown: 45          # seconds between activations
-      speed-boost: 1        # Speed level for the wearer (0 = off)
-      freeze-players: true  # also pin other players in place
-      weakness-level: 5     # Weakness level for frozen players (0 = off)
+      duration: 6.0
+      cooldown: 45
+      speed-boost: 1
+      freeze-players: true
+      weakness-level: 5
 
-    # Block system: same as the Mythical set and Dracula's Plate
-    block-rate: 25.0        # % chance to block
-    block-power: 4.0        # flat damage blocked
+    block-rate: 25.0
+    block-power: 4.0
 
     sound-effects:
       time-slow:
@@ -196,17 +159,9 @@ upgrading:
   redline-altar:
     enabled: true
 
-    # Seconds the ritual takes
     ritual-duration: 10.0
-
-    # Play minecraft:block.end_portal.spawn to everyone when the
-    # upgraded spear spawns at the end of the ritual
     spawn-sound: true
 
-    # Position offset of the planted spear display, in blocks
-    # (16 model pixels = 1 block, so 0.125 = 2 pixels). The axes
-    # are relative to the spear's own facing — the offset turns
-    # with it as it spins: x sideways, y up/down, z forward/back.
     spear-offset:
       x: 0.0
       y: 0.0
@@ -217,16 +172,17 @@ upgrading:
         sound: "minecraft:block.beacon.activate"
         volume: 100
         pitch: 0.8
+
       complete:
         sound: "minecraft:entity.player.levelup"
         volume: 100
         pitch: 1.0
-      # Played when the upgraded spear lands, 1.5s after the explosion
+
       anvil:
         sound: "minecraft:block.anvil.land"
         volume: 100
         pitch: 0.8
-      # Played to nearby players when an ingredient locks into the altar
+
       lock-in:
         sound: "minecraft:entity.creaking.spawn"
         volume: 100

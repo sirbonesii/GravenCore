@@ -256,7 +256,7 @@ alter:
   # The block the alter shows. Drives BOTH the item's model
   # (item_model, so the item looks like this block in hand and
   # inventory) and the 3D block the placed display renders.
-  block: "minecraft:crafting_table"
+  block: "minecraft:respawn_anchor"
 
   # The item's display name and its color as a MiniMessage hex
   # tag. The exact hex matters if your client animates specific

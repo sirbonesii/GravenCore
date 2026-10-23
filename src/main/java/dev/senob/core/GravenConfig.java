@@ -222,7 +222,7 @@ public class GravenConfig {
         ALTER_BRIGHTNESS_BLOCK = config.getInt("alter.brightness-block", 0);
         ALTER_BRIGHTNESS_SKY = config.getInt("alter.brightness-sky", 15);
         ALTER_GLINT = config.getBoolean("alter.glint", true);
-        ALTER_BLOCK_ID = config.getString("alter.block", "minecraft:crafting_table");
+        ALTER_BLOCK_ID = config.getString("alter.block", "minecraft:respawn_anchor");
         ALTER_DISPLAY_NAME = config.getString("alter.display_name", "Alter of Despair");
         ALTER_HEX_CODE = config.getString("alter.hex_code", "<#F8F854>");
     }
@@ -230,8 +230,8 @@ public class GravenConfig {
     /** The block the Alter of Despair shows, resolved from alter.block. */
     public static org.bukkit.Material alterBlockMaterial() {
         org.bukkit.Material mat = org.bukkit.Material.matchMaterial(
-                ALTER_BLOCK_ID != null ? ALTER_BLOCK_ID : "minecraft:crafting_table");
-        return mat != null ? mat : org.bukkit.Material.CRAFTING_TABLE;
+                ALTER_BLOCK_ID != null ? ALTER_BLOCK_ID : "minecraft:respawn_anchor");
+        return mat != null ? mat : org.bukkit.Material.RESPAWN_ANCHOR;
     }
 
     /** The item_model key for the alter item, from the same alter.block id. */
@@ -239,7 +239,7 @@ public class GravenConfig {
         org.bukkit.NamespacedKey key = ALTER_BLOCK_ID != null
                 ? org.bukkit.NamespacedKey.fromString(ALTER_BLOCK_ID) : null;
         return key != null ? key
-                : new org.bukkit.NamespacedKey(org.bukkit.NamespacedKey.MINECRAFT_NAMESPACE, "crafting_table");
+                : new org.bukkit.NamespacedKey(org.bukkit.NamespacedKey.MINECRAFT_NAMESPACE, "respawn_anchor");
     }
 
     private static void loadResourcePack(FileConfiguration config) {

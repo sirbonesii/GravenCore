@@ -26,7 +26,7 @@ import org.joml.Vector3f;
 /**
  * The Alter of Despair: a named dropper given out by
  * {@code /gravencore alter <username> [count]}, rendered as the
- * configured block (alter.block, default crafting table) via the
+ * configured block (alter.block, default respawn anchor) via the
  * item_model component (the placed block stays a
  * dropper). Placing it spawns the
  * glinting ItemDisplay of that block inside the dropper's own block —

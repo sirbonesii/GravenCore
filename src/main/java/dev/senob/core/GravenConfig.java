@@ -59,9 +59,14 @@ public class GravenConfig {
     public static String RESOURCE_PACK_PROMPT;
 
     // Alter of Despair (placeable altar dropper)
-    public static double ALTER_DISPLAY_SCALE;
-    public static int ALTER_BRIGHTNESS_BLOCK;
-    public static int ALTER_BRIGHTNESS_SKY;
+    // Hardcoded by design (Aaron): the alter display's scale and forced
+    // brightness are fixed tuning, not config. 1.01 gives the display a
+    // hair of overhang so it never z-fights the dropper; the display
+    // sits inside a solid block (light 0), so brightness is forced
+    // sky-only to light it like an outdoor object.
+    public static final double ALTER_DISPLAY_SCALE = 1.01;
+    public static final int ALTER_BRIGHTNESS_BLOCK = 0;
+    public static final int ALTER_BRIGHTNESS_SKY = 15;
     public static boolean ALTER_GLINT;
     public static String ALTER_BLOCK_ID;
     public static String ALTER_DISPLAY_NAME;
@@ -218,9 +223,6 @@ public class GravenConfig {
     }
 
     private static void loadAlter(FileConfiguration config) {
-        ALTER_DISPLAY_SCALE = config.getDouble("alter.display-scale", 1.01);
-        ALTER_BRIGHTNESS_BLOCK = config.getInt("alter.brightness-block", 0);
-        ALTER_BRIGHTNESS_SKY = config.getInt("alter.brightness-sky", 15);
         ALTER_GLINT = config.getBoolean("alter.glint", true);
         ALTER_BLOCK_ID = config.getString("alter.block", "minecraft:respawn_anchor");
         ALTER_DISPLAY_NAME = config.getString("alter.display_name", "Alter of Despair");

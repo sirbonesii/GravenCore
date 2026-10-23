@@ -38,7 +38,8 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   (`alter.block`, default `minecraft:respawn_anchor`) via the item_model
   component (the placed block stays a dropper); placing it spawns the glinting
   ItemDisplay of that block inside the dropper's block (enchantment glint
-  override, display scale and forced brightness from the new `alter` config
+  override from the `alter` config section; the display scale (1.01) and
+  forced brightness (block 0 / sky 15) are hardcoded constants
   section), and breaking the dropper removes the display and drops a fresh
   alter item so the cycle survives. It composes with the Redline Altar: the
   dropper is still the ritual bench, just with the display over it.

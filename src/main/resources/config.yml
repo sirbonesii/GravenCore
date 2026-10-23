@@ -206,16 +206,6 @@ alter:
   display_name: "Alter of Despair"
   hex_code: "<#F8F854>"
 
-  # Scale of the block display (1.0 = exactly one block; 1.01
-  # gives it a hair of overhang so it never z-fights the dropper)
-  display-scale: 1.01
-
-  # Forced brightness of the display, 0-15 each. It sits inside a
-  # solid block, so without this it renders at light level 0.
-  # Sky-only (block 0) lights it like an outdoor object.
-  brightness-block: 0
-  brightness-sky: 15
-
   # Enchantment glint on the displayed block
   glint: true
 

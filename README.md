@@ -8,14 +8,20 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
-- **Altar armor display (2026-10-24, unpushed):** a Legendary armor
-  piece placed in the altar's center slot locks in (green pane
-  named after the piece) and shows floating and spinning above
-  the altar, just for display for now — no ritual, no conversion,
-  nothing consumed. The piece can be taken back out by clicking
-  its pane with an empty hand, and a spear ritual can never
-  consume it (the spear path requires a base spear in the center).
-- **Smithing upgrade conversion (2026-10-24, unpushed):** smithing a
+- **Altar armor upgrade (2026-10-24, unpushed):** a Legendary armor
+  piece in the altar's center slot plus the same 8 ingredients as
+  the spear recipe (Dragon's Breath ×4, Heavy Core, Netherite
+  Ingot ×2, Ghast Tear) runs the same ritual and drops the
+  Mythical piece for that slot, with enchantments, damage and
+  custom name carried over. Without the full recipe the piece
+  just locks in and shows floating and spinning above the altar
+  for display, and can be taken back out by clicking its pane
+  with an empty hand. Gated by
+  `upgrading.redline-altar.disable-armor` in config.yml —
+  **default false** (upgrade on); set it to `true` to disable the
+  armor upgrade while keeping the display (config edit +
+  `/gravencore reload`, no rebuild).
+- **Smithing upgrade conversion (2026-10-24):** smithing a
   Legendary (diamond) piece into netherite yields the Mythical
   piece for that slot instead of a netherite item wearing the old
   Legendary tooltip and 1024 durability. Enchantments and damage

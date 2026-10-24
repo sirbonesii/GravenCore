@@ -134,11 +134,19 @@ public class RedlineAltar implements Listener {
         }
         if (pedestalsFor(center).isEmpty()) return; // not an altar: vanilla dropper behavior
         syncPreview(center);
-        if (readStored(center).size() == 9) {
+        Map<Integer, ItemStack> stored = readStored(center);
+        if (stored.size() == 9) {
             // Recipe already complete (e.g. finished before a restart):
             // right-clicking starts the ritual instead of opening the dropper
-            event.setCancelled(true);
-            startRitualFromDropper(event.getPlayer(), center);
+            ItemStack centerItem = stored.get(4);
+            if (centerItem != null && "legendary".equals(tieredArmorSet.getTierId(centerItem))
+                    && !GravenConfig.REDLINE_ALTAR_ARMOR_DISABLED) {
+                event.setCancelled(true);
+                startArmorRitualFromDropper(event.getPlayer(), center);
+            } else if (centerItem != null && redlineSpear.getRedlineTier(centerItem) == 1) {
+                event.setCancelled(true);
+                startRitualFromDropper(event.getPlayer(), center);
+            }
         }
         // Otherwise do nothing: the vanilla dropper opens, with its default title
     }
@@ -294,9 +302,21 @@ public class RedlineAltar implements Listener {
             syncPreview(center);
         }
         if (stored.size() == 9) {
-            Player starter = (player != null) ? player : firstViewer(inv);
-            for (HumanEntity viewer : new ArrayList<>(inv.getViewers())) viewer.closeInventory();
-            startRitualFromDropper(starter, center);
+            // The center item picks the ritual: a base spear upgrades the
+            // spear, a Legendary piece upgrades the armor — but only if
+            // the armor upgrade isn't disabled in the config. Anything
+            // else stays locked for display and no ritual starts.
+            ItemStack centerStored = stored.get(4);
+            boolean spear = centerStored != null && redlineSpear.getRedlineTier(centerStored) == 1;
+            boolean armor = centerStored != null
+                    && "legendary".equals(tieredArmorSet.getTierId(centerStored))
+                    && !GravenConfig.REDLINE_ALTAR_ARMOR_DISABLED;
+            if (spear || armor) {
+                Player starter = (player != null) ? player : firstViewer(inv);
+                for (HumanEntity viewer : new ArrayList<>(inv.getViewers())) viewer.closeInventory();
+                if (spear) startRitualFromDropper(starter, center);
+                else startArmorRitualFromDropper(starter, center);
+            }
         }
     }
 
@@ -631,7 +651,42 @@ public class RedlineAltar implements Listener {
         // The ritual takes over the live preview displays
         Map<Integer, ItemDisplay> adopted = previews.remove(center);
         pedestalCache.remove(center);
-        startRitual(player, center, pedestals, ringItems, spearItem, adopted);
+        startRitual(player, center, pedestals, ringItems, spearItem, adopted,
+                redlineSpear.createRedlineSpear(2));
+    }
+
+    /**
+     * Starts the armor ritual: a Legendary piece in the center plus
+     * the same 8 ingredients as the spear recipe goes through the
+     * same ceremony and comes out as the Mythical piece for that
+     * slot. Gated by {@code upgrading.redline-altar.disable-armor}:
+     * while that toggle is on, this never runs and the piece just displays.
+     */
+    private void startArmorRitualFromDropper(Player player, Location center) {
+        Map<Integer, ItemStack> stored = readStored(center);
+        if (stored.size() < 9) return;
+        ItemStack armorItem = stored.get(4);
+        if (armorItem == null || !"legendary".equals(tieredArmorSet.getTierId(armorItem))) return;
+        if (GravenConfig.REDLINE_ALTAR_ARMOR_DISABLED) return;
+        List<Location> pedestals = pedestalsFor(center);
+        if (pedestals.isEmpty()) return; // the altar never speaks in chat
+        ItemStack output = tieredArmorSet.upgradeLegendaryToMythical(armorItem);
+        if (output == null) return;
+
+        // Snapshot the ring items in compass order so each ingredient appears
+        // on the pedestal matching its recipe position
+        List<ItemStack> ringItems = new ArrayList<>();
+        for (int slot : SLOT_BY_COMPASS) ringItems.add(stored.get(slot).clone());
+        ItemStack centerItem = armorItem.clone();
+
+        Inventory dropper = dropperInventory(center);
+        if (dropper != null) dropper.clear(); // removes the green lock panes
+        writeStored(center, Map.of());
+
+        // The ritual takes over the live preview displays
+        Map<Integer, ItemDisplay> adopted = previews.remove(center);
+        pedestalCache.remove(center);
+        startRitual(player, center, pedestals, ringItems, centerItem, adopted, output);
     }
 
     /**
@@ -669,8 +724,8 @@ public class RedlineAltar implements Listener {
     }
 
     private void startRitual(Player player, Location center, List<Location> pedestals,
-                             List<ItemStack> ringItems, ItemStack spearItem,
-                             Map<Integer, ItemDisplay> adopted) {
+                             List<ItemStack> ringItems, ItemStack centerItem,
+                             Map<Integer, ItemDisplay> adopted, ItemStack outputItem) {
         World world = center.getWorld();
         if (world == null) return;
         activeAltars.add(center);
@@ -691,7 +746,7 @@ public class RedlineAltar implements Listener {
 
         // Adopt the live preview displays where they exist; spawn any missing ones
         List<ItemDisplay> displays = new ArrayList<>();
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < ringItems.size(); i++) {
             ItemDisplay display = (adopted != null) ? adopted.remove(i) : null;
             if (display == null || !display.isValid()) {
                 Location at = pedestals.get(i).clone().add(0.5, 1.7, 0.5);
@@ -701,8 +756,10 @@ public class RedlineAltar implements Listener {
         }
         ItemDisplay spearDisplay = (adopted != null) ? adopted.remove(CENTER_KEY) : null;
         if (spearDisplay == null || !spearDisplay.isValid()) {
-            Location spearAt = center.clone().add(0.5, 2.1, 0.5);
-            spearDisplay = spawnPlantedSpear(world, spearAt, spearItem);
+            Location centerAt = center.clone().add(0.5, 2.1, 0.5);
+            spearDisplay = redlineSpear.getRedlineTier(centerItem) >= 1
+                    ? spawnPlantedSpear(world, centerAt, centerItem)
+                    : spawnDisplay(world, centerAt, centerItem);
         }
         if (adopted != null) {
             for (ItemDisplay leftover : adopted.values()) leftover.remove();
@@ -726,12 +783,12 @@ public class RedlineAltar implements Listener {
         long totalTicks = Math.max(20L, (long) (GravenConfig.REDLINE_ALTAR_RITUAL_DURATION * 20.0));
         new BukkitRunnable() {
             long elapsed = 0;
-            float spearYaw = 0f;
+            float centerYaw = 0f;
 
             @Override
             public void run() {
                 if (elapsed >= totalTicks) {
-                    finishRitual(player, center, displays, centerDisplay);
+                    finishRitual(player, center, displays, centerDisplay, outputItem);
                     cancel();
                     return;
                 }
@@ -744,9 +801,9 @@ public class RedlineAltar implements Listener {
                 double eased = 1.0 - Math.pow(1.0 - progress, 2.0);
                 float yaw = (float) (eased * 3240.0);
                 if (centerDisplay.isValid()) {
-                    spearYaw += 9f + (float) (progress * 27.0);
+                    centerYaw += 9f + (float) (progress * 27.0);
                     Location l = centerDisplay.getLocation();
-                    l.setYaw(spearYaw);
+                    l.setYaw(centerYaw);
                     centerDisplay.teleport(l);
                 }
                 for (int i = 0; i < displays.size(); i++) {
@@ -772,7 +829,8 @@ public class RedlineAltar implements Listener {
         }.runTaskTimer(plugin, 0L, 1L);
     }
 
-    private void finishRitual(Player player, Location center, List<ItemDisplay> displays, ItemDisplay spearDisplay) {
+    private void finishRitual(Player player, Location center, List<ItemDisplay> displays, ItemDisplay spearDisplay,
+                              ItemStack outputItem) {
         World world = center.getWorld();
         if (world == null) return;
 
@@ -820,12 +878,12 @@ public class RedlineAltar implements Listener {
             spearDisplay.teleport(l);
         }, 1L, 1L);
 
-        // A beat of silence — 1.5 seconds — then the upgraded spear lands
+        // A beat of silence — 1.5 seconds — then the upgraded item lands
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             pauseSpin.cancel();
             if (spearDisplay.isValid()) spearDisplay.remove();
             Location dropAt = center.clone().add(0.5, 1.5, 0.5);
-            Item dropped = world.dropItem(dropAt, redlineSpear.createRedlineSpear(2));
+            Item dropped = world.dropItem(dropAt, outputItem);
             dropped.setVelocity(new Vector(0, 0, 0));
             dropped.setGlowing(true);
             dropped.setOwner(player != null ? player.getUniqueId() : null);
@@ -839,7 +897,7 @@ public class RedlineAltar implements Listener {
                         dropAt.clone().add(dir.clone().multiply(0.45)), 1, 0, 0, 0, 0, blood);
             }
 
-            // Anvil landing sound as the spear hits
+            // Anvil landing sound as the item hits
             world.playSound(dropAt, GravenConfig.REDLINE_ALTAR_ANVIL_SOUND,
                     GravenConfig.REDLINE_ALTAR_ANVIL_VOLUME, GravenConfig.REDLINE_ALTAR_ANVIL_PITCH);
 

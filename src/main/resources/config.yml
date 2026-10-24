@@ -15,6 +15,7 @@ upgrading:
   redline-altar:
     enabled: true
     disable-smithing-mythical: true
+    disable-armor: false
 
     ritual-duration: 10.0
     spawn-sound: true

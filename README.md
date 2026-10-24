@@ -11,11 +11,13 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - **Homes GUI redesign (2026-10-24):** the `/homes` menu now shows the
   player's actual head in the top slot (carrying the old banner's info:
   name, Max Capacity, Total Set, plus the current page), a bottom
-  navigation bar — **Back**, **help?** and **Next** — and a sparse
-  layout: only the top row is framed, the grid floats mid-GUI.
-  Homes are paged 10 per page (2 rows of 5, slots 19-23 and 28-32),
-  so a 19-home rank gets 2 pages; Back steps back through pages and
-  is greyed out on the first page, Next is greyed out on the last.
+  navigation bar — **Back**, **help?** and **Next** (slots 48-50) —
+  and a sparse layout: the grid floats mid-GUI inside a full outer
+  border of panes (top row, bottom row, and both side columns
+  top to bottom). Homes are paged 10 per page (2 rows
+  of 5, slots 20-24 and 29-33), so a 19-home rank gets 2 pages;
+  Back steps back through pages and is greyed out on the first
+  page, Next is greyed out on the last.
   Empty beds read **SET HOME**, over-limit slots are bedrock
   **LOCKED SLOT** blocks, both keeping their old lore lines
   ("Click to create a home" / "Upgrade your rank for more

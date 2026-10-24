@@ -26,16 +26,16 @@ public class HomeSystem implements CommandExecutor, TabCompleter {
     private final JavaPlugin plugin;
     private final HomeManager homeManager;
 
-    /** Home slots: 2 rows of 5, 10 homes per page (rows 2-3 of the GUI). */
+    /** Home slots: 2 rows of 5, 10 homes per page (rows 2-3, cols 2-6). */
     private static final int[] HOME_SLOTS = {
-            19, 20, 21, 22, 23,
-            28, 29, 30, 31, 32
+            20, 21, 22, 23, 24,
+            29, 30, 31, 32, 33
     };
     private static final int PAGE_SIZE = HOME_SLOTS.length;
     /** Bottom-row navigation: Back, help, Next. */
-    private static final int SLOT_BACK = 47;
-    private static final int SLOT_HELP = 48;
-    private static final int SLOT_NEXT = 49;
+    private static final int SLOT_BACK = 48;
+    private static final int SLOT_HELP = 49;
+    private static final int SLOT_NEXT = 50;
 
     public HomeSystem(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -178,10 +178,15 @@ public class HomeSystem implements CommandExecutor, TabCompleter {
         }
         gui.setItem(4, head, null);
 
-        // Framing: only the top row around the head. The other
-        // non-grid rows stay empty, so the grid floats mid-GUI.
+        // Framing: a full outer border — the top row around the head,
+        // the whole bottom row around the navigation, and both side
+        // columns top to bottom. The interior of rows 1 and 4 stays
+        // empty, so the grid still floats mid-GUI.
         ItemStack pane = decorativePane();
         for (int slot : new int[]{0, 1, 2, 3, 5, 6, 7, 8}) gui.setItem(slot, pane, null);
+        for (int slot : new int[]{9, 18, 27, 36}) gui.setItem(slot, pane, null);
+        for (int slot : new int[]{17, 26, 35, 44}) gui.setItem(slot, pane, null);
+        for (int slot : new int[]{45, 46, 47, 51, 52, 53}) gui.setItem(slot, pane, null);
 
         int firstIndex = currentPage * PAGE_SIZE;
         for (int i = 0; i < HOME_SLOTS.length; i++) {

@@ -26,9 +26,8 @@ public class HomeSystem implements CommandExecutor, TabCompleter {
     private final JavaPlugin plugin;
     private final HomeManager homeManager;
 
-    /** Home slots: 3 rows of 5, 15 homes per page. */
+    /** Home slots: 2 rows of 5, 10 homes per page (rows 2-3 of the GUI). */
     private static final int[] HOME_SLOTS = {
-            10, 11, 12, 13, 14,
             19, 20, 21, 22, 23,
             28, 29, 30, 31, 32
     };
@@ -179,12 +178,10 @@ public class HomeSystem implements CommandExecutor, TabCompleter {
         }
         gui.setItem(4, head, null);
 
-        // Decorative frame: rest of the top row, the divider row, and the
-        // bottom row around the navigation buttons
+        // Framing: only the top row around the head. The other
+        // non-grid rows stay empty, so the grid floats mid-GUI.
         ItemStack pane = decorativePane();
         for (int slot : new int[]{0, 1, 2, 3, 5, 6, 7, 8}) gui.setItem(slot, pane, null);
-        for (int slot = 36; slot <= 44; slot++) gui.setItem(slot, pane, null);
-        for (int slot : new int[]{45, 46, 50, 51, 52, 53}) gui.setItem(slot, pane, null);
 
         int firstIndex = currentPage * PAGE_SIZE;
         for (int i = 0; i < HOME_SLOTS.length; i++) {
@@ -224,7 +221,7 @@ public class HomeSystem implements CommandExecutor, TabCompleter {
                     ItemStack emptyBed = new ItemStack(Material.LIGHT_GRAY_BED);
                     ItemMeta meta = emptyBed.getItemMeta();
                     if (meta != null) {
-                        meta.displayName(GravenTheme.parse("<yellow><bold>NO HOME SET</bold></yellow>"));
+                        meta.displayName(GravenTheme.parse("<white>SET HOME</white>"));
                         meta.lore(List.of(GravenTheme.parse("<gray>Click to create a home</gray>")));
                         emptyBed.setItemMeta(meta);
                     }
@@ -247,7 +244,7 @@ public class HomeSystem implements CommandExecutor, TabCompleter {
                     });
                 }
             } else {
-                ItemStack locked = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+                ItemStack locked = new ItemStack(Material.BEDROCK);
                 ItemMeta meta = locked.getItemMeta();
                 if (meta != null) {
                     meta.displayName(GravenTheme.parse("<red>LOCKED SLOT</red>"));
@@ -258,30 +255,32 @@ public class HomeSystem implements CommandExecutor, TabCompleter {
             }
         }
 
-        // Bottom-row navigation
+        // Bottom-row navigation: pale oak hanging signs for Back/Next
+        // (greyed name when that way is closed), a dark oak hanging
+        // sign for help? — matching the reference look.
         if (currentPage > 0) {
-            ItemStack back = namedItem(Material.ARROW, "<green><bold>Back</bold></green>",
+            ItemStack back = namedItem(Material.PALE_OAK_HANGING_SIGN, "<green><bold>Back</bold></green>",
                     List.of(GravenTheme.parse("<gray>Go to page " + currentPage + "</gray>")));
             gui.setItem(SLOT_BACK, back, event ->
                     Bukkit.getScheduler().runTaskLater(plugin, () -> openHomesGui(viewer, target, currentPage - 1), 1L));
         } else {
-            ItemStack back = namedItem(Material.GRAY_STAINED_GLASS_PANE, "<gray><bold>Back</bold></gray>",
+            ItemStack back = namedItem(Material.PALE_OAK_HANGING_SIGN, "<gray><bold>Back</bold></gray>",
                     List.of(GravenTheme.parse("<gray>You are on the first page.</gray>")));
             gui.setItem(SLOT_BACK, back, null);
         }
 
-        ItemStack help = namedItem(Material.BOOK, "<yellow><bold>help?</bold></yellow>",
+        ItemStack help = namedItem(Material.DARK_OAK_HANGING_SIGN, "<yellow><bold>help?</bold></yellow>",
                 List.of(GravenTheme.parse("<gray>Click to learn how the homes system works.</gray>")));
         gui.setItem(SLOT_HELP, help, event ->
                 Bukkit.getScheduler().runTaskLater(plugin, () -> openHelpGui(viewer, target, currentPage), 1L));
 
         if (currentPage < totalPages - 1) {
-            ItemStack next = namedItem(Material.ARROW, "<green><bold>Next</bold></green>",
+            ItemStack next = namedItem(Material.PALE_OAK_HANGING_SIGN, "<green><bold>Next</bold></green>",
                     List.of(GravenTheme.parse("<gray>Go to page " + (currentPage + 2) + "</gray>")));
             gui.setItem(SLOT_NEXT, next, event ->
                     Bukkit.getScheduler().runTaskLater(plugin, () -> openHomesGui(viewer, target, currentPage + 1), 1L));
         } else {
-            ItemStack next = namedItem(Material.GRAY_STAINED_GLASS_PANE, "<gray><bold>Next</bold></gray>",
+            ItemStack next = namedItem(Material.PALE_OAK_HANGING_SIGN, "<gray><bold>Next</bold></gray>",
                     List.of(GravenTheme.parse("<gray>No more pages.</gray>")));
             gui.setItem(SLOT_NEXT, next, null);
         }
@@ -317,8 +316,8 @@ public class HomeSystem implements CommandExecutor, TabCompleter {
         int maxSlots = homeManager.getMaxHomes(target);
         ItemStack limits = namedItem(Material.PAPER, "<green><bold>Limits & Pages</bold></green>", List.of(
                 GravenTheme.parse("<gray>Your rank allows up to <yellow>" + maxSlots + "</yellow> homes.</gray>"),
-                GravenTheme.parse("<gray>Gray slots are locked — upgrade your</gray>"),
-                GravenTheme.parse("<gray>rank for more homes.</gray>"),
+                GravenTheme.parse("<gray>Bedrock slots are locked — upgrade</gray>"),
+                GravenTheme.parse("<gray>your rank for more homes.</gray>"),
                 GravenTheme.parse("<gray>Use Next and Back to flip pages.</gray>")
         ));
         gui.setItem(16, limits, null);

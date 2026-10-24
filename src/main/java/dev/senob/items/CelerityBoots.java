@@ -212,9 +212,8 @@ public class CelerityBoots implements Listener, CustomItem {
         lore.add(TooltipBuilder.attribute("🔥", "Block Power", "#FCD34D", formatStat(blockPower(item))));
         if (GravenConfig.MYTHICAL_BOOTS_TIMESLOW_ENABLED) {
             lore.add(TooltipBuilder.section("ABILITY"));
-            lore.add(GravenTheme.parse("<aqua>⏳ TIME SLOW</aqua><gray>:</gray> <white>Shift + Left Click</white>"));
-            lore.add(GravenTheme.parse("<gray>Freezes everything for <yellow>"
-                    + slowDuration(item) + "s</yellow> — only you keep moving</gray>"));
+            lore.add(GravenTheme.parse("<aqua>⏳ TIME FREEZE</aqua>"));
+            lore.add(GravenTheme.parse("<white>Shift + Left Click</white>"));
         }
         lore.add(TooltipBuilder.divider());
 

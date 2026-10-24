@@ -20,6 +20,13 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   deleting (right-click then confirm, or `/delhome <name>`) and rank
   limits, with a Back button returning to the page you came from.
   The delete-confirm screen now also returns to that same page.
+- **Celerity Boots tooltip reword (2026-10-24):** the ABILITY
+  block is now just `⏳ TIME FREEZE` with `Shift + Left Click` on the
+  line under it — the old `TIME SLOW: Shift + Left Click` title and
+  the `Freezes everything for …` description line are gone. That
+  long description line was also what stretched the tooltip's
+  dividers to ~50 chars; with it gone `fitDividers` sizes them to
+  the widest content line (~23), so the dividers hug the text now.
 - **special/armor.yml (2026-10-24):** Dracula's Plate and the Celerity
   Boots moved into their own file, `plugins/GravenCore/special/armor.yml`
   (sections `dracula` and `mythical-boots`), again with the exact

@@ -1,0 +1,66 @@
+# ==================================================================
+#  GravenCore — Armor
+#  One section per piece: dracula (Dracula's Plate, a chestplate)
+#  and mythical-boots (the Celerity Boots). Each piece's stats,
+#  tuning and sounds live here. (The Redline Spear stays in
+#  special/weapons.yml; the armor sets stay in tiers/armor_tiers.yml.)
+#  Reload with /gravencore reload.
+# ==================================================================
+dracula:
+  tier: "unknown"
+  cooldown: 30
+  duration: 10
+
+  armor: 8.0
+  toughness: 3.0
+  attack-damage: 2.0
+  lifesteal-percent: 20.0
+  lifesteal-chance: 85.0
+  block-rate: 25.0
+  block-power: 4.0
+
+  sound-effects:
+    block:
+      sound: "minecraft:block.anvil.land"
+      volume: 100
+      pitch: 1.9
+
+mythical-boots:
+  tier: "unknown"
+
+  durability: 2096
+
+  # Time Slow: shift + left-click freezes the world. Tick freeze
+  # natively exempts players, so the wearer stays unaffected (plus
+  # a speed boost) while everything else stops.
+  time-slow:
+    enabled: true
+    duration: 6.0
+    cooldown: 45
+    speed-boost: 1
+    freeze-players: true
+    weakness-level: 5
+
+  block-rate: 25.0
+  block-power: 4.0
+
+  sound-effects:
+    time-slow:
+      sound: "minecraft:block.beacon.activate"
+      volume: 100
+      pitch: 0.8
+    block:
+      sound: "minecraft:block.anvil.land"
+      volume: 100
+      pitch: 1.9
+
+
+# ============================================================
+#   Upgrading — Redline Altar
+# ============================================================
+# A dropper ringed by 8 lodestone pedestals. Place the recipe in
+# the dropper (it works like a normal dropper) to lock it in and
+# start the ritual.
+# Recipe: 4x Dragon's Breath (corners), Heavy Core (top),
+# 2x Netherite Ingot (sides), Ghast Tear (bottom), base Redline
+# spear (center).

@@ -1,8 +1,11 @@
 package dev.senob.core;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,7 +93,7 @@ public class GravenConfig {
     public static String DRACULA_TIER;
 
     // --- ARMOR SETS (Mythical / Legendary / Epic / Rare / Uncommon / Common) ---
-    /** Stats for one tiered armor set, loaded from armor.<tierId>.*. */
+    /** Stats for one tiered armor set, loaded from armor_tiers.yml <tierId>.*. */
     public static class ArmorTierStats {
         public String tier;
         public int durability;
@@ -139,30 +142,37 @@ public class GravenConfig {
         // 1. GLOBAL
         CREATOR = config.getString("settings.creator", "Senob");
 
+        // 2. WEAPONS — the Redline Spear lives in its own file
+        // (special/weapons.yml, top-level weapon ids).
+        FileConfiguration weapons = loadWeaponsConfig(config);
+        // Dracula's Plate and the Celerity Boots are armor, so they
+        // live in special/armor.yml instead.
+        FileConfiguration armorCfg = loadArmorConfig(config);
+
         // 2. REDLINE SPEAR
-        REDLINE_TIER = config.getString("weapons.redline.tier", "unknown");
-        REDLINE_MELEE_BASE = config.getDouble("weapons.redline.melee-damage.base", 5.0);
-        REDLINE_MELEE_UPGRADED = config.getDouble("weapons.redline.melee-damage.upgraded", 5.0);
-        REDLINE_ABILITY_BASE = config.getDouble("weapons.redline.ability-damage.base", 16.0);
-        REDLINE_ABILITY_UPGRADED = config.getDouble("weapons.redline.ability-damage.upgraded", 22.0);
-        REDLINE_RANGE_BASE = config.getDouble("weapons.redline.ability-range.base", 28.0);
-        REDLINE_RANGE_UPGRADED = config.getDouble("weapons.redline.ability-range.upgraded", 28.0);
-        REDLINE_COOLDOWN_BASE = config.getLong("weapons.redline.cooldown.base", 20L);
-        REDLINE_COOLDOWN_UPGRADED = config.getLong("weapons.redline.cooldown.upgraded", 16L);
-        REDLINE_ATTACK_SPEED = config.getDouble("weapons.redline.attack-speed", 0.87);
-        REDLINE_LAUNCH_VELOCITY = config.getDouble("weapons.redline.launch-velocity", 2.85);
-        REDLINE_PIERCE_BLOCKS = config.getBoolean("weapons.redline.pierce-blocks", true);
-        String[] charge = readSoundList(config, "weapons.redline.sound-effects.charge",
+        REDLINE_TIER = weapons.getString("redline.tier", "unknown");
+        REDLINE_MELEE_BASE = weapons.getDouble("redline.melee-damage.base", 5.0);
+        REDLINE_MELEE_UPGRADED = weapons.getDouble("redline.melee-damage.upgraded", 5.0);
+        REDLINE_ABILITY_BASE = weapons.getDouble("redline.ability-damage.base", 16.0);
+        REDLINE_ABILITY_UPGRADED = weapons.getDouble("redline.ability-damage.upgraded", 22.0);
+        REDLINE_RANGE_BASE = weapons.getDouble("redline.ability-range.base", 28.0);
+        REDLINE_RANGE_UPGRADED = weapons.getDouble("redline.ability-range.upgraded", 28.0);
+        REDLINE_COOLDOWN_BASE = weapons.getLong("redline.cooldown.base", 20L);
+        REDLINE_COOLDOWN_UPGRADED = weapons.getLong("redline.cooldown.upgraded", 16L);
+        REDLINE_ATTACK_SPEED = weapons.getDouble("redline.attack-speed", 0.87);
+        REDLINE_LAUNCH_VELOCITY = weapons.getDouble("redline.launch-velocity", 2.85);
+        REDLINE_PIERCE_BLOCKS = weapons.getBoolean("redline.pierce-blocks", true);
+        String[] charge = readSoundList(weapons, "redline.sound-effects.charge",
                 "minecraft:block.end_portal_frame.fill", "100.0", "0.9");
         REDLINE_CHARGE_SOUND = charge[0];
         REDLINE_CHARGE_VOLUME = Float.parseFloat(charge[1]);
         REDLINE_CHARGE_PITCH = Float.parseFloat(charge[2]);
-        String[] preFire = readSoundList(config, "weapons.redline.sound-effects.pre-fire",
+        String[] preFire = readSoundList(weapons, "redline.sound-effects.pre-fire",
                 "minecraft:entity.warden.sonic_charge", "100.0", "0.6");
         REDLINE_PREFIRE_SOUND = preFire[0];
         REDLINE_PREFIRE_VOLUME = Float.parseFloat(preFire[1]);
         REDLINE_PREFIRE_PITCH = Float.parseFloat(preFire[2]);
-        String[] fire = readSoundList(config, "weapons.redline.sound-effects.fire",
+        String[] fire = readSoundList(weapons, "redline.sound-effects.fire",
                 "minecraft:entity.warden.sonic_boom", "100.0", "0.6");
         REDLINE_FIRE_SOUND = fire[0];
         REDLINE_FIRE_VOLUME = Float.parseFloat(fire[1]);
@@ -172,51 +182,161 @@ public class GravenConfig {
         loadAlter(config);
 
         // 3. DRACULA PLATE
-        DRACULA_COOLDOWN = config.getLong("weapons.dracula.cooldown", 30L);
-        DRACULA_DURATION = config.getLong("weapons.dracula.duration", 10L);
-        DRACULA_ARMOR = config.getDouble("weapons.dracula.armor", 8.0);
-        DRACULA_TOUGHNESS = config.getDouble("weapons.dracula.toughness", 3.0);
+        DRACULA_COOLDOWN = armorCfg.getLong("dracula.cooldown", 30L);
+        DRACULA_DURATION = armorCfg.getLong("dracula.duration", 10L);
+        DRACULA_ARMOR = armorCfg.getDouble("dracula.armor", 8.0);
+        DRACULA_TOUGHNESS = armorCfg.getDouble("dracula.toughness", 3.0);
 
-        DRACULA_ATTACK_DAMAGE = config.getDouble("weapons.dracula.attack-damage", 2.0);
-        DRACULA_LIFESTEAL_PERCENT = config.getDouble("weapons.dracula.lifesteal-percent", 20.0);
-        DRACULA_LIFESTEAL_CHANCE = config.getDouble("weapons.dracula.lifesteal-chance", 85.0);
-        DRACULA_BLOCK_RATE = config.getDouble("weapons.dracula.block-rate", 25.0);
-        DRACULA_BLOCK_POWER = config.getDouble("weapons.dracula.block-power", 4.0);
-        loadDraculaBlockSound(config);
-        DRACULA_TIER = config.getString("weapons.dracula.tier", "unknown");
+        DRACULA_ATTACK_DAMAGE = armorCfg.getDouble("dracula.attack-damage", 2.0);
+        DRACULA_LIFESTEAL_PERCENT = armorCfg.getDouble("dracula.lifesteal-percent", 20.0);
+        DRACULA_LIFESTEAL_CHANCE = armorCfg.getDouble("dracula.lifesteal-chance", 85.0);
+        DRACULA_BLOCK_RATE = armorCfg.getDouble("dracula.block-rate", 25.0);
+        DRACULA_BLOCK_POWER = armorCfg.getDouble("dracula.block-power", 4.0);
+        loadDraculaBlockSound(armorCfg);
+        DRACULA_TIER = armorCfg.getString("dracula.tier", "unknown");
 
         // 4. ARMOR SETS — all six tiers, best to lowest.
         // Piece defaults are [defense (per piece), toughness, kb-resist].
-        // Mythical reads the same armor.mythical.* keys the old standalone
-        // set did, so existing pieces and configs keep working unchanged.
-        // (The old 25.0 code fallback for its block rate is now 45.0,
-        // matching the approved live value in config.yml.)
-        loadMythicalBoots(config);
-        loadArmorTier(config, "mythical", 2096, 45.0, 4.0,
+        // The tiers live in their own file (tiers/armor_tiers.yml, top-level
+        // tier ids); the Celerity Boots live in special/armor.yml.
+        loadMythicalBoots(armorCfg);
+        FileConfiguration tiers = loadTiersConfig(config);
+        loadArmorTier(tiers, "mythical", 2096, 45.0, 4.0,
                 new double[]{3.0, 3.0, 0.1}, new double[]{8.0, 3.0, 0.1},
                 new double[]{6.0, 3.0, 0.1}, new double[]{3.0, 3.0, 0.1});
-        loadArmorTier(config, "legendary", 1024, 35.0, 3.0,
+        loadArmorTier(tiers, "legendary", 1024, 35.0, 3.0,
                 new double[]{3.0, 2.0, 0.0}, new double[]{8.0, 2.0, 0.0},
                 new double[]{6.0, 2.0, 0.0}, new double[]{3.0, 2.0, 0.0});
-        loadArmorTier(config, "epic", 512, 25.0, 2.0,
+        loadArmorTier(tiers, "epic", 512, 25.0, 2.0,
                 new double[]{2.0, 1.0, 0.0}, new double[]{6.0, 1.0, 0.0},
                 new double[]{5.0, 1.0, 0.0}, new double[]{2.0, 1.0, 0.0});
-        loadArmorTier(config, "rare", 256, 15.0, 1.5,
+        loadArmorTier(tiers, "rare", 256, 15.0, 1.5,
                 new double[]{2.0, 0.0, 0.0}, new double[]{5.0, 0.0, 0.0},
                 new double[]{4.0, 0.0, 0.0}, new double[]{1.0, 0.0, 0.0});
-        loadArmorTier(config, "uncommon", 128, 10.0, 1.0,
+        loadArmorTier(tiers, "uncommon", 128, 10.0, 1.0,
                 new double[]{2.0, 0.0, 0.0}, new double[]{5.0, 0.0, 0.0},
                 new double[]{3.0, 0.0, 0.0}, new double[]{1.0, 0.0, 0.0});
-        loadArmorTier(config, "common", 64, 5.0, 0.5,
+        loadArmorTier(tiers, "common", 64, 5.0, 0.5,
                 new double[]{1.0, 0.0, 0.0}, new double[]{3.0, 0.0, 0.0},
                 new double[]{2.0, 0.0, 0.0}, new double[]{1.0, 0.0, 0.0});
+    }
+
+    /**
+     * Loads the weapons from plugins/GravenCore/special/weapons.yml
+     * (copied from the jar on first run). If that file is missing,
+     * the weapons.* sections of the main config are lifted into the
+     * same shape, so an old live config still works — and if those
+     * are gone too, the code fallbacks carry it.
+     */
+    private static FileConfiguration loadWeaponsConfig(FileConfiguration config) {
+        File weaponsDir = new File(plugin.getDataFolder(), "special");
+        if (!weaponsDir.exists()) weaponsDir.mkdirs();
+        try {
+            if (plugin.getResource("special/weapons.yml") != null) {
+                plugin.saveResource("special/weapons.yml", false);
+            }
+        } catch (IllegalArgumentException e) {
+            plugin.getLogger().warning("weapons.yml not found in the jar; reading weapons from config.yml.");
+        }
+        File weaponsFile = new File(weaponsDir, "weapons.yml");
+        if (weaponsFile.exists()) {
+            return YamlConfiguration.loadConfiguration(weaponsFile);
+        }
+        YamlConfiguration lifted = new YamlConfiguration();
+        ConfigurationSection weapons = config.getConfigurationSection("weapons");
+        if (weapons != null) {
+            for (Map.Entry<String, Object> entry : weapons.getValues(false).entrySet()) {
+                if (entry.getValue() instanceof ConfigurationSection section) {
+                    for (Map.Entry<String, Object> deep : section.getValues(true).entrySet()) {
+                        lifted.set(entry.getKey() + "." + deep.getKey(), deep.getValue());
+                    }
+                }
+            }
+        }
+        return lifted;
+    }
+
+    /**
+     * Loads Dracula's Plate and the Celerity Boots from
+     * plugins/GravenCore/special/armor.yml (copied from the jar on
+     * first run). If that file is missing, the old locations are
+     * lifted into the same shape — weapons.dracula and
+     * armor.mythical-boots from the main config — so an old live
+     * config still works, and if those are gone too the code
+     * fallbacks carry it.
+     */
+    private static FileConfiguration loadArmorConfig(FileConfiguration config) {
+        File armorDir = new File(plugin.getDataFolder(), "special");
+        if (!armorDir.exists()) armorDir.mkdirs();
+        try {
+            if (plugin.getResource("special/armor.yml") != null) {
+                plugin.saveResource("special/armor.yml", false);
+            }
+        } catch (IllegalArgumentException e) {
+            plugin.getLogger().warning("armor.yml not found in the jar; reading armor pieces from config.yml.");
+        }
+        File armorFile = new File(armorDir, "armor.yml");
+        if (armorFile.exists()) {
+            return YamlConfiguration.loadConfiguration(armorFile);
+        }
+        YamlConfiguration lifted = new YamlConfiguration();
+        liftSection(config, "weapons.dracula", lifted, "dracula");
+        liftSection(config, "armor.mythical-boots", lifted, "mythical-boots");
+        return lifted;
+    }
+
+    /** Copies one dotted section of the main config into a top-level section. */
+    private static void liftSection(FileConfiguration from, String fromPath,
+                                    FileConfiguration to, String toId) {
+        ConfigurationSection section = from.getConfigurationSection(fromPath);
+        if (section != null) {
+            for (Map.Entry<String, Object> deep : section.getValues(true).entrySet()) {
+                to.set(toId + "." + deep.getKey(), deep.getValue());
+            }
+        }
+    }
+
+    /**
+     * Loads the armor tiers from plugins/GravenCore/tiers/armor_tiers.yml
+     * (copied from the jar on first run). If that file is missing,
+     * the armor.* sections of the main config are lifted into the
+     * same shape, so an old live config still works — and if those
+     * are gone too, the code fallbacks in loadArmorTier carry it.
+     */
+    private static FileConfiguration loadTiersConfig(FileConfiguration config) {
+        File tiersDir = new File(plugin.getDataFolder(), "tiers");
+        if (!tiersDir.exists()) tiersDir.mkdirs();
+        try {
+            if (plugin.getResource("tiers/armor_tiers.yml") != null) {
+                plugin.saveResource("tiers/armor_tiers.yml", false);
+            }
+        } catch (IllegalArgumentException e) {
+            plugin.getLogger().warning("armor_tiers.yml not found in the jar; reading armor tiers from config.yml.");
+        }
+        File tiersFile = new File(tiersDir, "armor_tiers.yml");
+        if (tiersFile.exists()) {
+            return YamlConfiguration.loadConfiguration(tiersFile);
+        }
+        YamlConfiguration lifted = new YamlConfiguration();
+        ConfigurationSection armor = config.getConfigurationSection("armor");
+        if (armor != null) {
+            for (Map.Entry<String, Object> entry : armor.getValues(false).entrySet()) {
+                if (entry.getValue() instanceof ConfigurationSection section) {
+                    for (Map.Entry<String, Object> deep : section.getValues(true).entrySet()) {
+                        lifted.set(entry.getKey() + "." + deep.getKey(), deep.getValue());
+                    }
+                }
+            }
+        }
+        return lifted;
     }
 
     private static void loadArmorTier(FileConfiguration config, String id,
                                       int durability, double blockRate, double blockPower,
                                       double[] helmet, double[] chestplate,
                                       double[] leggings, double[] boots) {
-        String base = "armor." + id;
+        // armor_tiers.yml uses top-level tier ids (the lifted fallback too)
+        String base = id;
         ArmorTierStats stats = new ArmorTierStats();
         stats.tier = config.getString(base + ".tier", id);
         stats.durability = config.getInt(base + ".durability", durability);
@@ -297,14 +417,14 @@ public class GravenConfig {
     }
 
     private static void loadDraculaBlockSound(FileConfiguration config) {
-        String[] s = readSoundList(config, "weapons.dracula.sound-effects.block");
+        String[] s = readSoundList(config, "dracula.sound-effects.block");
         DRACULA_BLOCK_SOUND = s[0];
         DRACULA_BLOCK_VOLUME = Float.parseFloat(s[1]);
         DRACULA_BLOCK_PITCH = Float.parseFloat(s[2]);
     }
 
     private static void loadMythicalBoots(FileConfiguration config) {
-        String base = "armor.mythical-boots";
+        String base = "mythical-boots";
         MYTHICAL_BOOTS_TIER = config.getString(base + ".tier", "unknown");
         MYTHICAL_BOOTS_DURABILITY = config.getInt(base + ".durability", 2096);
         MYTHICAL_BOOTS_TIMESLOW_ENABLED = config.getBoolean(base + ".time-slow.enabled", true);

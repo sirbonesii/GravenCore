@@ -1,0 +1,44 @@
+# ==================================================================
+#  GravenCore — Weapons
+#  One section: redline (the Redline Spear). Its stats, tuning and
+#  sounds live here. (Dracula's Plate and the Celerity Boots are
+#  armor — they live in armor/armor.yml.)
+#  Reload with /gravencore reload.
+# ==================================================================
+redline:
+  tier: "unknown"
+  melee-damage:
+    base: 5.0
+    upgraded: 6.5
+
+  ability-damage:
+    base: 16.0
+    upgraded: 200.0
+
+  ability-range:
+    base: 30.0
+    upgraded: 30.0
+
+  cooldown:
+    base: 30
+    upgraded: 16
+
+  attack-speed: 0.87
+  launch-velocity: -2.85
+  pierce-blocks: true
+
+  sound-effects:
+    charge:
+      sound: "minecraft:block.end_portal_frame.fill"
+      volume: 100
+      pitch: 0.9
+
+    pre-fire:
+      sound: "minecraft:entity.warden.sonic_charge"
+      volume: 100
+      pitch: 0.6
+
+    fire:
+      sound: "minecraft:entity.warden.sonic_boom"
+      volume: 100
+      pitch: 0.6

@@ -263,7 +263,7 @@ public class RedlineSpear implements Listener, CustomItem {
 
                 for (PulseBeat beat : PULSE_BEATS) {
                     if (tick == beat.tick()) {
-                        // Charge-up sound (config: weapons.redline.sound-effects.charge),
+                        // Charge-up sound (config: weapons.yml redline.sound-effects.charge),
                         // heard only by players within 30 blocks — the plugin
                         // equivalent of /playsound ... player @a[distance=..30]
                         for (Player listener : world.getPlayers()) {
@@ -274,7 +274,7 @@ public class RedlineSpear implements Listener, CustomItem {
                             }
                         }
 
-                        // Pre-fire sound (config: weapons.redline.sound-effects.pre-fire):
+                        // Pre-fire sound (config: weapons.yml redline.sound-effects.pre-fire):
                         // Aaron (2026-10-22) — the warden sonic charge plays on
                         // the 1st pulse only, to everyone (master @a style)
                         if (beat.tick() == PULSE_BEATS.get(0).tick()) {
@@ -321,7 +321,7 @@ public class RedlineSpear implements Listener, CustomItem {
         Vector dir = origin.getDirection().normalize();
         World world = origin.getWorld();
 
-        // Fire sound (config: weapons.redline.sound-effects.fire), played
+        // Fire sound (config: weapons.yml redline.sound-effects.fire), played
         // to everyone like /playsound ... master @a
         world.playSound(origin, GravenConfig.REDLINE_FIRE_SOUND,
                 SoundCategory.MASTER, GravenConfig.REDLINE_FIRE_VOLUME,

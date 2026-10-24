@@ -36,14 +36,14 @@ import java.util.concurrent.ThreadLocalRandom;
  * Enchantments, ATTRIBUTES), real attribute modifiers with per-item PDC
  * overrides, and the block system (best worn piece procs) — and differs
  * only in its tier data: materials, stats and block tuning, all loaded
- * from armor.&lt;tier&gt;.* in config (see GravenConfig). The block
+ * from armor_tiers.yml &lt;tier&gt;.* (see GravenConfig). The block
  * ladder: Mythical 45%, Legendary 35%, Epic 25%, Rare 15%, Uncommon 10%,
  * Common 5%.
  *
  * Mythical pieces made by the old standalone MythicalArmorSet keep
  * working unchanged: this module uses the same PDC keys
  * ("mythical_armor" plus "mythical_&lt;stat&gt;") and the same
- * armor.mythical.* config keys, so no migration is needed.
+ * mythical stats (now in armor_tiers.yml), so no migration is needed.
  */
 @SuppressWarnings({"UnstableApiUsage", "unused"})
 public class TieredArmorSet implements CustomItem, Listener {

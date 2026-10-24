@@ -1,0 +1,20 @@
+# ==================================================================
+#  GravenCore — Homes Config
+#  Home limits per rank. Ranks themselves live in LuckPerms: grant
+#  a group one of the permission nodes below and every player in
+#  that group gets that many homes.
+#    Example: /lp group default permission set gravehomes.limit.10 true
+#  If a player ends up with more than one of these permissions
+#  (for example through group inheritance), they get the highest
+#  amount. Players with none of them get the default.
+#  To add a new rank limit, add one line under "permissions" and
+#  grant that node to the group in LuckPerms — no code changes.
+#  Changes need a server restart to take effect.
+# ==================================================================
+
+limits:
+  default: 5
+
+  permissions:
+    "gravehomes.limit.10": 10
+    "gravehomes.limit.19": 19

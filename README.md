@@ -8,15 +8,80 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
+- **Homes GUI redesign (2026-10-24):** the `/homes` menu now shows the
+  player's actual head in the top slot (carrying the old banner's info:
+  name, Max Capacity, Total Set, plus the current page), a framed
+  layout with a divider row, and a bottom navigation bar — **Back**,
+  **help?** and **Next**. Homes are paged 15 per page (3 rows of 5),
+  so a 19-home rank gets 2 pages; Back steps back through pages and
+  is greyed out on the first page, Next is greyed out on the last.
+  The help screen teaches setting (click an empty bed, or
+  `/sethome <name>`), teleporting (click a bed, or `/home <name>`),
+  deleting (right-click then confirm, or `/delhome <name>`) and rank
+  limits, with a Back button returning to the page you came from.
+  The delete-confirm screen now also returns to that same page.
+- **special/armor.yml (2026-10-24):** Dracula's Plate and the Celerity
+  Boots moved into their own file, `plugins/GravenCore/special/armor.yml`
+  (sections `dracula` and `mythical-boots`), again with the exact
+  same values. Same loader pattern: read on boot and on
+  `/gravencore reload`, falling back to the old `weapons.dracula`
+  and `armor.mythical-boots` sections in `config.yml` and then to
+  the code fallbacks. `config.yml` no longer has an `armor:` block
+  at all.
+- **special/weapons.yml (2026-10-24):** the weapons moved out of
+  `config.yml` the same way — `plugins/GravenCore/special/weapons.yml`,
+  now just the Redline Spear (`redline`) since the plate moved to
+  `armor.yml`, with the exact same values, so nothing changes
+  in-game. Same loader pattern as the tiers: read on boot and on
+  `/gravencore reload`, falling back to the old `weapons.*`
+  sections in `config.yml` and then to the code fallbacks if the
+  file is missing. The old `weapons.*` sections in a live
+  `config.yml` are now ignored and can be deleted. (The folder is
+  `special`, not `weapons` — Aaron's call.)
+- **armor_tiers.yml (2026-10-24):** the armor tier system moved out of
+  `config.yml` into its own short-named file,
+  `plugins/GravenCore/tiers/armor_tiers.yml` — one top-level section per
+  set (mythical, legendary, epic, rare, uncommon, common) with the
+  exact same values, so nothing changes in-game. The loader reads
+  it on boot and on `/gravencore reload`; if the file is missing it
+  falls back to the old `armor.*` sections in `config.yml`, and then
+  to the code fallbacks. (The boots are a standalone item, not part
+  of the tier system — they live in `special/armor.yml`.) The old
+  `armor.*` set sections in a live `config.yml` are now ignored and
+  can be deleted.
+- **homes_config.yml (2026-10-24):** home limits moved out of code
+  into their own config file. `limits.default` is what players get
+  with no limit permission, and `limits.permissions` maps LuckPerms
+  permission nodes to limits (`gravehomes.limit.10` → 10,
+  `gravehomes.limit.19` → 19 by default, same as the old hardcoded
+  behavior). Grant a node to a LuckPerms group and that group gets
+  that many homes; a player holding several limit permissions gets
+  the highest. New ranks need only a new line plus the LuckPerms
+  grant — no code changes. Changes need a server restart. Both
+  homes files live in their own folder,
+  `plugins/GravenCore/homes/` (`homes_config.yml` + `homes_db.yml`),
+  instead of loose in the plugin folder.
+- **Professional homes_db.yml (2026-10-24):** the homes data file
+  is renamed from `homes.yml` to `homes_db.yml` (an existing
+  `homes.yml` is moved over automatically on first boot, so no
+  homes are lost) and rewritten in a tidy, deterministic form on
+  every save: a header comment explaining the layout, players
+  sorted by name with a readable `name` field beside each UUID,
+  homes sorted alphabetically, coordinates rounded (positions to
+  2 decimals, angles to 1), and no leftover section when a player
+  deletes their last home. Homes whose world isn't loaded are kept
+  verbatim so a temporarily unloaded world never eats homes; hand
+  edits still need a server restart to take effect.
 - **Unknown tier (2026-10-24):** new `Unknown` item tier for the one-off
   signature items — the Redline Spear, Dracula's Plate and the Celerity
   Boots are now Unknown tier (their tier lines read "Tier: Unknown" in
   the client's glitch text effect, #F8F87C, fitting for a tier nobody
   can place). The spear's tooltip gains the tier line at the top (it
   had none); the plate and boots keep their existing layouts, only the
-  tier line changes. Configurable per item via `weapons.redline.tier`,
-  `weapons.dracula.tier` and `armor.mythical-boots.tier` (all default
-  "unknown"); the Mythical armor set is unaffected.
+  tier line changes. Configurable per item via `special/weapons.yml`
+  (`redline.tier`) and `special/armor.yml` (`dracula.tier`,
+  `mythical-boots.tier`, all default "unknown"); the Mythical
+  armor set is unaffected.
 - **Tiered armor sets (2026-10-22):** five new armor tiers under Mythical,
   all sharing its exact mechanics (Mythical tooltip chrome, real attribute
   modifiers with per-item PDC overrides, Enchantments section, live

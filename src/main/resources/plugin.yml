@@ -1,5 +1,5 @@
 name: GravenCore
-version: 1.7.5
+version: 1.7.8
 main: dev.senob.GravenCore
 api-version: '1.21'
 description: Core server plugin including the Modules.

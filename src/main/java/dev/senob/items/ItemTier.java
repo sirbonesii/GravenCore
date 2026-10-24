@@ -11,6 +11,8 @@ import net.kyori.adventure.text.format.TextColor;
  */
 public enum ItemTier {
 
+    /** The one-off signature items (Redline, Dracula's Plate, Celerity Boots) — glitch effect on the client, fitting for a tier nobody can place. */
+    UNKNOWN("unknown", "Unknown", TextColor.color(0xF8F87C)),
     MYTHICAL("mythical", "Mythical", TextColor.color(0xF8F8A0)),
     LEGENDARY("legendary", "Legendary", TextColor.color(0xF8F894)),
     EPIC("epic", "Epic", TextColor.color(0xF8F878)),

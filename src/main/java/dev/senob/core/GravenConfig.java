@@ -16,6 +16,7 @@ public class GravenConfig {
 
     // --- REDLINE SPEAR ---
     public static double REDLINE_MELEE_BASE, REDLINE_MELEE_UPGRADED;
+    public static String REDLINE_TIER;
     public static double REDLINE_ABILITY_BASE, REDLINE_ABILITY_UPGRADED;
     public static double REDLINE_RANGE_BASE, REDLINE_RANGE_UPGRADED;
     public static long REDLINE_COOLDOWN_BASE, REDLINE_COOLDOWN_UPGRADED;
@@ -153,6 +154,7 @@ public class GravenConfig {
         CREATOR = config.getString("settings.creator", "Senob");
 
         // 2. REDLINE SPEAR
+        REDLINE_TIER = config.getString("weapons.redline.tier", "unknown");
         REDLINE_MELEE_BASE = config.getDouble("weapons.redline.melee-damage.base", 5.0);
         REDLINE_MELEE_UPGRADED = config.getDouble("weapons.redline.melee-damage.upgraded", 5.0);
         REDLINE_ABILITY_BASE = config.getDouble("weapons.redline.ability-damage.base", 16.0);
@@ -195,7 +197,7 @@ public class GravenConfig {
         DRACULA_BLOCK_RATE = config.getDouble("weapons.dracula.block-rate", 25.0);
         DRACULA_BLOCK_POWER = config.getDouble("weapons.dracula.block-power", 4.0);
         loadDraculaBlockSound(config);
-        DRACULA_TIER = config.getString("weapons.dracula.tier", "mythical");
+        DRACULA_TIER = config.getString("weapons.dracula.tier", "unknown");
 
         // 4. MYTHICAL ARMOR SET
         MYTHICAL_TIER = config.getString("armor.mythical.tier", "mythical");
@@ -330,7 +332,7 @@ public class GravenConfig {
 
     private static void loadMythicalBoots(FileConfiguration config) {
         String base = "armor.mythical-boots";
-        MYTHICAL_BOOTS_TIER = config.getString(base + ".tier", "mythical");
+        MYTHICAL_BOOTS_TIER = config.getString(base + ".tier", "unknown");
         MYTHICAL_BOOTS_DURABILITY = config.getInt(base + ".durability", 2096);
         MYTHICAL_BOOTS_TIMESLOW_ENABLED = config.getBoolean(base + ".time-slow.enabled", true);
         MYTHICAL_BOOTS_TIMESLOW_DURATION = config.getDouble(base + ".time-slow.duration", 6.0);

@@ -17,6 +17,7 @@ settings:
 # ============================================================
 weapons:
   redline:
+    tier: "unknown"
     melee-damage:
       base: 5.0
       upgraded: 6.5
@@ -57,7 +58,7 @@ weapons:
   #   Weapons — Dracula's Plate
   # ==========================================================
   dracula:
-    tier: "mythical"
+    tier: "unknown"
     cooldown: 30
     duration: 10
 
@@ -272,7 +273,7 @@ armor:
   #   Armor — Celerity Boots (standalone, not part of the set)
   # ==========================================================
   mythical-boots:
-    tier: "mythical"
+    tier: "unknown"
 
     durability: 2096
 

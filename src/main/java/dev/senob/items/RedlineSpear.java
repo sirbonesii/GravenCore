@@ -178,6 +178,8 @@ public class RedlineSpear implements Listener, CustomItem {
         meta.addAttributeModifier(Attribute.ATTACK_SPEED, speedModifier);
 
         List<Component> finalLore = new ArrayList<>();
+        // Tier line, first — the Redline spear is an Unknown-tier item
+        finalLore.add(TooltipBuilder.tierLine(ItemTier.fromId(GravenConfig.REDLINE_TIER)));
         for (String line : LORE) {
             if (lungeEnchant != null && line.contains("Lunge IV")) continue;
 

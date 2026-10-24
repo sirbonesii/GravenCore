@@ -8,6 +8,15 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
+- **Unknown tier (2026-10-24):** new `Unknown` item tier for the one-off
+  signature items — the Redline Spear, Dracula's Plate and the Celerity
+  Boots are now Unknown tier (their tier lines read "Tier: Unknown" in
+  the client's glitch text effect, #F8F87C, fitting for a tier nobody
+  can place). The spear's tooltip gains the tier line at the top (it
+  had none); the plate and boots keep their existing layouts, only the
+  tier line changes. Configurable per item via `weapons.redline.tier`,
+  `weapons.dracula.tier` and `armor.mythical-boots.tier` (all default
+  "unknown"); the Mythical armor set is unaffected.
 - **Tiered armor sets (2026-10-22):** five new armor tiers under Mythical,
   all sharing its exact mechanics (Mythical tooltip chrome, real attribute
   modifiers with per-item PDC overrides, Enchantments section, live

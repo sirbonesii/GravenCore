@@ -89,21 +89,7 @@ public class GravenConfig {
     public static float DRACULA_BLOCK_PITCH;
     public static String DRACULA_TIER;
 
-    // --- MYTHICAL ARMOR SET ---
-    public static String MYTHICAL_TIER;
-    public static int MYTHICAL_DURABILITY;
-    /** Chance (percent, 0-100) for a worn piece to block an incoming attack. */
-    public static double MYTHICAL_BLOCK_RATE;
-    /** Flat damage subtracted when the block triggers. */
-    public static double MYTHICAL_BLOCK_POWER;
-    /** Block proc sound: namespaced id, volume, pitch (from sound-effects.block). */
-    public static String MYTHICAL_BLOCK_SOUND;
-    public static float MYTHICAL_BLOCK_VOLUME;
-    public static float MYTHICAL_BLOCK_PITCH;
-    /** Piece id -> [defense, toughness, knockback-resistance]. */
-    public static Map<String, double[]> MYTHICAL_PIECES;
-
-    // --- TIERED ARMOR SETS (Legendary / Epic / Rare / Uncommon / Common) ---
+    // --- ARMOR SETS (Mythical / Legendary / Epic / Rare / Uncommon / Common) ---
     /** Stats for one tiered armor set, loaded from armor.<tierId>.*. */
     public static class ArmorTierStats {
         public String tier;
@@ -199,22 +185,16 @@ public class GravenConfig {
         loadDraculaBlockSound(config);
         DRACULA_TIER = config.getString("weapons.dracula.tier", "unknown");
 
-        // 4. MYTHICAL ARMOR SET
-        MYTHICAL_TIER = config.getString("armor.mythical.tier", "mythical");
-        MYTHICAL_DURABILITY = config.getInt("armor.mythical.durability", 2096);
-        MYTHICAL_BLOCK_RATE = config.getDouble("armor.mythical.block-rate", 25.0);
-        MYTHICAL_BLOCK_POWER = config.getDouble("armor.mythical.block-power", 4.0);
-        loadMythicalBlockSound(config);
-        loadMythicalBoots(config);
-        MYTHICAL_PIECES = new LinkedHashMap<>();
-        loadMythicalPiece(config, "helmet", 3.0);
-        loadMythicalPiece(config, "chestplate", 8.0);
-        loadMythicalPiece(config, "leggings", 6.0);
-        loadMythicalPiece(config, "boots", 3.0);
-
-        // 5. TIERED ARMOR SETS — the ladder under Mythical (45% block):
-        // Legendary 35, Epic 25, Rare 15, Uncommon 10, Common 5.
+        // 4. ARMOR SETS — all six tiers, best to lowest.
         // Piece defaults are [defense (per piece), toughness, kb-resist].
+        // Mythical reads the same armor.mythical.* keys the old standalone
+        // set did, so existing pieces and configs keep working unchanged.
+        // (The old 25.0 code fallback for its block rate is now 45.0,
+        // matching the approved live value in config.yml.)
+        loadMythicalBoots(config);
+        loadArmorTier(config, "mythical", 2096, 45.0, 4.0,
+                new double[]{3.0, 3.0, 0.1}, new double[]{8.0, 3.0, 0.1},
+                new double[]{6.0, 3.0, 0.1}, new double[]{3.0, 3.0, 0.1});
         loadArmorTier(config, "legendary", 1024, 35.0, 3.0,
                 new double[]{3.0, 2.0, 0.0}, new double[]{8.0, 2.0, 0.0},
                 new double[]{6.0, 2.0, 0.0}, new double[]{3.0, 2.0, 0.0});
@@ -323,13 +303,6 @@ public class GravenConfig {
         DRACULA_BLOCK_PITCH = Float.parseFloat(s[2]);
     }
 
-    private static void loadMythicalBlockSound(FileConfiguration config) {
-        String[] s = readSoundList(config, "armor.mythical.sound-effects.block");
-        MYTHICAL_BLOCK_SOUND = s[0];
-        MYTHICAL_BLOCK_VOLUME = Float.parseFloat(s[1]);
-        MYTHICAL_BLOCK_PITCH = Float.parseFloat(s[2]);
-    }
-
     private static void loadMythicalBoots(FileConfiguration config) {
         String base = "armor.mythical-boots";
         MYTHICAL_BOOTS_TIER = config.getString(base + ".tier", "unknown");
@@ -383,12 +356,4 @@ public class GravenConfig {
         return new String[]{defSound, defVolume, defPitch};
     }
 
-    private static void loadMythicalPiece(FileConfiguration config, String id, double defaultDefense) {
-        String base = "armor.mythical.pieces." + id;
-        MYTHICAL_PIECES.put(id, new double[]{
-                config.getDouble(base + ".defense", defaultDefense),
-                config.getDouble(base + ".toughness", 3.0),
-                config.getDouble(base + ".knockback-resistance", 0.1)
-        });
-    }
 }

@@ -3,7 +3,6 @@ package dev.senob.listeners;
 import dev.senob.GravenCore;
 import dev.senob.items.CelerityBoots;
 import dev.senob.items.DraculaPlate;
-import dev.senob.items.MythicalArmorSet;
 import dev.senob.items.TieredArmorSet;
 import dev.senob.items.TooltipBuilder;
 import net.kyori.adventure.text.Component;
@@ -26,8 +25,8 @@ import org.bukkit.persistence.PersistentDataType;
 
 /**
  * Keeps the Enchantments lore section live on the custom pieces that render
- * one (Mythical armor, the five tiered armor sets, Dracula's Plate, Celerity
- * Boots — the Redline spear shows vanilla enchantments, so it needs nothing).
+ * one (the six armor sets, Dracula's Plate, Celerity Boots — the Redline
+ * spear shows vanilla enchantments, so it needs nothing).
  *
  * Those pieces bake their enchantments into the lore under their own
  * Enchantments header (with HIDE_ENCHANTS suppressing the vanilla block),
@@ -49,23 +48,19 @@ public class EnchantSyncListener implements Listener {
 
     private final GravenCore plugin;
     private final DraculaPlate draculaPlate;
-    private final MythicalArmorSet mythicalArmorSet;
     private final CelerityBoots celerityBoots;
     private final TieredArmorSet tieredArmorSet;
     private final NamespacedKey draculaKey;
-    private final NamespacedKey mythicalKey;
     private final NamespacedKey bootsKey;
 
     public EnchantSyncListener(GravenCore plugin, DraculaPlate draculaPlate,
-                               MythicalArmorSet mythicalArmorSet, CelerityBoots celerityBoots,
+                               CelerityBoots celerityBoots,
                                TieredArmorSet tieredArmorSet) {
         this.plugin = plugin;
         this.draculaPlate = draculaPlate;
-        this.mythicalArmorSet = mythicalArmorSet;
         this.celerityBoots = celerityBoots;
         this.tieredArmorSet = tieredArmorSet;
         this.draculaKey = new NamespacedKey(plugin, "dracula_plate");
-        this.mythicalKey = new NamespacedKey(plugin, "mythical_armor");
         this.bootsKey = new NamespacedKey(plugin, "mythical_boots");
 
         // Catch-all sweep for the paths with no event (see class docs)
@@ -149,19 +144,16 @@ public class EnchantSyncListener implements Listener {
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
 
         boolean dracula = pdc.has(draculaKey, PersistentDataType.INTEGER);
-        boolean mythical = pdc.has(mythicalKey, PersistentDataType.STRING);
         boolean boots = pdc.has(bootsKey, PersistentDataType.INTEGER);
         boolean tiered = tieredArmorSet.isItem(item);
-        if (!dracula && !mythical && !boots && !tiered) return false;
+        if (!dracula && !boots && !tiered) return false;
         if (!TooltipBuilder.enchantSectionStale(meta)) return false;
 
-        String pieceId = mythical ? pdc.get(mythicalKey, PersistentDataType.STRING) : null;
         // A re-sync resets the display name to the piece's canonical name;
         // keep whatever name the item currently shows (anvil renames)
         Component shownName = meta.displayName();
 
         if (dracula) draculaPlate.syncPlateStatsAndLore(item);
-        else if (mythical) mythicalArmorSet.syncPieceStatsAndLore(item, pieceId);
         else if (tiered) tieredArmorSet.syncPieceStatsAndLore(item);
         else celerityBoots.syncBootsStatsAndLore(item);
 

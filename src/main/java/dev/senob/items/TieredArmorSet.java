@@ -29,21 +29,28 @@ import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * The tiered armor sets under Mythical: Legendary (diamond), Epic (iron),
- * Rare (chainmail), Uncommon (gold) and Common (leather). All five share
- * the Mythical set's mechanics exactly — same tooltip chrome (tier line,
- * durability, Enchantments, ATTRIBUTES), real attribute modifiers with
- * per-item PDC overrides, and the block system (best worn piece procs) —
- * and differ only in their tier data: materials, stats and block tuning,
- * all loaded from armor.&lt;tier&gt;.* in config (see GravenConfig).
- * The block ladder: Legendary 35%, Epic 25%, Rare 15%, Uncommon 10%,
- * Common 5% (Mythical sits above them at 45%).
+ * All six armor sets, best to lowest: Mythical (netherite) plus the five
+ * tiers under it — Legendary (diamond), Epic (iron), Rare (chainmail),
+ * Uncommon (gold) and Common (leather). Every set shares the same
+ * mechanics exactly — same tooltip chrome (tier line, durability,
+ * Enchantments, ATTRIBUTES), real attribute modifiers with per-item PDC
+ * overrides, and the block system (best worn piece procs) — and differs
+ * only in its tier data: materials, stats and block tuning, all loaded
+ * from armor.&lt;tier&gt;.* in config (see GravenConfig). The block
+ * ladder: Mythical 45%, Legendary 35%, Epic 25%, Rare 15%, Uncommon 10%,
+ * Common 5%.
+ *
+ * Mythical pieces made by the old standalone MythicalArmorSet keep
+ * working unchanged: this module uses the same PDC keys
+ * ("mythical_armor" plus "mythical_&lt;stat&gt;") and the same
+ * armor.mythical.* config keys, so no migration is needed.
  */
 @SuppressWarnings({"UnstableApiUsage", "unused"})
 public class TieredArmorSet implements CustomItem, Listener {
 
-    /** The five tiers this module owns, best to lowest. */
+    /** The six tiers this module owns, best to lowest. */
     public enum Tier {
+        MYTHICAL("mythical", Material.NETHERITE_HELMET, Material.NETHERITE_CHESTPLATE, Material.NETHERITE_LEGGINGS, Material.NETHERITE_BOOTS),
         LEGENDARY("legendary", Material.DIAMOND_HELMET, Material.DIAMOND_CHESTPLATE, Material.DIAMOND_LEGGINGS, Material.DIAMOND_BOOTS),
         EPIC("epic", Material.IRON_HELMET, Material.IRON_CHESTPLATE, Material.IRON_LEGGINGS, Material.IRON_BOOTS),
         RARE("rare", Material.CHAINMAIL_HELMET, Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_LEGGINGS, Material.CHAINMAIL_BOOTS),

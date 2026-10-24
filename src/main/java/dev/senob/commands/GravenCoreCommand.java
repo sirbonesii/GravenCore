@@ -6,7 +6,6 @@ import dev.senob.core.GravenTheme;
 import dev.senob.items.AlterOfDespair;
 import dev.senob.items.DraculaPlate;
 import dev.senob.items.ItemTier;
-import dev.senob.items.MythicalArmorSet;
 import dev.senob.items.TieredArmorSet;
 import dev.senob.items.CelerityBoots;
 import dev.senob.items.RedlineSpear;
@@ -38,16 +37,14 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
     private final GravenCore plugin;
     private final RedlineSpear redlineSpear;
     private final DraculaPlate draculaPlate;
-    private final MythicalArmorSet mythicalArmorSet;
     private final CelerityBoots celerityBoots;
     private final AlterOfDespair alterOfDespair;
     private final TieredArmorSet tieredArmorSet;
 
-    public GravenCoreCommand(GravenCore plugin, RedlineSpear redlineSpear, DraculaPlate draculaPlate, MythicalArmorSet mythicalArmorSet, CelerityBoots celerityBoots, AlterOfDespair alterOfDespair, TieredArmorSet tieredArmorSet) {
+    public GravenCoreCommand(GravenCore plugin, RedlineSpear redlineSpear, DraculaPlate draculaPlate, CelerityBoots celerityBoots, AlterOfDespair alterOfDespair, TieredArmorSet tieredArmorSet) {
         this.plugin = plugin;
         this.redlineSpear = redlineSpear;
         this.draculaPlate = draculaPlate;
-        this.mythicalArmorSet = mythicalArmorSet;
         this.celerityBoots = celerityBoots;
         this.alterOfDespair = alterOfDespair;
         this.tieredArmorSet = tieredArmorSet;
@@ -110,21 +107,14 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
             String tierArg = args[2].toLowerCase(Locale.ROOT);
-            boolean mythical = tierArg.equals("mythical");
-            if (!mythical && TieredArmorSet.Tier.fromId(tierArg) == null) {
+            if (TieredArmorSet.Tier.fromId(tierArg) == null) {
                 sender.sendMessage(GravenTheme.parse("<red>Unknown armor tier. Available: mythical, legendary, epic, rare, uncommon, common</red>"));
                 return true;
             }
 
             List<ItemStack> pieces = new ArrayList<>();
-            if (mythical) {
-                for (MythicalArmorSet.Piece piece : MythicalArmorSet.Piece.values()) {
-                    pieces.add(mythicalArmorSet.createPiece(piece));
-                }
-            } else {
-                for (String pieceId : TieredArmorSet.PIECE_IDS) {
-                    pieces.add(tieredArmorSet.createPiece(tierArg, pieceId));
-                }
+            for (String pieceId : TieredArmorSet.PIECE_IDS) {
+                pieces.add(tieredArmorSet.createPiece(tierArg, pieceId));
             }
             Map<Integer, ItemStack> leftover =
                     target.getInventory().addItem(pieces.toArray(new ItemStack[0]));
@@ -223,7 +213,6 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
 
             NamespacedKey redlineKey = new NamespacedKey(plugin, "redline_tier");
             NamespacedKey draculaKey = new NamespacedKey(plugin, "dracula_plate");
-            NamespacedKey mythicalKey = new NamespacedKey(plugin, "mythical_armor");
             NamespacedKey bootsKey = new NamespacedKey(plugin, "mythical_boots");
 
             // Loop through all online players to instantly update their held weapons
@@ -240,8 +229,6 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                         redlineSpear.syncSpearStatsAndLore(item, pdc.getOrDefault(redlineKey, PersistentDataType.INTEGER, 1));
                     } else if (pdc.has(draculaKey, PersistentDataType.INTEGER)) {
                         draculaPlate.syncPlateStatsAndLore(item);
-                    } else if (pdc.has(mythicalKey, PersistentDataType.STRING)) {
-                        mythicalArmorSet.syncPieceStatsAndLore(item, pdc.get(mythicalKey, PersistentDataType.STRING));
                     } else if (tieredArmorSet.isItem(item)) {
                         tieredArmorSet.syncPieceStatsAndLore(item);
                     } else if (pdc.has(bootsKey, PersistentDataType.INTEGER)) {
@@ -321,34 +308,6 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                         heldItem.setItemMeta(meta);
                         draculaPlate.syncPlateStatsAndLore(heldItem);
                         player.sendMessage(GravenTheme.parse("<green>Updated Dracula " + setting + " to " + valueStr + "!</green>"));
-                        return true;
-                    } catch (NumberFormatException e) {
-                        player.sendMessage(GravenTheme.parse("<red>Invalid number format.</red>"));
-                        return true;
-                    }
-                }
-                else if (args[1].equalsIgnoreCase("mythical")) {
-                    NamespacedKey mythicalKey = new NamespacedKey(plugin, "mythical_armor");
-                    if (!pdc.has(mythicalKey, PersistentDataType.STRING)) {
-                        player.sendMessage(GravenTheme.parse("<red>You must be holding a Mythical armor piece!</red>"));
-                        return true;
-                    }
-
-                    try {
-                        switch (setting) {
-                            case "defense" -> pdc.set(new NamespacedKey(plugin, "mythical_defense"), PersistentDataType.DOUBLE, Double.parseDouble(valueStr));
-                            case "toughness" -> pdc.set(new NamespacedKey(plugin, "mythical_toughness"), PersistentDataType.DOUBLE, Double.parseDouble(valueStr));
-                            case "kbresist" -> pdc.set(new NamespacedKey(plugin, "mythical_kbresist"), PersistentDataType.DOUBLE, Double.parseDouble(valueStr));
-                            case "blockrate" -> pdc.set(new NamespacedKey(plugin, "mythical_blockrate"), PersistentDataType.DOUBLE, Double.parseDouble(valueStr));
-                            case "blockpower" -> pdc.set(new NamespacedKey(plugin, "mythical_blockpower"), PersistentDataType.DOUBLE, Double.parseDouble(valueStr));
-                            default -> {
-                                player.sendMessage(GravenTheme.parse("<red>Valid Mythical settings: defense, toughness, kbresist, blockrate, blockpower</red>"));
-                                return true;
-                            }
-                        }
-                        heldItem.setItemMeta(meta);
-                        mythicalArmorSet.syncPieceStatsAndLore(heldItem, pdc.get(mythicalKey, PersistentDataType.STRING));
-                        player.sendMessage(GravenTheme.parse("<green>Updated Mythical " + setting + " to " + valueStr + "!</green>"));
                         return true;
                     } catch (NumberFormatException e) {
                         player.sendMessage(GravenTheme.parse("<red>Invalid number format.</red>"));
@@ -451,7 +410,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
             if (args[0].equalsIgnoreCase("config")) {
                 if (args[1].equalsIgnoreCase("redline")) return List.of("cooldown", "range", "basedamage", "abilitydamage");
                 if (args[1].equalsIgnoreCase("dracula")) return List.of("cooldown", "duration", "blockrate", "blockpower");
-                if (args[1].equalsIgnoreCase("mythical") || TieredArmorSet.Tier.fromId(args[1].toLowerCase(Locale.ROOT)) != null) return List.of("defense", "toughness", "kbresist", "blockrate", "blockpower");
+                if (TieredArmorSet.Tier.fromId(args[1].toLowerCase(Locale.ROOT)) != null) return List.of("defense", "toughness", "kbresist", "blockrate", "blockpower");
                 if (args[1].equalsIgnoreCase("time_boots")) return List.of("duration", "cooldown", "speedboost", "freezeplayers", "weaknesslevel", "blockrate", "blockpower");
             }
         }

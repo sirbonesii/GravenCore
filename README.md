@@ -225,6 +225,15 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
 
 #### Changed
+- **Mythical set merged into TieredArmorSet (2026-10-24):** the
+  standalone `MythicalArmorSet` is gone — one module now owns all six
+  armor tiers (Mythical netherite + Legendary/Epic/Rare/Uncommon/
+  Common). Zero behavior change and no migration: the merged module
+  uses the same `mythical_armor` PDC keys, the same
+  `armor.mythical.*` config keys, and the same stats (45% block /
+  4.0 power, 2096 durability). `/gravencore armor <username>
+  mythical` and `/gravencore config mythical …` work exactly as
+  before.
 - **Enchantments section stays live after /enchant (2026-10-22):** the
   vanilla /enchant command fires no Bukkit event, so a piece enchanted
   that way kept its old tooltip until a /gravencore reload. The enchant

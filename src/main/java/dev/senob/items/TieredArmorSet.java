@@ -151,6 +151,75 @@ public class TieredArmorSet implements CustomItem, Listener {
         return item;
     }
 
+    /**
+     * Converts a Legendary tiered piece into the Mythical piece for the
+     * same slot, carrying enchantments, damage (clamped to the
+     * Mythical max) and a custom name from {@code transferFrom}.
+     * Returns null if the input isn't a Legendary piece. Shared by
+     * the smithing conversion and the altar ritual, so both upgrade
+     * paths behave the same.
+     *
+     * <p>The two arguments are usually the same item. They differ
+     * for smithing: the tier identity is read from the base piece
+     * (whose PDC is guaranteed), while enchantments, damage and the
+     * name are read from the vanilla smithing result (which already
+     * merged them from the base) — so the conversion works whether
+     * or not the result kept the base's PDC.
+     */
+    public ItemStack upgradeLegendaryToMythical(ItemStack legendary) {
+        return upgradeLegendaryToMythical(legendary, legendary);
+    }
+
+    public ItemStack upgradeLegendaryToMythical(ItemStack legendary, ItemStack transferFrom) {
+        if (!"legendary".equals(getTierId(legendary))) return null;
+        String pieceId = getPieceId(legendary);
+        if (pieceId == null) return null;
+        ItemStack converted = createPiece("mythical", pieceId);
+        if (converted == null) return null;
+
+        ItemMeta sourceMeta = (transferFrom != null) ? transferFrom.getItemMeta() : null;
+        boolean changed = false;
+
+        // Enchantments on the source transfer to the new piece
+        if (sourceMeta != null && sourceMeta.hasEnchants()) {
+            ItemMeta convertedMeta = converted.getItemMeta();
+            if (convertedMeta != null) {
+                sourceMeta.getEnchants().forEach((enchantment, level) ->
+                        convertedMeta.addEnchant(enchantment, level, true));
+                converted.setItemMeta(convertedMeta);
+                changed = true;
+            }
+        }
+
+        // Damage on the source carries over, clamped to the converted
+        // piece's own max durability
+        if (sourceMeta instanceof Damageable sourceDamage && sourceDamage.getDamage() > 0) {
+            ItemMeta convertedMeta = converted.getItemMeta();
+            if (convertedMeta instanceof Damageable targetDamage && targetDamage.hasMaxDamage()) {
+                targetDamage.setDamage(Math.min(sourceDamage.getDamage(), targetDamage.getMaxDamage() - 1));
+                converted.setItemMeta(convertedMeta);
+                changed = true;
+            }
+        }
+
+        // Re-sync so the tooltip reflects the transferred enchantments
+        // and the real remaining durability
+        if (changed) syncPieceStatsAndLore(converted);
+
+        // A renamed source keeps its custom name through the conversion;
+        // the re-sync resets the name to the vanilla one, so restore it
+        if (sourceMeta != null && sourceMeta.hasDisplayName()) {
+            Component customName = sourceMeta.displayName();
+            ItemMeta convertedMeta = converted.getItemMeta();
+            if (convertedMeta != null && customName != null) {
+                convertedMeta.displayName(customName);
+                converted.setItemMeta(convertedMeta);
+            }
+        }
+
+        return converted;
+    }
+
     /** Re-syncs a piece, deriving its tier and piece id from its PDC. */
     public void syncPieceStatsAndLore(ItemStack item) {
         String tierId = getTierId(item);

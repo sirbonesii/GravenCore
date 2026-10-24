@@ -8,6 +8,24 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
+- **Altar armor display (2026-10-24, unpushed):** a Legendary armor
+  piece placed in the altar's center slot locks in (green pane
+  named after the piece) and shows floating and spinning above
+  the altar, just for display for now — no ritual, no conversion,
+  nothing consumed. The piece can be taken back out by clicking
+  its pane with an empty hand, and a spear ritual can never
+  consume it (the spear path requires a base spear in the center).
+- **Smithing upgrade conversion (2026-10-24, unpushed):** smithing a
+  Legendary (diamond) piece into netherite yields the Mythical
+  piece for that slot instead of a netherite item wearing the old
+  Legendary tooltip and 1024 durability. Enchantments and damage
+  carry over (damage clamped to 2096), and a custom name survives.
+  Same pattern as the crafting conversion; vanilla diamond armor
+  smithed to netherite stays vanilla, and armor trims pass through
+  untouched. Gated by `upgrading.redline-altar.disable-smithing-mythical`
+  in config.yml — **default true**, so Mythical stays altar-only
+  unless the toggle is set to `false` (config edit + `/gravencore reload`,
+  no rebuild).
 - **Homes GUI redesign (2026-10-24):** the `/homes` menu now shows the
   player's actual head in the top slot (carrying the old banner's info:
   name, Max Capacity, Total Set, plus the current page), a bottom

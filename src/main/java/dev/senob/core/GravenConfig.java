@@ -55,6 +55,8 @@ public class GravenConfig {
     public static float REDLINE_ALTAR_LOCK_VOLUME;
     public static float REDLINE_ALTAR_LOCK_PITCH;
     public static boolean REDLINE_ALTAR_SPAWN_SOUND;
+    /** When true, smithing a Legendary piece into netherite does NOT convert it to the Mythical piece. True by default: Mythical stays altar-only. */
+    public static boolean SMITHING_MYTHICAL_DISABLED;
 
     // Resource pack (/gravencore packreload)
     public static String RESOURCE_PACK_URL;
@@ -367,6 +369,7 @@ public class GravenConfig {
         REDLINE_ALTAR_SPEAR_OFFSET_Y = config.getDouble(base + ".spear-offset.y", 0.0);
         REDLINE_ALTAR_SPEAR_OFFSET_Z = config.getDouble(base + ".spear-offset.z", 0.120);
         REDLINE_ALTAR_SPAWN_SOUND = config.getBoolean(base + ".spawn-sound", true);
+        SMITHING_MYTHICAL_DISABLED = config.getBoolean(base + ".disable-smithing-mythical", true);
         String[] s = readSoundList(config, base + ".sound-effects.start");
         REDLINE_ALTAR_START_SOUND = s[0];
         REDLINE_ALTAR_START_VOLUME = Float.parseFloat(s[1]);

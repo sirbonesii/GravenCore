@@ -100,6 +100,7 @@ public class RedlineAltar implements Listener {
 
     private final GravenCore plugin;
     private final RedlineSpear redlineSpear;
+    private final TieredArmorSet tieredArmorSet;
     private final Set<Location> activeAltars = new HashSet<>();
     /** Live pedestal displays per altar center, keyed by compass sector / CENTER_KEY. */
     private final Map<Location, Map<Integer, ItemDisplay>> previews = new HashMap<>();
@@ -110,9 +111,10 @@ public class RedlineAltar implements Listener {
     private float previewYaw = 0f;
     private boolean previewSparkleFlip = false;
 
-    public RedlineAltar(GravenCore plugin, RedlineSpear redlineSpear) {
+    public RedlineAltar(GravenCore plugin, RedlineSpear redlineSpear, TieredArmorSet tieredArmorSet) {
         this.plugin = plugin;
         this.redlineSpear = redlineSpear;
+        this.tieredArmorSet = tieredArmorSet;
         plugin.getLogger().info("Redline Altar module initialized!");
     }
 
@@ -257,7 +259,7 @@ public class RedlineAltar implements Listener {
             if (stored.containsKey(r)) {
                 ItemStack cur = inv.getItem(r);
                 if (cur == null || cur.getType() != Material.GREEN_STAINED_GLASS_PANE) {
-                    inv.setItem(r, lockPane(r)); // pane went missing: restore the marker
+                    inv.setItem(r, lockPane(r, stored.get(r))); // pane went missing: restore the marker
                 }
                 continue;
             }
@@ -273,7 +275,7 @@ public class RedlineAltar implements Listener {
                 World world = center.getWorld();
                 if (world != null) world.dropItemNaturally(center.clone().add(0.5, 1.2, 0.5), excess);
             }
-            inv.setItem(r, lockPane(r));
+            inv.setItem(r, lockPane(r, one));
             lockedAny = true;
         }
         if (lockedAny) {
@@ -371,19 +373,35 @@ public class RedlineAltar implements Listener {
     }
 
     /** The green pane that replaces a locked-in ingredient in the dropper. */
-    private static ItemStack lockPane(int recipeSlot) {
+    private ItemStack lockPane(int recipeSlot, ItemStack item) {
         ItemStack pane = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
         ItemMeta meta = pane.getItemMeta();
         if (meta != null) {
-            meta.displayName(GravenTheme.parse("<green>✔ " + ingredientName(recipeSlot) + "</green>"));
+            String name = ingredientName(recipeSlot);
+            if (recipeSlot == 4 && item != null && "legendary".equals(tieredArmorSet.getTierId(item))) {
+                name = formatMaterialName(item.getType());
+            }
+            meta.displayName(GravenTheme.parse("<green>✔ " + name + "</green>"));
             pane.setItemMeta(meta);
         }
         return pane;
     }
 
+    /** "DIAMOND_HELMET" -> "Diamond Helmet", for the armor lock pane. */
+    private static String formatMaterialName(Material material) {
+        String[] words = material.name().toLowerCase().split("_");
+        StringBuilder sb = new StringBuilder();
+        for (String word : words) {
+            if (!sb.isEmpty()) sb.append(' ');
+            sb.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
+        }
+        return sb.toString();
+    }
+
     private boolean isCorrectForSlot(int recipeSlot, ItemStack item) {
         if (item == null) return false;
-        if (recipeSlot == 4) return redlineSpear.getRedlineTier(item) == 1;
+        if (recipeSlot == 4) return redlineSpear.getRedlineTier(item) == 1
+                || "legendary".equals(tieredArmorSet.getTierId(item));
         return item.getType() == SLOT_MATERIALS[recipeSlot];
     }
 
@@ -425,11 +443,15 @@ public class RedlineAltar implements Listener {
             Location at = pedestals.get(compass).clone().add(0.5, 1.7, 0.5);
             reconcile(shown, compass, at, item);
         }
-        ItemStack spear = stored.get(4);
-        ItemStack spearShown = (spear != null && redlineSpear.getRedlineTier(spear) >= 1) ? spear : null;
-        // The spear sticks point-down into the dropper (the in-hand model is
-        // long, so the display origin sits well above the block)
-        reconcile(shown, CENTER_KEY, center.clone().add(0.5, 2.1, 0.5), spearShown);
+        ItemStack centerItem = stored.get(4);
+        ItemStack centerShown = null;
+        if (centerItem != null && (redlineSpear.getRedlineTier(centerItem) >= 1
+                || "legendary".equals(tieredArmorSet.getTierId(centerItem)))) {
+            centerShown = centerItem;
+        }
+        // The center item shows above the dropper: the spear planted in
+        // its in-hand model, an armor piece as a floating item
+        reconcile(shown, CENTER_KEY, center.clone().add(0.5, 2.1, 0.5), centerShown);
         ensureSpinTask();
     }
 
@@ -479,7 +501,8 @@ public class RedlineAltar implements Listener {
         if (existing != null) existing.remove();
         World world = at.getWorld();
         if (world == null) return;
-        shown.put(key, key == CENTER_KEY ? spawnPlantedSpear(world, at, item) : spawnDisplay(world, at, item));
+        boolean plantedSpear = key == CENTER_KEY && redlineSpear.getRedlineTier(item) >= 1;
+        shown.put(key, plantedSpear ? spawnPlantedSpear(world, at, item) : spawnDisplay(world, at, item));
     }
 
     /** Spawns the center spear planted point-down into the altar, using its in-hand model. */
@@ -591,6 +614,7 @@ public class RedlineAltar implements Listener {
     private void startRitualFromDropper(Player player, Location center) {
         Map<Integer, ItemStack> stored = readStored(center);
         if (stored.size() < 9) return;
+        if (redlineSpear.getRedlineTier(stored.get(4)) != 1) return; // center must be a base spear
         List<Location> pedestals = pedestalsFor(center);
         if (pedestals.isEmpty()) return; // the altar never speaks in chat
 

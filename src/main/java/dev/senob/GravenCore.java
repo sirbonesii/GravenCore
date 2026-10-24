@@ -19,6 +19,7 @@ import dev.senob.listeners.AttributeHider;
 import dev.senob.listeners.EnchantSyncListener;
 import dev.senob.listeners.CombatLogger;
 import dev.senob.listeners.ArmorCraftListener;
+import dev.senob.listeners.ArmorSmithingListener;
 import dev.senob.listeners.DurabilityLoreListener;
 import dev.senob.listeners.EnderChestEx;
 import org.bukkit.Bukkit;
@@ -72,9 +73,10 @@ public class GravenCore extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(redlineSpear, this);
         Bukkit.getPluginManager().registerEvents(tieredArmorSet, this);
         Bukkit.getPluginManager().registerEvents(celerityBoots, this);
-        Bukkit.getPluginManager().registerEvents(new RedlineAltar(this, redlineSpear), this);
+        Bukkit.getPluginManager().registerEvents(new RedlineAltar(this, redlineSpear, tieredArmorSet), this);
         Bukkit.getPluginManager().registerEvents(new EnchantSyncListener(this, draculaPlate, celerityBoots, tieredArmorSet), this);
         Bukkit.getPluginManager().registerEvents(new ArmorCraftListener(tieredArmorSet), this);
+        Bukkit.getPluginManager().registerEvents(new ArmorSmithingListener(tieredArmorSet), this);
         Bukkit.getPluginManager().registerEvents(alterOfDespair, this);
 
         // 4. Register Command Router

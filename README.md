@@ -336,12 +336,14 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
 
 #### Changed
-- **Redline spear charge sequence (2026-10-25):** from Aaron's video —
-  the charge is now 6 pulse beats (ticks 0/10/20/30/40/50, charge chime
-  + expanding flame ring each), then the warden pre-fire sound once at
-  tick 60, then the beam ~55 ticks later at tick 115 (~115 ticks total,
-  nearly double the old 60). Releasing early still cancels the charge;
-  the sounds and their config keys are unchanged.
+- **Redline spear charge sequence (2026-10-25, re-measured):** from Aaron's video —
+  the charge is now 6 pulse beats (ticks 0/18/36/41/45/49 — three slow, then three rapid,
+  charge chime + expanding flame ring each), then the warden pre-fire sound once at
+  tick 73, then the beam ~32 ticks later at tick 105 (~105 ticks total). The old
+  even-spaced 0/10/20/30/40/50 + 60/115 timing left dead air between the charge sound
+  ending and the beam; the new gap matches the charge sound's own length, so the beam
+  lands right as it ends. Releasing early still cancels the charge; the sounds and
+  their config keys are unchanged.
 - **Alter config moved to crafting_alter/alter.yml (2026-10-25):**
   the `alter:` section leaves config.yml for its own file under
   `plugins/GravenCore/crafting_alter/alter.yml`, following the same
@@ -392,8 +394,8 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   video was tried and reverted the same day), and the per-beat charge chime
   is unchanged. The new `weapons.redline.sound-effects.pre-fire` sound
   (default warden sonic_charge, 100, 0.6) plays to everyone once, after
-  the last pulse of the charge-up (tick 60), and the beam fires ~55 ticks
-  later at tick 115 with the new `weapons.redline.sound-effects.fire` sound
+  the last pulse of the charge-up (tick 73), and the beam fires ~32 ticks
+  later at tick 105 with the new `weapons.redline.sound-effects.fire` sound
   (default warden sonic_boom, 100, 0.6) ahead of the existing blast sounds. The end-of-beam
   flame rings still expand as before.
 - **packreload API fix:** the command now calls Paper's `setResourcePack`

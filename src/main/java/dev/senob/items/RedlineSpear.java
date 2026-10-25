@@ -71,11 +71,12 @@ public class RedlineSpear implements Listener, CustomItem {
     private final Map<UUID, Long> lastRightClickTime = new HashMap<>();
     private final Map<UUID, Long> fallImmunity = new HashMap<>();
 
-    // New charge sequence (Aaron's video, 2026-10-25): hold right-click
-    // for 6 pulse beats, then the warden pre-fire sound, then the beam
-    // ~55 ticks later — ~115 ticks total.
-    private static final int PRE_FIRE_TICK = 60;
-    private static final int FIRE_TICK = 115;
+    // New charge sequence (Aaron's video, re-measured 2026-10-25): hold right-click
+    // for 6 pulse beats — three slow (18 ticks apart), then three rapid (4 apart) —
+    // then the warden pre-fire sound, then the beam ~32 ticks later, right as the
+    // charge sound ends — ~105 ticks total.
+    private static final int PRE_FIRE_TICK = 73;
+    private static final int FIRE_TICK = 105;
     private static final int RING_POINTS = 96;
     private static final int RING_LAYERS = 2;
     private static final int SHIELD_DURABILITY_DAMAGE = 180;
@@ -84,11 +85,11 @@ public class RedlineSpear implements Listener, CustomItem {
 
     private static final List<PulseBeat> PULSE_BEATS = List.of(
             new PulseBeat(0,  0.22, 0.135),
-            new PulseBeat(10, 0.21, 0.123),
-            new PulseBeat(20, 0.19, 0.111),
-            new PulseBeat(30, 0.18, 0.099),
-            new PulseBeat(40, 0.16, 0.087),
-            new PulseBeat(50, 0.15, 0.075)
+            new PulseBeat(18, 0.21, 0.123),
+            new PulseBeat(36, 0.19, 0.111),
+            new PulseBeat(41, 0.18, 0.099),
+            new PulseBeat(45, 0.16, 0.087),
+            new PulseBeat(49, 0.15, 0.075)
     );
 
     public RedlineSpear(GravenCore plugin, CooldownManager cooldownManager) {

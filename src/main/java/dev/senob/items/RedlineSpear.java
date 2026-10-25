@@ -71,7 +71,11 @@ public class RedlineSpear implements Listener, CustomItem {
     private final Map<UUID, Long> lastRightClickTime = new HashMap<>();
     private final Map<UUID, Long> fallImmunity = new HashMap<>();
 
-    private static final int CHARGE_TICKS = 60;
+    // New charge sequence (Aaron's video, 2026-10-25): hold right-click
+    // for 6 pulse beats, then the warden pre-fire sound, then the beam
+    // ~55 ticks later — ~115 ticks total.
+    private static final int PRE_FIRE_TICK = 60;
+    private static final int FIRE_TICK = 115;
     private static final int RING_POINTS = 96;
     private static final int RING_LAYERS = 2;
     private static final int SHIELD_DURABILITY_DAMAGE = 180;
@@ -80,12 +84,11 @@ public class RedlineSpear implements Listener, CustomItem {
 
     private static final List<PulseBeat> PULSE_BEATS = List.of(
             new PulseBeat(0,  0.22, 0.135),
-            new PulseBeat(20, 0.20, 0.125),
-            new PulseBeat(27, 0.20, 0.115),
-            new PulseBeat(34, 0.18, 0.105),
-            new PulseBeat(41, 0.18, 0.095),
-            new PulseBeat(48, 0.16, 0.085),
-            new PulseBeat(54, 0.15, 0.075)
+            new PulseBeat(10, 0.21, 0.123),
+            new PulseBeat(20, 0.19, 0.111),
+            new PulseBeat(30, 0.18, 0.099),
+            new PulseBeat(40, 0.16, 0.087),
+            new PulseBeat(50, 0.15, 0.075)
     );
 
     public RedlineSpear(GravenCore plugin, CooldownManager cooldownManager) {
@@ -274,23 +277,23 @@ public class RedlineSpear implements Listener, CustomItem {
                             }
                         }
 
-                        // Pre-fire sound (config: weapons.yml redline.sound-effects.pre-fire):
-                        // Aaron (2026-10-22) — the warden sonic charge plays on
-                        // the 1st pulse only, to everyone (master @a style)
-                        if (beat.tick() == PULSE_BEATS.get(0).tick()) {
-                            world.playSound(eye, GravenConfig.REDLINE_PREFIRE_SOUND,
-                                    SoundCategory.MASTER, GravenConfig.REDLINE_PREFIRE_VOLUME,
-                                    GravenConfig.REDLINE_PREFIRE_PITCH);
-                        }
-
                         Location ringCenter = eye.clone().add(dir.clone().multiply(2.8));
                         ParticleEngineUtil.spawnExpandingRing(ringCenter, dir, beat.startRadius(), beat.expansionSpeed(), Particle.FLAME, RING_POINTS, RING_LAYERS);
                     }
                 }
 
+                // Pre-fire sound (config: weapons.yml redline.sound-effects.pre-fire):
+                // Aaron's video sequence (2026-10-25) — the warden sonic charge
+                // plays once, after the last pulse, to everyone (master @a style)
+                if (tick == PRE_FIRE_TICK) {
+                    world.playSound(eye, GravenConfig.REDLINE_PREFIRE_SOUND,
+                            SoundCategory.MASTER, GravenConfig.REDLINE_PREFIRE_VOLUME,
+                            GravenConfig.REDLINE_PREFIRE_PITCH);
+                }
+
                 tick++;
 
-                if (tick >= CHARGE_TICKS) {
+                if (tick >= FIRE_TICK) {
                     chargingPlayers.remove(uuid);
                     lastRightClickTime.remove(uuid);
                     player.clearActiveItem();
@@ -301,8 +304,7 @@ public class RedlineSpear implements Listener, CustomItem {
 
                     cooldownManager.setCooldown(player, COOLDOWN_TYPE, cdSeconds);
 
-                    // The pre-fire sound played on the last two pulses; the
-                    // blast fires right at the end of the charge, and the
+                    // The beam fires ~55 ticks after the pre-fire sound, and the
                     // fire sound (sonic_boom) plays inside fireRedlineBlast
                     fireRedlineBlast(player, item, tier);
                     cancel();

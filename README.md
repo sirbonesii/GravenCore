@@ -24,7 +24,7 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   just locks in and shows floating and spinning above the altar
   for display, and can be taken back out by clicking its pane
   with an empty hand. Gated by
-  `upgrading.redline-altar.disable-armor` in config.yml —
+  `upgrading.redline-altar.disable-armor` in crafting_alter/alter.yml —
   **default false** (upgrade on); set it to `true` to disable the
   armor upgrade while keeping the display (config edit +
   `/gravencore reload`, no rebuild).
@@ -36,9 +36,9 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   Same pattern as the crafting conversion; vanilla diamond armor
   smithed to netherite stays vanilla, and armor trims pass through
   untouched. Gated by `upgrading.redline-altar.disable-smithing-mythical`
-  in config.yml — **default true**, so Mythical stays altar-only
-  unless the toggle is set to `false` (config edit + `/gravencore reload`,
-  no rebuild).
+  in crafting_alter/alter.yml — **default false**, so smithing
+  conversion is allowed unless the toggle is set to `true`
+  (config edit + `/gravencore reload`, no rebuild).
 - **Homes GUI redesign (2026-10-24):** the `/homes` menu now shows the
   player's actual head in the top slot (carrying the old banner's info:
   name, Max Capacity, Total Set, plus the current page), a bottom
@@ -212,7 +212,7 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   upgraded spear drops at the center
   with a small blood-red poof and an anvil sound (outside that finish burst
   and the pedestal enchant sparkles, the altar has no particles)
-  (`upgrading.redline-altar` config: enabled, ritual-duration, start/complete/anvil/lock-in sounds).
+  (`upgrading.redline-altar` in crafting_alter/alter.yml: enabled, ritual-duration, start/complete/anvil/lock-in sounds).
 - **Celerity Boots: freeze duration on the action bar + block system (2026-10-19):**
   the freeze duration now shows as `❄ 6s` next to the `⏳` cooldown on the action bar;
   boots also gain the block system (new `armor.mythical-boots.block-rate`/`block-power`
@@ -340,11 +340,13 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   the `alter:` section leaves config.yml for its own file under
   `plugins/GravenCore/crafting_alter/alter.yml`, following the same
   pattern as the tiers/special splits (copied from the jar on first
-  run, `/gravencore reload` picks up changes, old config.yml section
-  as fallback). Same keys, same defaults — only the wrapper level
-  is gone, so the keys are now bare (`block`, `display_name`,
-  `hex_code`, `glint`). A live config.yml's old `alter:` section
-  is ignored once the new file exists and is safe to delete.
+  run, `/gravencore reload` picks up changes, old config.yml sections
+  as fallback). Same keys — only the wrapper level is gone for the
+  item, so its keys are now bare (`block`, `display_name`,
+  `hex_code`, `glint`) — and the `upgrading.redline-altar` ritual
+  section moves into the same file, keeping its `upgrading:` wrapper.
+  A live config.yml's old `alter:` / `upgrading:` sections are
+  ignored once the new file exists and are safe to delete.
 - **Vanish reminder is a boss bar now (2026-10-25):** a vanished
   player sees a green boss bar instead of the repeating action-bar
   message; it appears on vanish (including rejoin with a persisted
@@ -370,7 +372,7 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   other silent path included).
 - **Altar spear position is configurable (2026-10-22):** the planted
   spear's display offset on the Redline Altar is now
-  `upgrading.redline-altar.spear-offset` (x / y / z, in blocks, relative
+  `upgrading.redline-altar.spear-offset` in crafting_alter/alter.yml (x / y / z, in blocks, relative
   to the spear's own facing; defaults 0 / 0 / 0.120, Aaron's measured
   values), so its position can be tuned live without a code change.
 - **Sound config format (2026-10-22):** sound effects in config.yml are
@@ -413,7 +415,7 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   heard only by players within 30 blocks; replaces the note-block chime/pling
   + firecharge layer and its rising-pitch ladder. The altar's spear-spawn
   sound (`minecraft:block.end_portal.spawn` to everyone) can be toggled with
-  `upgrading.redline-altar.spawn-sound`.
+  `upgrading.redline-altar.spawn-sound` in crafting_alter/alter.yml.
 - **Redline custom model data (2026-10-21):** base spear gets `custom_model_data` 2000,
   upgraded gets 2001 (set in `syncSpearStatsAndLore`, so reloads re-apply it).
 - **Teldaria-style dividers v3 (2026-10-19):** reverted to dashes (the ── character didn't

@@ -191,12 +191,14 @@ public class GravenConfig {
         REDLINE_FIRE_SOUND = fire[0];
         REDLINE_FIRE_VOLUME = Float.parseFloat(fire[1]);
         REDLINE_FIRE_PITCH = Float.parseFloat(fire[2]);
-        loadRedlineAltar(config);
+        // The Alter of Despair and the Redline Altar ritual both live
+        // in crafting_alter/alter.yml — load it once, share it.
+        FileConfiguration alterCfg = loadAlterConfig(config);
+        loadRedlineAltar(alterCfg);
         loadResourcePack(config);
         loadNameObfuscation(config);
         loadVanishedName(config);
-        // The Alter of Despair lives in its own file (crafting_alter/alter.yml)
-        loadAlter(loadAlterConfig(config));
+        loadAlter(alterCfg);
 
         // 3. DRACULA PLATE
         DRACULA_COOLDOWN = armorCfg.getLong("dracula.cooldown", 30L);
@@ -429,9 +431,10 @@ public class GravenConfig {
      * Loads the Alter of Despair from
      * plugins/GravenCore/crafting_alter/alter.yml (copied from the
      * jar on first run). If that file is missing, the alter section
-     * of the main config is lifted into the same shape, so an old
-     * live config still works — and if that is gone too, the code
-     * fallbacks in loadAlter carry it.
+     * and the upgrading.redline-altar section of the main config
+     * are lifted into the same shape, so an old live config still
+     * works — and if those are gone too, the code fallbacks in
+     * loadAlter/loadRedlineAltar carry it.
      */
     private static FileConfiguration loadAlterConfig(FileConfiguration config) {
         File alterDir = new File(plugin.getDataFolder(), "crafting_alter");
@@ -454,6 +457,7 @@ public class GravenConfig {
                 lifted.set(deep.getKey(), deep.getValue());
             }
         }
+        liftSection(config, "upgrading.redline-altar", lifted, "upgrading.redline-altar");
         return lifted;
     }
 

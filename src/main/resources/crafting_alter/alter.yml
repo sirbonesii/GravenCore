@@ -17,3 +17,44 @@ hex_code: "<#F8F854>"
 
 # Enchantment glint on the displayed block
 glint: true
+
+
+# ============================================================
+#   Redline Altar ritual
+# ============================================================
+# The ritual that upgrades a base Redline Spear (or a Legendary
+# armor piece, with the full spear recipe) at a dropper altar.
+upgrading:
+  redline-altar:
+    enabled: true
+    disable-smithing-mythical: false
+    disable-armor: false
+
+    ritual-duration: 10.0
+    spawn-sound: true
+
+    spear-offset:
+      x: 0.0
+      y: 0.0
+      z: 0.120
+
+    sound-effects:
+      start:
+        sound: "minecraft:block.beacon.activate"
+        volume: 100
+        pitch: 0.8
+
+      complete:
+        sound: "minecraft:entity.player.levelup"
+        volume: 100
+        pitch: 1.0
+
+      anvil:
+        sound: "minecraft:block.anvil.land"
+        volume: 100
+        pitch: 0.8
+
+      lock-in:
+        sound: "minecraft:entity.creaking.spawn"
+        volume: 100
+        pitch: 0.7

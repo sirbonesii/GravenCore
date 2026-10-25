@@ -18,6 +18,12 @@ name-obfuscation:
   obfuscated: true
   show-in-tab: false
 
+# Boss bar title shown to a vanished player (plain text renders green,
+# MiniMessage tags allowed). Both the list form below and the plain
+# vanished-name.display-name form work.
+vanished-name:
+  - display-name: "You are [👻]"
+
 upgrading:
   redline-altar:
     enabled: true

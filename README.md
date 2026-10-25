@@ -336,6 +336,13 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
 
 #### Changed
+- **Vanish reminder is a boss bar now (2026-10-25):** a vanished
+  player sees a green boss bar instead of the repeating action-bar
+  message; it appears on vanish (including rejoin with a persisted
+  vanish) and clears on unvanish and on plugin disable. Its title is
+  configurable via `vanished-name.display-name` in config.yml
+  (default "You are [👻]") and a `/gravencore reload` re-titles
+  live bars at once.
 - **Mythical set merged into TieredArmorSet (2026-10-24):** the
   standalone `MythicalArmorSet` is gone — one module now owns all six
   armor tiers (Mythical netherite + Legendary/Epic/Rare/Uncommon/

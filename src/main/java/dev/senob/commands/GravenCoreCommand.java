@@ -212,6 +212,8 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
             GravenConfig.reload();
             // TAB names + visibility follow the reloaded toggles at once
             dev.senob.listeners.NameObfuscationListener.refreshAll();
+            // Vanish boss bars pick up a reloaded vanished-name at once
+            VanishCommand.refreshBossBarTitles();
 
             NamespacedKey redlineKey = new NamespacedKey(plugin, "redline_tier");
             NamespacedKey draculaKey = new NamespacedKey(plugin, "dracula_plate");

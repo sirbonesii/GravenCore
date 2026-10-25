@@ -114,6 +114,8 @@ public class GravenCore extends JavaPlugin {
     public void onDisable() {
         // Never leave the server stuck at a slowed tick rate after a reload/stop mid-slow
         CelerityBoots.cancelActiveSlow();
+        // Never leave a stale vanish boss bar on clients after a reload/stop
+        VanishCommand.clearBossBars();
         getLogger().info("GravenCore disabled!");
     }
 }

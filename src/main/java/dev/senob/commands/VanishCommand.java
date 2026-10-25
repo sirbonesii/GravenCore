@@ -1,7 +1,11 @@
 package dev.senob.commands;
 
 import dev.senob.GravenCore;
+import dev.senob.core.GravenConfig;
 import dev.senob.core.GravenTheme;
+import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
@@ -15,7 +19,6 @@ import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,9 +40,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * get the same treatment. Admins keep seeing the vanished player,
  * whose nameplate gains a green {@code [👻] Vanished} tag and whose
  * player-list name gains a short green {@code [👻]} after the name.
- * The vanished player gets a repeating action-bar reminder so they
- * know they're hidden. The state is stored in the player's own PDC,
- * so it survives relogs.</p>
+ * The vanished player gets a green boss bar (title from config,
+ * default {@code You are [👻]}) so they know they're hidden. The state
+ * is stored in the player's own PDC, so it survives relogs.</p>
  */
 public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
 
@@ -49,28 +53,41 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
     private final NamespacedKey vanishedKey;
     // Concurrent: the async chat handler in NameObfuscationListener reads this too.
     private static final Set<UUID> vanished = ConcurrentHashMap.newKeySet();
+    // One self-reminder boss bar per vanished player, shown only to them.
+    private static final Map<UUID, BossBar> bossBars = new ConcurrentHashMap<>();
 
     /** Shared lookup for the PlaceholderAPI expansion. */
     public static boolean isVanishedId(UUID id) {
         return vanished.contains(id);
     }
 
+    /** Remove every vanish boss bar (plugin disable) so none lingers on clients. */
+    public static void clearBossBars() {
+        for (Map.Entry<UUID, BossBar> entry : bossBars.entrySet()) {
+            Player player = Bukkit.getPlayer(entry.getKey());
+            if (player != null) player.hideBossBar(entry.getValue());
+        }
+        bossBars.clear();
+    }
+
+    /** Re-title every live vanish boss bar from the reloaded config. */
+    public static void refreshBossBarTitles() {
+        Component title = bossBarTitle();
+        for (BossBar bar : bossBars.values()) bar.name(title);
+    }
+
+    /** Boss-bar title from config: MiniMessage when it parses, plain green text otherwise. */
+    private static Component bossBarTitle() {
+        try {
+            return GravenTheme.parse("<green>" + GravenConfig.VANISHED_NAME + "</green>");
+        } catch (Exception e) {
+            return Component.text(GravenConfig.VANISHED_NAME, NamedTextColor.GREEN);
+        }
+    }
+
     public VanishCommand(GravenCore plugin) {
         this.plugin = plugin;
         this.vanishedKey = new NamespacedKey(plugin, "vanished");
-
-        // Persistent self-reminder for vanished players
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                for (UUID id : vanished) {
-                    Player player = Bukkit.getPlayer(id);
-                    if (player != null) {
-                        player.sendActionBar(GravenTheme.parse("<green>You are " + TAG + "</green>"));
-                    }
-                }
-            }
-        }.runTaskTimer(plugin, 40L, 40L);
     }
 
     public boolean isVanished(Player player) {
@@ -178,6 +195,8 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
         target.getPersistentDataContainer().remove(vanishedKey);
         vanished.remove(target.getUniqueId());
         vanishTeam().removeEntry(target.getName());
+        BossBar bar = bossBars.remove(target.getUniqueId());
+        if (bar != null) target.hideBossBar(bar);
         // List name + visibility recompute (keeps an invisibility
         // scramble/hide in place if the player is invisible too)
         dev.senob.listeners.NameObfuscationListener.refresh(target);
@@ -197,6 +216,11 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
         // List name + visibility recompute (an invisible target keeps
         // its scrambled name, with the tag appended for admins)
         dev.senob.listeners.NameObfuscationListener.refresh(target);
+        // Self-reminder boss bar (replaces the old repeating action bar)
+        BossBar bossBar = bossBars.computeIfAbsent(target.getUniqueId(), id ->
+                BossBar.bossBar(bossBarTitle(),
+                        1.0f, BossBar.Color.GREEN, BossBar.Overlay.PROGRESS));
+        target.showBossBar(bossBar);
     }
 
     private Team vanishTeam() {

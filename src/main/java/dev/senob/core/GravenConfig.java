@@ -139,6 +139,10 @@ public class GravenConfig {
     /** False (default): invisible players are hidden from TAB entirely. */
     public static boolean NAME_OBFUSCATION_SHOW_IN_TAB;
 
+    // --- VANISHED NAME (boss-bar title) ---
+    /** Boss-bar title shown to a vanished player (config: vanished-name.display-name). */
+    public static String VANISHED_NAME = "You are [👻]";
+
     public static void init(JavaPlugin instance) {
         plugin = instance;
         plugin.saveDefaultConfig();
@@ -190,6 +194,7 @@ public class GravenConfig {
         loadRedlineAltar(config);
         loadResourcePack(config);
         loadNameObfuscation(config);
+        loadVanishedName(config);
         loadAlter(config);
 
         // 3. DRACULA PLATE
@@ -403,6 +408,20 @@ public class GravenConfig {
     private static void loadNameObfuscation(FileConfiguration config) {
         NAME_OBFUSCATION_ENABLED = config.getBoolean("name-obfuscation.obfuscated", true);
         NAME_OBFUSCATION_SHOW_IN_TAB = config.getBoolean("name-obfuscation.show-in-tab", false);
+    }
+
+    private static void loadVanishedName(FileConfiguration config) {
+        // Accepts both vanished-name.display-name and the list form
+        // vanished-name: [{display-name: ...}] — anything else falls back.
+        String name = config.getString("vanished-name.display-name");
+        if (name == null) {
+            List<?> entries = config.getList("vanished-name");
+            if (entries != null && !entries.isEmpty() && entries.get(0) instanceof Map<?, ?> first) {
+                Object value = first.get("display-name");
+                if (value instanceof String s) name = s;
+            }
+        }
+        VANISHED_NAME = (name == null || name.isBlank()) ? "You are [👻]" : name;
     }
 
     private static void loadAlter(FileConfiguration config) {

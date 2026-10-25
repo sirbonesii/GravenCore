@@ -195,7 +195,8 @@ public class GravenConfig {
         loadResourcePack(config);
         loadNameObfuscation(config);
         loadVanishedName(config);
-        loadAlter(config);
+        // The Alter of Despair lives in its own file (crafting_alter/alter.yml)
+        loadAlter(loadAlterConfig(config));
 
         // 3. DRACULA PLATE
         DRACULA_COOLDOWN = armorCfg.getLong("dracula.cooldown", 30L);
@@ -424,14 +425,46 @@ public class GravenConfig {
         VANISHED_NAME = (name == null || name.isBlank()) ? "You are [👻]" : name;
     }
 
-    private static void loadAlter(FileConfiguration config) {
-        ALTER_GLINT = config.getBoolean("alter.glint", true);
-        ALTER_BLOCK_ID = config.getString("alter.block", "minecraft:respawn_anchor");
-        ALTER_DISPLAY_NAME = config.getString("alter.display_name", "Alter of Despair");
-        ALTER_HEX_CODE = config.getString("alter.hex_code", "<#F8F854>");
+    /**
+     * Loads the Alter of Despair from
+     * plugins/GravenCore/crafting_alter/alter.yml (copied from the
+     * jar on first run). If that file is missing, the alter section
+     * of the main config is lifted into the same shape, so an old
+     * live config still works — and if that is gone too, the code
+     * fallbacks in loadAlter carry it.
+     */
+    private static FileConfiguration loadAlterConfig(FileConfiguration config) {
+        File alterDir = new File(plugin.getDataFolder(), "crafting_alter");
+        if (!alterDir.exists()) alterDir.mkdirs();
+        try {
+            if (plugin.getResource("crafting_alter/alter.yml") != null) {
+                plugin.saveResource("crafting_alter/alter.yml", false);
+            }
+        } catch (IllegalArgumentException e) {
+            plugin.getLogger().warning("alter.yml not found in the jar; reading the alter from config.yml.");
+        }
+        File alterFile = new File(alterDir, "alter.yml");
+        if (alterFile.exists()) {
+            return YamlConfiguration.loadConfiguration(alterFile);
+        }
+        YamlConfiguration lifted = new YamlConfiguration();
+        ConfigurationSection alter = config.getConfigurationSection("alter");
+        if (alter != null) {
+            for (Map.Entry<String, Object> deep : alter.getValues(true).entrySet()) {
+                lifted.set(deep.getKey(), deep.getValue());
+            }
+        }
+        return lifted;
     }
 
-    /** The block the Alter of Despair shows, resolved from alter.block. */
+    private static void loadAlter(FileConfiguration alterCfg) {
+        ALTER_GLINT = alterCfg.getBoolean("glint", true);
+        ALTER_BLOCK_ID = alterCfg.getString("block", "minecraft:respawn_anchor");
+        ALTER_DISPLAY_NAME = alterCfg.getString("display_name", "Alter of Despair");
+        ALTER_HEX_CODE = alterCfg.getString("hex_code", "<#F8F854>");
+    }
+
+    /** The block the Alter of Despair shows, resolved from crafting_alter/alter.yml. */
     public static org.bukkit.Material alterBlockMaterial() {
         org.bukkit.Material mat = org.bukkit.Material.matchMaterial(
                 ALTER_BLOCK_ID != null ? ALTER_BLOCK_ID : "minecraft:respawn_anchor");

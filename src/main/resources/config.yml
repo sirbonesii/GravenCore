@@ -61,27 +61,6 @@ upgrading:
 
 
 # ============================================================
-#   Alter of Despair
-# ============================================================
-# Given with /gravencore alter <username> [count]. Placing the
-# dropper spawns the glinting block display inside its block.
-alter:
-  # The block the alter shows. Drives BOTH the item's model
-  # (item_model, so the item looks like this block in hand and
-  # inventory) and the 3D block the placed display renders.
-  block: "minecraft:respawn_anchor"
-
-  # The item's display name and its color as a MiniMessage hex
-  # tag. The exact hex matters if your client animates specific
-  # colors — the default <#F8F854> is the red-shake trigger.
-  display_name: "Alter of Despair"
-  hex_code: "<#F8F854>"
-
-  # Enchantment glint on the displayed block
-  glint: true
-
-
-# ============================================================
 #   Server Resource Pack (MinePack)
 # ============================================================
 # /gravencore packreload pushes this pack to every online player,

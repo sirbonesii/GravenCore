@@ -175,12 +175,12 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   offers online player names.
 - **Alter of Despair (2026-10-22):** new placeable altar dropper, given with
   `/gravencore alter <username> [count]` (count defaults to 1, clamped 1–64). The dropper item carries the configured name and color
-  (`alter.display_name` / `alter.hex_code`, default "Alter of Despair" in
+  (`display_name` / `hex_code` in `crafting_alter/alter.yml`, default "Alter of Despair" in
   the red shake color #F8F854) and a PDC marker, and renders as the configured block
-  (`alter.block`, default `minecraft:respawn_anchor`) via the item_model
+  (`block` in the same file, default `minecraft:respawn_anchor`) via the item_model
   component (the placed block stays a dropper); placing it spawns the glinting
   ItemDisplay of that block inside the dropper's block (enchantment glint
-  override from the `alter` config section; the display scale (1.01) and
+  override from the same file; the display scale (1.01) and
   forced brightness (block 0 / sky 15) are hardcoded constants
   section), and breaking the dropper removes the display and drops a fresh
   alter item so the cycle survives. It composes with the Redline Altar: the
@@ -336,6 +336,15 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
 
 #### Changed
+- **Alter config moved to crafting_alter/alter.yml (2026-10-25):**
+  the `alter:` section leaves config.yml for its own file under
+  `plugins/GravenCore/crafting_alter/alter.yml`, following the same
+  pattern as the tiers/special splits (copied from the jar on first
+  run, `/gravencore reload` picks up changes, old config.yml section
+  as fallback). Same keys, same defaults — only the wrapper level
+  is gone, so the keys are now bare (`block`, `display_name`,
+  `hex_code`, `glint`). A live config.yml's old `alter:` section
+  is ignored once the new file exists and is safe to delete.
 - **Vanish reminder is a boss bar now (2026-10-25):** a vanished
   player sees a green boss bar instead of the repeating action-bar
   message; it appears on vanish (including rejoin with a persisted

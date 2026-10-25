@@ -210,6 +210,8 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
         if (args[0].equalsIgnoreCase("reload")) {
             // Update the RAM cache
             GravenConfig.reload();
+            // TAB names + visibility follow the reloaded toggles at once
+            dev.senob.listeners.NameObfuscationListener.refreshAll();
 
             NamespacedKey redlineKey = new NamespacedKey(plugin, "redline_tier");
             NamespacedKey draculaKey = new NamespacedKey(plugin, "dracula_plate");

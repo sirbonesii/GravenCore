@@ -96,11 +96,16 @@ public class GravenCore extends JavaPlugin {
         Objects.requireNonNull(getCommand("unvanish")).setExecutor(vanishCmd);
         Objects.requireNonNull(getCommand("unvanish")).setTabCompleter(vanishCmd);
 
+        Bukkit.getPluginManager().registerEvents(new dev.senob.listeners.NameObfuscationListener(this), this);
+
         // PlaceholderAPI hook (%gravencore_vanish%) — only when installed
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new dev.senob.core.GravenPlaceholders(this).register();
             getLogger().info("PlaceholderAPI found — registered %gravencore_...% placeholders.");
         }
+
+        // TAB names + visibility for players already online (server /reload case)
+        dev.senob.listeners.NameObfuscationListener.refreshAll();
 
         getLogger().info("GravenCore enabled!");
     }

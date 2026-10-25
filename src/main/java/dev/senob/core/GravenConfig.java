@@ -133,6 +133,12 @@ public class GravenConfig {
     public static float MYTHICAL_BOOTS_BLOCK_VOLUME;
     public static float MYTHICAL_BOOTS_BLOCK_PITCH;
 
+    // --- NAME OBFUSCATION (invisible / vanished players) ---
+    /** Scramble hidden players' names in kill-feed messages and TAB. */
+    public static boolean NAME_OBFUSCATION_ENABLED;
+    /** False (default): invisible players are hidden from TAB entirely. */
+    public static boolean NAME_OBFUSCATION_SHOW_IN_TAB;
+
     public static void init(JavaPlugin instance) {
         plugin = instance;
         plugin.saveDefaultConfig();
@@ -183,6 +189,7 @@ public class GravenConfig {
         REDLINE_FIRE_PITCH = Float.parseFloat(fire[2]);
         loadRedlineAltar(config);
         loadResourcePack(config);
+        loadNameObfuscation(config);
         loadAlter(config);
 
         // 3. DRACULA PLATE
@@ -391,6 +398,11 @@ public class GravenConfig {
         REDLINE_ALTAR_LOCK_SOUND = l[0];
         REDLINE_ALTAR_LOCK_VOLUME = Float.parseFloat(l[1]);
         REDLINE_ALTAR_LOCK_PITCH = Float.parseFloat(l[2]);
+    }
+
+    private static void loadNameObfuscation(FileConfiguration config) {
+        NAME_OBFUSCATION_ENABLED = config.getBoolean("name-obfuscation.obfuscated", true);
+        NAME_OBFUSCATION_SHOW_IN_TAB = config.getBoolean("name-obfuscation.show-in-tab", false);
     }
 
     private static void loadAlter(FileConfiguration config) {

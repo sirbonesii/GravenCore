@@ -11,6 +11,13 @@ settings:
   # Creator name shown at the bottom of item tooltips (<creator>)
   creator: "Senob"
 
+# Obfuscate player names while they have the invisibility effect:
+# kill-feed names and TAB names render scrambled while it is active.
+# show-in-tab: false (default) hides invisible players from TAB entirely.
+name-obfuscation:
+  obfuscated: true
+  show-in-tab: false
+
 upgrading:
   redline-altar:
     enabled: true

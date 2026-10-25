@@ -8,7 +8,14 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
-- **Altar armor upgrade (2026-10-24, unpushed):** a Legendary armor
+- **Name obfuscation for invisible players (2026-10-25):** while a player
+  has the Invisibility effect, their name renders scrambled in kill-feed
+  death messages (killer and victim), in regular chat, and in TAB; `name-obfuscation`
+  (`obfuscated`, default true) toggles it, and `show-in-tab: false`
+  (default) hides invisible players from TAB entirely instead of
+  showing a scrambled name. Vanished players' names are always
+  scrambled in kill-feed and chat messages, without the [👻] tag.
+- **Altar armor upgrade (2026-10-24):** a Legendary armor
   piece in the altar's center slot plus the same 8 ingredients as
   the spear recipe (Dragon's Breath ×4, Heavy Core, Netherite
   Ingot ×2, Ghast Tear) runs the same ritual and drops the

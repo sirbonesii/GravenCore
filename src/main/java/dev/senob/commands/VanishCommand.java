@@ -22,10 +22,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * /vanish and /unvanish (permission: gravencore.admin), each with an
@@ -47,7 +47,8 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
 
     private final GravenCore plugin;
     private final NamespacedKey vanishedKey;
-    private static final Set<UUID> vanished = new HashSet<>();
+    // Concurrent: the async chat handler in NameObfuscationListener reads this too.
+    private static final Set<UUID> vanished = ConcurrentHashMap.newKeySet();
 
     /** Shared lookup for the PlaceholderAPI expansion. */
     public static boolean isVanishedId(UUID id) {
@@ -176,11 +177,10 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
     public void unvanish(Player target) {
         target.getPersistentDataContainer().remove(vanishedKey);
         vanished.remove(target.getUniqueId());
-        for (Player viewer : Bukkit.getOnlinePlayers()) {
-            if (viewer != target) viewer.showPlayer(plugin, target);
-        }
         vanishTeam().removeEntry(target.getName());
-        target.playerListName(null);
+        // List name + visibility recompute (keeps an invisibility
+        // scramble/hide in place if the player is invisible too)
+        dev.senob.listeners.NameObfuscationListener.refresh(target);
     }
 
     private void applyVanish(Player target) {
@@ -193,14 +193,10 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
                 }
             }
         }
-        for (Player viewer : Bukkit.getOnlinePlayers()) {
-            if (viewer != target && !viewer.hasPermission("gravencore.admin")) {
-                viewer.hidePlayer(plugin, target);
-            }
-        }
         vanishTeam().addEntry(target.getName());
-        // TAB list gets the short tag only: green [👻] after the name
-        target.playerListName(GravenTheme.parse(target.getName() + " <green>[👻]</green>"));
+        // List name + visibility recompute (an invisible target keeps
+        // its scrambled name, with the tag appended for admins)
+        dev.senob.listeners.NameObfuscationListener.refresh(target);
     }
 
     private Team vanishTeam() {

@@ -45,10 +45,13 @@ public final class TooltipBuilder {
     // \uE005 (description) has no section in the current tooltips; unwired.
 
     /**
-     * A single glyph line in the tooltip font.
+     * A single glyph line in the tooltip font. Forced white so the glyph
+     * renders in its texture's true colors: Minecraft tints bitmap glyphs
+     * by the line's text color, and a lore line with no explicit color
+     * picks up a tint (the divider was showing purple on the server).
      */
     private static Component glyphLine(String glyph) {
-        return GravenTheme.parse("<font:" + TOOLTIP_FONT + ">" + glyph + "</font>");
+        return GravenTheme.parse("<font:" + TOOLTIP_FONT + "><white>" + glyph + "</white></font>");
     }
 
     /**

@@ -346,6 +346,11 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   so enchant sync still finds its section. The Redline spear builds its own lore,
   so its tooltip is unchanged; the description glyph (\uE005) has no section yet
   and stays unwired.
+- **Tooltip glyph lines forced white (2026-10-26):** the divider and
+  section-header glyph lines now carry an explicit white color, so Minecraft
+  renders them in their textures' true colors instead of tinting them (a
+  lore line with no explicit color was picking up a tint on the server, and
+  the divider was showing purple).
 - **Redline spear charge sequence (2026-10-25, re-measured; tail shortened 2026-10-26):** from Aaron's video —
   the charge is now 6 pulse beats (ticks 0/18/36/41/45/49 — three slow, then three rapid,
   charge chime + expanding flame ring each), then the warden pre-fire sound once at

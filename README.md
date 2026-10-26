@@ -336,6 +336,16 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
 
 #### Changed
+- **Tooltip section chrome as pack font glyphs (2026-10-26):** dividers and section
+  headers now render as textured glyphs from the server pack's `dividers.json`
+  font (`minecraft:dividers`) instead of dash lines: divider \uE000, Enchantments
+  \uE001, ATTRIBUTES \uE002, ABILITY \uE003, EFFECTS \uE004. `TooltipBuilder`
+  maps known titles to glyphs (other titles keep the dash header) and `divider()`
+  returns the divider glyph; the dash builders stay for `fitDividers`' resize pass
+  over legacy lines. `enchantSectionStale` now recognizes the glyph header line
+  so enchant sync still finds its section. The Redline spear builds its own lore,
+  so its tooltip is unchanged; the description glyph (\uE005) has no section yet
+  and stays unwired.
 - **Redline spear charge sequence (2026-10-25, re-measured; tail shortened 2026-10-26):** from Aaron's video —
   the charge is now 6 pulse beats (ticks 0/18/36/41/45/49 — three slow, then three rapid,
   charge chime + expanding flame ring each), then the warden pre-fire sound once at

@@ -32,34 +32,68 @@ public final class TooltipBuilder {
     private static final int DIVIDER_WIDTH = 17;
 
     /**
-     * The standard divider line placed between tooltip sections.
+     * The server pack's tooltip font (assets/minecraft/font/dividers.json).
+     * Its glyphs are textured section chrome: they render at their texture
+     * width, so glyph lines are never resized by fitDividers.
      */
-    public static Component divider() {
-        return divider(DIVIDER_WIDTH);
+    private static final String TOOLTIP_FONT = "minecraft:dividers";
+    private static final String DIVIDER_GLYPH = "\uE000";
+    private static final String ENCHANTMENTS_GLYPH = "\uE001";
+    private static final String ATTRIBUTES_GLYPH = "\uE002";
+    private static final String ABILITY_GLYPH = "\uE003";
+    private static final String EFFECTS_GLYPH = "\uE004";
+    // \uE005 (description) has no section in the current tooltips; unwired.
+
+    /**
+     * A single glyph line in the tooltip font.
+     */
+    private static Component glyphLine(String glyph) {
+        return GravenTheme.parse("<font:" + TOOLTIP_FONT + ">" + glyph + "</font>");
     }
 
     /**
-     * A divider line with an explicit width, in dashes.
+     * The standard divider line placed between tooltip sections.
+     */
+    public static Component divider() {
+        return glyphLine(DIVIDER_GLYPH);
+    }
+
+    /**
+     * A divider line with an explicit width, in dashes. Kept for
+     * fitDividers' resize pass over legacy dash lines; direct callers
+     * use divider(), which returns the divider glyph.
      */
     public static Component divider(int width) {
         return GravenTheme.parse("<gray>" + "-".repeat(Math.max(1, width)) + "</gray>");
     }
 
     /**
-     * A section header embedded in the middle of the divider,
-     * e.g. ──────────ATTRIBUTES──────────. The title is centered with equal
-     * line segments per side so all headers align consistently, Teldaria-style.
-     * Each section has its own title color (white ATTRIBUTES, aqua EFFECTS,
-     * gold ENCHANTMENTS).
+     * A section header. Known titles render as their textured glyph
+     * (glyphs-only, per Aaron's tooltip design); any other title falls
+     * back to the dash header below.
      */
     public static Component section(String title) {
+        String glyph = switch (title.toUpperCase()) {
+            case "ENCHANTMENTS" -> ENCHANTMENTS_GLYPH;
+            case "ATTRIBUTES" -> ATTRIBUTES_GLYPH;
+            case "ABILITY" -> ABILITY_GLYPH;
+            case "EFFECTS" -> EFFECTS_GLYPH;
+            default -> null;
+        };
+        if (glyph != null) return glyphLine(glyph);
         return section(title, sectionColor(title), DIVIDER_WIDTH);
     }
 
     /**
-     * A section header with an explicit title color and width.
-     * The total character count exactly matches width so headers align
-     * with plain dividers.
+     * A section header with an explicit title color and width, embedded
+     * in the middle of the divider, e.g. ──────────ATTRIBUTES──────────.
+     * The title is centered with equal line segments per side so all headers
+     * align consistently, Teldaria-style. Each section has its own title
+     * color (white ATTRIBUTES, aqua EFFECTS, gold ENCHANTMENTS).
+     * This is the legacy dash renderer, kept for fitDividers' resize pass;
+     * direct callers go through section(String), which maps known titles
+     * to glyphs. The total character count exactly matches width so headers
+     * align with plain dividers.
      */
     public static Component section(String title, String color, int width) {
         int left = Math.max(4, (width - title.length()) / 2);
@@ -197,10 +231,10 @@ public final class TooltipBuilder {
         for (Component line : lore) {
             String plain = PlainTextComponentSerializer.plainText().serialize(line).trim();
             if (!inSection) {
-                if (plain.contains("Enchantments")) inSection = true;
+                if (plain.contains("Enchantments") || plain.contains(ENCHANTMENTS_GLYPH)) inSection = true;
                 continue;
             }
-            if (plain.contains("-") || plain.contains("—")) break;
+            if (plain.contains("-") || plain.contains("—") || isChromeGlyphLine(plain)) break;
             shown.add(plain);
         }
 
@@ -209,6 +243,18 @@ public final class TooltipBuilder {
             actual.add(PlainTextComponentSerializer.plainText().serialize(line).trim());
         }
         return !shown.equals(actual);
+    }
+
+    /**
+     * True if a lore line's plain text is one of the tooltip font's chrome
+     * glyphs (divider or section header). Used by enchantSectionStale so a
+     * following glyph header ends the enchantments section, the way a dash
+     * line used to.
+     */
+    private static boolean isChromeGlyphLine(String plain) {
+        return plain.contains(DIVIDER_GLYPH) || plain.contains(ENCHANTMENTS_GLYPH)
+                || plain.contains(ATTRIBUTES_GLYPH) || plain.contains(ABILITY_GLYPH)
+                || plain.contains(EFFECTS_GLYPH);
     }
 
     /**

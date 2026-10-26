@@ -8,6 +8,13 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 ### [Unreleased]
 
 #### Added
+- **Pack SHA1 update command (2026-10-26):** `/gravencore pack <sha1>`
+  points the server pack at a new upload in one step: it validates the 40-hex
+  SHA1, writes it into `resource-pack.sha1` in config.yml (a plain text edit,
+  so comments and formatting survive), updates the live config, and pushes
+  the pack to every online player like `packreload` does. A later
+  `/gravencore reload` re-reads the saved value. Requires
+  `resource-pack.url` to already be set.
 - **Name obfuscation for invisible players (2026-10-25):** while a player
   has the Invisibility effect, their name renders scrambled in kill-feed
   death messages (killer and victim), in regular chat, and in TAB; `name-obfuscation`
@@ -346,6 +353,10 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   so enchant sync still finds its section. The Redline spear builds its own lore,
   so its tooltip is unchanged; the description glyph (\uE005) has no section yet
   and stays unwired.
+- **Tooltip font namespace (2026-10-26):** the tooltip font is now
+  `gravenmoor:dividers` (`assets/gravenmoor/font/dividers.json`) to match pack
+  v0.0.3, which moved the font out of the `minecraft` namespace. Glyphs and
+  mapping are unchanged.
 - **Redline spear charge sequence (2026-10-25, re-measured; tail shortened 2026-10-26):** from Aaron's video —
   the charge is now 6 pulse beats (ticks 0/18/36/41/45/49 — three slow, then three rapid,
   charge chime + expanding flame ring each), then the warden pre-fire sound once at

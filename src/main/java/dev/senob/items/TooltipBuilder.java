@@ -32,11 +32,11 @@ public final class TooltipBuilder {
     private static final int DIVIDER_WIDTH = 17;
 
     /**
-     * The server pack's tooltip font (assets/minecraft/font/dividers.json).
+     * The server pack's tooltip font (assets/gravenmoor/font/dividers.json).
      * Its glyphs are textured section chrome: they render at their texture
      * width, so glyph lines are never resized by fitDividers.
      */
-    private static final String TOOLTIP_FONT = "minecraft:dividers";
+    private static final String TOOLTIP_FONT = "gravenmoor:dividers";
     private static final String DIVIDER_GLYPH = "\uE000";
     private static final String ENCHANTMENTS_GLYPH = "\uE001";
     private static final String ATTRIBUTES_GLYPH = "\uE002";

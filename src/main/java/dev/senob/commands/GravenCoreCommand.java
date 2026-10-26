@@ -25,6 +25,10 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HexFormat;
@@ -58,7 +62,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 0) {
-            sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore <armor|weapon|config|reload|packreload|alter></red>"));
+            sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore <armor|weapon|config|reload|packreload|pack|alter></red>"));
             return true;
         }
 
@@ -193,16 +197,37 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                         "<red>Resource pack isn't configured — set resource-pack.url and a valid 40-character resource-pack.sha1 in the config, then /gravencore reload.</red>")));
                 return true;
             }
-            Component prompt = (GravenConfig.RESOURCE_PACK_PROMPT == null || GravenConfig.RESOURCE_PACK_PROMPT.isBlank())
-                    ? null : GravenTheme.parse(GravenConfig.RESOURCE_PACK_PROMPT);
-            byte[] hash = HexFormat.of().parseHex(sha1);
-            int sent = 0;
-            for (Player online : Bukkit.getOnlinePlayers()) {
-                online.setResourcePack(url, hash, prompt, GravenConfig.RESOURCE_PACK_REQUIRED);
-                sent++;
+            pushResourcePack(sender);
+            return true;
+        }
+
+        // --- PACK LOGIC ---
+        // /gravencore pack <sha1> — point the server pack at a new upload:
+        // saves the sha1 into config.yml, updates the live config, and
+        // pushes the pack to every online player (same send as packreload).
+        if (args[0].equalsIgnoreCase("pack")) {
+            if (args.length < 2) {
+                sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore pack <sha1></red>"));
+                return true;
             }
+            String sha1 = args[1].toLowerCase(Locale.ROOT);
+            if (!sha1.matches("[0-9a-f]{40}")) {
+                sender.sendMessage(GravenTheme.parse("<red>Invalid SHA1 — it must be exactly 40 hex characters.</red>"));
+                return true;
+            }
+            String url = GravenConfig.RESOURCE_PACK_URL;
+            if (url == null || url.isBlank()) {
+                sender.sendMessage(GravenTheme.parse("<red>Resource pack URL isn't set — set resource-pack.url in the config first, then run this again.</red>"));
+                return true;
+            }
+            if (!saveResourcePackSha1(sha1)) {
+                sender.sendMessage(GravenTheme.parse("<red>Could not write the new SHA1 to config.yml — the pack was not changed.</red>"));
+                return true;
+            }
+            GravenConfig.RESOURCE_PACK_SHA1 = sha1;
             sender.sendMessage(GravenTheme.prefix().append(GravenTheme.parse(
-                    "<green>Resource pack sent to " + sent + " player(s) — they'll download and apply it now.</green>")));
+                    "<green>Pack SHA1 updated and saved to config.yml.</green>")));
+            pushResourcePack(sender);
             return true;
         }
 
@@ -386,9 +411,72 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    // Pushes the currently configured pack (url + sha1 + prompt + required)
+    // to every online player. Callers validate the config first.
+    private void pushResourcePack(CommandSender sender) {
+        Component prompt = (GravenConfig.RESOURCE_PACK_PROMPT == null || GravenConfig.RESOURCE_PACK_PROMPT.isBlank())
+                ? null : GravenTheme.parse(GravenConfig.RESOURCE_PACK_PROMPT);
+        byte[] hash = HexFormat.of().parseHex(GravenConfig.RESOURCE_PACK_SHA1);
+        int sent = 0;
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            online.setResourcePack(GravenConfig.RESOURCE_PACK_URL, hash, prompt, GravenConfig.RESOURCE_PACK_REQUIRED);
+            sent++;
+        }
+        sender.sendMessage(GravenTheme.prefix().append(GravenTheme.parse(
+                "<green>Resource pack sent to " + sent + " player(s) — they'll download and apply it now.</green>")));
+    }
+
+    // Rewrites only the resource-pack.sha1 line in config.yml, leaving every
+    // other line (and comment) untouched. Bukkit's saveConfig() would drop
+    // all comments, so this stays a plain text edit. A later
+    // /gravencore reload re-reads the file and picks the saved value up.
+    // Returns false if the file could not be read or written.
+    private boolean saveResourcePackSha1(String sha1) {
+        File file = new File(plugin.getDataFolder(), "config.yml");
+        List<String> lines;
+        try {
+            lines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            return false;
+        }
+        int section = -1;
+        int shaLine = -1;
+        for (int i = 0; i < lines.size(); i++) {
+            String line = lines.get(i);
+            if (line.startsWith("resource-pack:")) {
+                section = i;
+                continue;
+            }
+            if (section >= 0) {
+                if (!line.isBlank() && !Character.isWhitespace(line.charAt(0))) break; // next top-level key
+                if (line.stripLeading().startsWith("sha1:")) {
+                    shaLine = i;
+                    break;
+                }
+            }
+        }
+        if (shaLine >= 0) {
+            String old = lines.get(shaLine);
+            int indent = old.length() - old.stripLeading().length();
+            lines.set(shaLine, " ".repeat(indent) + "sha1: \"" + sha1 + "\"");
+        } else if (section >= 0) {
+            lines.add(section + 1, "  sha1: \"" + sha1 + "\"");
+        } else {
+            lines.add("");
+            lines.add("resource-pack:");
+            lines.add("  sha1: \"" + sha1 + "\"");
+        }
+        try {
+            Files.write(file.toPath(), lines, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String @NotNull [] args) {
-        if (args.length == 1) return List.of("armor", "weapon", "config", "reload", "packreload", "alter");
+        if (args.length == 1) return List.of("armor", "weapon", "config", "reload", "packreload", "pack", "alter");
 
         if (args.length == 2) {
             if (args[0].equalsIgnoreCase("armor") || args[0].equalsIgnoreCase("weapon") || args[0].equalsIgnoreCase("alter")) {

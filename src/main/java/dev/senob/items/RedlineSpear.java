@@ -30,6 +30,8 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
@@ -68,6 +70,9 @@ public class RedlineSpear implements Listener, CustomItem {
     );
 
     private final Set<UUID> chargingPlayers = new HashSet<>();
+    // Players whose charge applied Slow Falling (only tracked when the
+    // plugin applied it — a pre-existing Slow Falling is left alone).
+    private final Set<UUID> chargeSlowFalling = new HashSet<>();
     private final Map<UUID, Long> lastRightClickTime = new HashMap<>();
     private final Map<UUID, Long> fallImmunity = new HashMap<>();
 
@@ -258,6 +263,17 @@ public class RedlineSpear implements Listener, CustomItem {
 
         chargingPlayers.add(uuid);
 
+        // Slow Falling for the charge window, until the ability is cast:
+        // no particles (the flame rings are the visual), HUD icon kept.
+        // Duration 120 ticks covers the 80-tick charge with margin; the
+        // effect is removed explicitly at fire or on cancel either way.
+        // Only applied if the player does not already have it, so a
+        // pre-existing Slow Falling is never stripped by the cleanup.
+        if (!player.hasPotionEffect(PotionEffectType.SLOW_FALLING)) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 120, 0, false, false, true));
+            chargeSlowFalling.add(uuid);
+        }
+
         new BukkitRunnable() {
             int tick = 0;
 
@@ -272,6 +288,9 @@ public class RedlineSpear implements Listener, CustomItem {
 
                 if (!player.isOnline() || player.isDead() || !holdingSpear || !stillHoldingRightClick) {
                     chargingPlayers.remove(uuid);
+                    if (chargeSlowFalling.remove(uuid) && player.isOnline()) {
+                        player.removePotionEffect(PotionEffectType.SLOW_FALLING);
+                    }
                     lastRightClickTime.remove(uuid);
                     cancel();
                     return;
@@ -312,6 +331,12 @@ public class RedlineSpear implements Listener, CustomItem {
 
                 if (tick >= FIRE_TICK) {
                     chargingPlayers.remove(uuid);
+                    // Charge over, beam cast: the Slow Falling window ends
+                    // here (the tier ≥2 launch keeps its own 3s fall
+                    // immunity for the landing).
+                    if (chargeSlowFalling.remove(uuid)) {
+                        player.removePotionEffect(PotionEffectType.SLOW_FALLING);
+                    }
                     lastRightClickTime.remove(uuid);
                     player.clearActiveItem();
 

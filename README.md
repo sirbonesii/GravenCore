@@ -383,6 +383,14 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   line underneath. Enchants stay vanilla (no header), and the old
   dash-embedded header line — including its unclosed-bold quirk — goes
   away with this.
+- **Redline charge grants Slow Falling until cast (2026-10-28):**
+  starting a spear charge applies Slow Falling I (no particles, HUD icon
+  kept) for the charge window; it is removed when the beam fires or the
+  charge is cancelled. The 120-tick duration covers the 80-tick charge
+  with margin and is only a safety net — removal is explicit either way.
+  A pre-existing Slow Falling is left alone (the plugin only tracks and
+  removes an effect it applied itself). The tier ≥2 launch keeps its
+  separate 3s fall immunity for the landing.
 - **Redline spear charge sequence (2026-10-25, re-measured; tail shortened 2026-10-26):** from Aaron's video —
   the charge is now 6 pulse beats (ticks 0/18/36/41/45/49 — three slow, then three rapid,
   charge chime + expanding flame ring each), then the warden pre-fire sound once at

@@ -1,13 +1,110 @@
 # GravenCore
 
+A Paper plugin built for the Gravenmoor SMP: custom items and armor tiers,
+upgrade rituals, a homes system, and admin tools — with sectioned tooltips
+and a live action-bar timer display.
+
+## Features
+
+- **Tiered armor sets** — six tiers from Common (leather) to Mythical
+  (netherite), each with real attribute modifiers, per-piece tuning, a
+  block system (a chance to shave flat damage off incoming attacks), live
+  durability lore, and enchantment sync that keeps tooltips current.
+- **Signature items (Unknown tier)** — the Redline Spear (a charge-up beam
+  with a 4-second pulse sequence), Dracula's Plate (Vampire's Flight and
+  lifesteal), and the Celerity Boots (Time Freeze, which stops the world
+  for 6 seconds while the wearer keeps moving). Unknown-tier items are
+  Unbreakable.
+- **Redline Altar** — a dropper ringed by 8 lodestone pedestals. Lock in
+  the spear recipe (or a Legendary armor piece with the same ingredients)
+  and the ritual forges the upgraded spear (or the Mythical piece).
+- **Alter of Despair** — a placeable altar dropper with a glinting block
+  display and a configurable block, name, and color.
+- **Homes** — a GUI for setting, teleporting to, and deleting homes, with
+  per-rank limits via LuckPerms.
+- **Vanish and name obfuscation** — `/vanish` hides a player from
+  non-admins (entity, TAB list, kill-feed, chat, advancements, mob
+  targeting); invisible players get scrambled names. A vanished player
+  sees a green `[👻]` in their action bar.
+- **Trust System** — `/trust add` teams two players so they can't hurt
+  each other; `/trust remove` dissolves the team.
+- **Admin tools** — `/invsee` for a live editable inventory view, and
+  `/gravencore pack` / `packreload` for pushing the server resource pack
+  to online players without a restart.
+- **Action-bar timers** — ability durations render left of the vanish
+  `[👻]`, cooldowns right, separated by small ` | ` dividers. Cooldowns
+  only appear once no duration is running.
+
+## Commands
+
+| Command | Permission | Description |
+| ------- | ---------- | ----------- |
+| `/gravencore armor <username> <tier>` | `gravencore.admin` | Give a full armor set (`mythical`, `legendary`, `epic`, `rare`, `uncommon`, `common`) |
+| `/gravencore weapon <username> <item> [base\|upgraded]` | `gravencore.admin` | Give a signature item (`redline`, `dracula`, `celerity`) |
+| `/gravencore alter <username> [count]` | `gravencore.admin` | Give Alter of Despair items (1–64) |
+| `/gravencore config <item> <setting> <value>` | `gravencore.admin` | Tune per-item stats on the held piece |
+| `/gravencore reload` | `gravencore.admin` | Reload config and re-sync items |
+| `/gravencore pack <sha1>` | `gravencore.admin` | Update the pack SHA1 and push to online players |
+| `/gravencore packreload` | `gravencore.admin` | Push the resource pack to online players |
+| `/vanish [player]` (`/v`) | `gravencore.admin` | Vanish a player |
+| `/unvanish [player]` (`/uv`) | `gravencore.admin` | Unvanish a player |
+| `/invsee <player>` | `gravencore.admin` | Live editable view of a player's inventory |
+| `/trust add <player>` / `/trust remove <player>` | — (any player) | Team / unteam with another player |
+| `/homes` (`/h`) | `gravehomes.member` | Homes GUI |
+| `/home <name>` | `gravehomes.member` | Teleport to a home |
+| `/sethome <name>` (`/sh`) | `gravehomes.member` | Set a home |
+| `/delhome <name>` (`/dh`) | `gravehomes.member` | Delete a home |
+| `/checkhomes` (`/ch`) | `gravehomes.admin` | Admin view of homes |
+
+## Configuration
+
+```
+plugins/GravenCore/
+├── config.yml                 # settings, name-obfuscation, vanished-name, resource-pack
+├── tiers/armor_tiers.yml      # the six armor tiers
+├── special/weapons.yml        # Redline Spear
+├── special/armor.yml          # Dracula's Plate, Celerity Boots
+├── crafting_alter/alter.yml   # Alter of Despair, Redline Altar ritual
+└── homes/                     # homes_config.yml (limits), homes_db.yml (data)
+```
+
+Split files are copied from the jar on first run, and `/gravencore reload`
+picks up changes (homes limits need a server restart). Old sections left
+in a live `config.yml` are ignored and safe to delete.
+
+## Requirements
+
+- Paper 1.21.4, Java 21
+- PlaceholderAPI (optional — enables `%gravencore_vanish%` and
+  `%gravencore_invis_name%`)
+- TAB (optional — for the vanish tag in the player list)
+- The Gravenmoor server resource pack (for the glyph tooltip chrome —
+  dividers and section headers render as pack font glyphs, so without
+  the pack those lines won't render)
+
 ## Changelog
 
 All notable changes to the core system of GravenCore are documented here.
-Going forward, every change is logged under one of: **Added**, **Removed**, **Changed**.
+Every change is logged under one of: **Added**, **Changed**. Entries are
+newest first within each section.
 
 ### [Unreleased]
 
 #### Added
+- **Trust System (2026-10-28):** `/trust add <player>` teams
+  two players — neither can hurt the other (melee, projectiles, and the
+  Redline beam, which skips trusted players outright since its fire and
+  knockback bypass the damage event) — and both sides see
+  "[Gravenmoor] <PlayerName> is now trusted." in chat. `/trust remove
+  <player>` dissolves the team (message: "...is no longer trusted."),
+  and remove works while the target is offline. Trust lives in
+  `trusts.yml` (UUID pairs, saved on every change), so it survives
+  restarts; one add writes both directions, one remove clears both.
+  CombatLogger ignores trust-cancelled hits, so sparring with a trusted
+  player no longer combat-tags either of you. No permission gate — any
+  player can use it. Not covered: TNT ignited by a player, lingering
+  potion clouds, end crystals (damage cannot be attributed to a player),
+  and Time Freeze (deals no damage).
 - **Name obfuscation for invisible players (2026-10-25):** while a player
   has the Invisibility effect, their name renders scrambled in kill-feed
   death messages (killer and victim), in regular chat, and in TAB; `name-obfuscation`
@@ -276,6 +373,24 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   (`dracula_blockrate`/`dracula_blockpower`), tunable via `/gravencore config dracula
   <blockrate|blockpower>` (tab-completed); Block Rate (✦ teal) and Block Power (🔥 amber)
   shown in the ATTRIBUTES tooltip section.
+- **Mythical block system (2026-10-18):** while wearing at least one set piece, incoming attacks
+  have an `armor.mythical.block-rate`% chance (default 25.0) to trigger a block that subtracts
+  `armor.mythical.block-power` flat damage (default 4.0), with a shield-clang sound and crit
+  particles on proc. `MythicalArmorSet` is now also a Listener, registered in `onEnable`. Block
+  Rate (✦ teal, shown as %) and Block Power (🔥 amber, +flat) now appear in the ATTRIBUTES section;
+  `TooltipBuilder.attribute()` gained a no-plus-prefix overload for percent stats.
+- **Block stats per-item tunable (2026-10-18):** block rate/power are now per-piece PDC values
+  (defaulting from `armor.mythical.block-rate`/`block-power`), editable in-game via
+  `/gravencore config mythical <blockrate|blockpower> <value>` while holding the piece (tab-completed).
+  When hit, the worn piece with the highest block rate does the blocking; the tooltip shows each
+  piece's own values.
+- **Reload message fix (2026-10-18):** `/gravencore reload` printed raw `TextComponentImpl{...}`
+  garbage — `GravenTheme.prefix()` returns a Component and was being string-concatenated, which
+  called `toString()` on it. Now properly appended as a component.
+- **Lore hardcoded (2026-10-18):** item lore text is no longer read from the config — the
+  Redline spear lore, Dracula ABILITY lines and Dracula EFFECTS lines now live as constants in
+  `RedlineSpear`/`DraculaPlate`. Stat numbers still come from config (placeholders keep working),
+  but the text itself can't be broken by config edits. Dead `lore:`/`effects:` keys removed.
 - **Mythical armor set prototype (2026-10-17):** new `MythicalArmorSet` module — a full
   netherite armor set (helmet/chestplate/leggings/boots) sharing the Mythical tier tooltip
   chrome (tier line, indented Durability: Unbreakable, ATTRIBUTES — no "Created by" footer). ATTRIBUTES
@@ -304,24 +419,6 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
 - **Tab completion fix (2026-10-17):** `/gravencore config` was suggesting `armor` as the second
   word, but the command expects `mythical` — now completes `redline|dracula|mythical` (give keeps
   `redline|dracula|armor` → `mythical` → `helmet|chestplate|leggings|boots|set`).
-- **Mythical block system (2026-10-18):** while wearing at least one set piece, incoming attacks
-  have an `armor.mythical.block-rate`% chance (default 25.0) to trigger a block that subtracts
-  `armor.mythical.block-power` flat damage (default 4.0), with a shield-clang sound and crit
-  particles on proc. `MythicalArmorSet` is now also a Listener, registered in `onEnable`. Block
-  Rate (✦ teal, shown as %) and Block Power (🔥 amber, +flat) now appear in the ATTRIBUTES section;
-  `TooltipBuilder.attribute()` gained a no-plus-prefix overload for percent stats.
-- **Block stats per-item tunable (2026-10-18):** block rate/power are now per-piece PDC values
-  (defaulting from `armor.mythical.block-rate`/`block-power`), editable in-game via
-  `/gravencore config mythical <blockrate|blockpower> <value>` while holding the piece (tab-completed).
-  When hit, the worn piece with the highest block rate does the blocking; the tooltip shows each
-  piece's own values.
-- **Reload message fix (2026-10-18):** `/gravencore reload` printed raw `TextComponentImpl{...}`
-  garbage — `GravenTheme.prefix()` returns a Component and was being string-concatenated, which
-  called `toString()` on it. Now properly appended as a component.
-- **Lore hardcoded (2026-10-18):** item lore text is no longer read from the config — the
-  Redline spear lore, Dracula ABILITY lines and Dracula EFFECTS lines now live as constants in
-  `RedlineSpear`/`DraculaPlate`. Stat numbers still come from config (placeholders keep working),
-  but the text itself can't be broken by config edits. Dead `lore:`/`effects:` keys removed.
 - **Tooltip system prototype (2026-10-17):** new `TooltipBuilder` utility that composes sectioned
   item tooltips (tier line, dividers, `ATTRIBUTES` / `EFFECTS` headers, creator footer) so item
   classes only declare content. New `ItemTier` enum (currently only `MYTHICAL`; more tiers later).
@@ -333,42 +430,8 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   (new `weapons.dracula.effects` key, `<lifesteal>` placeholder).
 - **DraculaPlate tier line:** shows `Tier: Mythical` (new `weapons.dracula.tier` key, read via
   `ItemTier.fromId`, ready for the full tier system later).
-- `src/main/resources/config.yml.backup` — verbatim backup of the pre-migration config file.
 
 #### Changed
-- **Tooltip section chrome as pack font glyphs (2026-10-26):** dividers and section
-  headers now render as textured glyphs from the server pack's `dividers.json`
-  font (`minecraft:dividers`) instead of dash lines: divider \uE000, Enchantments
-  \uE001, ATTRIBUTES \uE002, ABILITY \uE003, EFFECTS \uE004. `TooltipBuilder`
-  maps known titles to glyphs (other titles keep the dash header) and `divider()`
-  returns the divider glyph; the dash builders stay for `fitDividers`' resize pass
-  over legacy lines. `enchantSectionStale` now recognizes the glyph header line
-  so enchant sync still finds its section. The Redline spear builds its own lore,
-  so its tooltip is unchanged; the description glyph (\uE005) has no section yet
-  and stays unwired.
-- **Tooltip glyph lines forced white (2026-10-26):** the divider and
-  section-header glyph lines now carry an explicit white color, so Minecraft
-  renders them in their textures' true colors instead of tinting them (a
-  lore line with no explicit color was picking up a tint on the server, and
-  the divider was showing purple).
-- **Redline spear charge trimmed (2026-10-26):** pre-fire 58 → 50,
-  beam 90 → 80, so the full charge is 4.0s instead of 4.5s. The 6 pulse beats
-  (0/18/36/41/45/49) are untouched; the pre-fire sound still lands right after
-  the last pulse, and the pre-fire → beam gap stays ~30 ticks.
-- **Vanish tag stripped from kill-feed (2026-10-27):** the
-  `[👻] Vanished` suffix was surviving in death messages even though the
-  strip code was there — the team suffix parsed as two nodes (a bare space
-  plus the green tag), so the exact-match strip never lined up. The suffix
-  now keeps its space inside the color tag (visually identical), and the
-  strip has a fallback that drops the tag text on its own, so the tag can
-  no longer leak through kill-feed either way.
-- **Dracula bat form exempt from name obfuscation (2026-10-27):**
-  Vampire's Flight runs on an invisibility potion, and the obfuscation
-  listener treated that like any invisible player — scrambled TAB/chat
-  names and hidden from TAB, i.e. the vanish suite. Bat-form players now
-  keep their normal name in TAB, chat and kill-feed; the ability still
-  hides its own way (potion + stripped armor + bat swarm). A player who is
-  also vanished still gets the full vanish treatment.
 - **Durability lore refreshes on Mending (2026-10-28):** the
   "Durability: actual/max" line only moved on damage events, so a Mended
   item looked stuck at its last damaged value while its real durability
@@ -407,20 +470,6 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   it is gone and the text "ABILITY: VAMPIRE'S FLIGHT" header becomes the
   ABILITIES banner with "VAMPIRE'S FLIGHT" kept as its own dark red
   bold line underneath. The divider before the creator footer stays.
-- **Trust System (2026-10-28):** `/trust add <player>` teams
-  two players — neither can hurt the other (melee, projectiles, and the
-  Redline beam, which skips trusted players outright since its fire and
-  knockback bypass the damage event) — and both sides see
-  "[Gravenmoor] <PlayerName> is now trusted." in chat. `/trust remove
-  <player>` dissolves the team (message: "...is no longer trusted."),
-  and remove works while the target is offline. Trust lives in
-  `trusts.yml` (UUID pairs, saved on every change), so it survives
-  restarts; one add writes both directions, one remove clears both.
-  CombatLogger ignores trust-cancelled hits, so sparring with a trusted
-  player no longer combat-tags either of you. No permission gate — any
-  player can use it. Not covered: TNT ignited by a player, lingering
-  potion clouds, end crystals (damage cannot be attributed to a player),
-  and Time Freeze (deals no damage).
 - **Vanish indicator moved to the action bar (2026-10-28):**
   the "You are [👻]" boss bar is gone. A vanished player now sees just
   a green `[👻]` in their action bar, in the middle of the timers —
@@ -437,6 +486,39 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   earlier boss-bar-only options (progress 0, pack sprites). The
   `vanished-name` config key is now unused (left in place); TAB `[👻]`
   tags and chat messages are untouched.
+- **Vanish tag stripped from kill-feed (2026-10-27):** the
+  `[👻] Vanished` suffix was surviving in death messages even though the
+  strip code was there — the team suffix parsed as two nodes (a bare space
+  plus the green tag), so the exact-match strip never lined up. The suffix
+  now keeps its space inside the color tag (visually identical), and the
+  strip has a fallback that drops the tag text on its own, so the tag can
+  no longer leak through kill-feed either way.
+- **Dracula bat form exempt from name obfuscation (2026-10-27):**
+  Vampire's Flight runs on an invisibility potion, and the obfuscation
+  listener treated that like any invisible player — scrambled TAB/chat
+  names and hidden from TAB, i.e. the vanish suite. Bat-form players now
+  keep their normal name in TAB, chat and kill-feed; the ability still
+  hides its own way (potion + stripped armor + bat swarm). A player who is
+  also vanished still gets the full vanish treatment.
+- **Tooltip section chrome as pack font glyphs (2026-10-26):** dividers and section
+  headers now render as textured glyphs from the server pack's `dividers.json`
+  font (`minecraft:dividers`) instead of dash lines: divider \uE000, Enchantments
+  \uE001, ATTRIBUTES \uE002, ABILITY \uE003, EFFECTS \uE004. `TooltipBuilder`
+  maps known titles to glyphs (other titles keep the dash header) and `divider()`
+  returns the divider glyph; the dash builders stay for `fitDividers`' resize pass
+  over legacy lines. `enchantSectionStale` now recognizes the glyph header line
+  so enchant sync still finds its section. The Redline spear builds its own lore,
+  so its tooltip is unchanged; the description glyph (\uE005) has no section yet
+  and stays unwired.
+- **Tooltip glyph lines forced white (2026-10-26):** the divider and
+  section-header glyph lines now carry an explicit white color, so Minecraft
+  renders them in their textures' true colors instead of tinting them (a
+  lore line with no explicit color was picking up a tint on the server, and
+  the divider was showing purple).
+- **Redline spear charge trimmed (2026-10-26):** pre-fire 58 → 50,
+  beam 90 → 80, so the full charge is 4.0s instead of 4.5s. The 6 pulse beats
+  (0/18/36/41/45/49) are untouched; the pre-fire sound still lands right after
+  the last pulse, and the pre-fire → beam gap stays ~30 ticks.
 - **Redline spear charge sequence (2026-10-25, re-measured; tail shortened 2026-10-26):** from Aaron's video —
   the charge is now 6 pulse beats (ticks 0/18/36/41/45/49 — three slow, then three rapid,
   charge chime + expanding flame ring each), then the warden pre-fire sound once at
@@ -500,11 +582,6 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   later at tick 90 with the new `weapons.redline.sound-effects.fire` sound
   (default warden sonic_boom, 100, 0.6) ahead of the existing blast sounds. The end-of-beam
   flame rings still expand as before.
-- **packreload API fix:** the command now calls Paper's `setResourcePack`
-  (URL, byte-hash, prompt, force) — the `sendResourcePack` overloads it was
-  written against don't exist in the Paper 1.21.4 API, so the first build
-  failed to compile. The config SHA1 is converted from hex to bytes with
-  `HexFormat`.
 - **Enchantments now apply live (2026-10-22):** the Mythical set, Dracula's
   Plate and Celerity Boots bake their enchantments into the lore's
   Enchantments section, which used to go stale — enchant a piece and the
@@ -565,3 +642,11 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   the migration).
 - **Mythical tier color (2026-10-17):** tier name now renders in `#F8F8A0` (was purple
   `0xAA00AA`).
+
+- **packreload API fix:** the command now calls Paper's `setResourcePack`
+  (URL, byte-hash, prompt, force) — the `sendResourcePack` overloads it was
+  written against don't exist in the Paper 1.21.4 API, so the first build
+  failed to compile. The config SHA1 is converted from hex to bytes with
+  `HexFormat`.
+
+> Note: `src/main/resources/config.yml.backup` is a verbatim backup of the pre-migration config file, kept in the repo for reference.

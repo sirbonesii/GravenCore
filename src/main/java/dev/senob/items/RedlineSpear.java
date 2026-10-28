@@ -72,11 +72,12 @@ public class RedlineSpear implements Listener, CustomItem {
     private final Map<UUID, Long> fallImmunity = new HashMap<>();
 
     // New charge sequence (Aaron's video, re-measured 2026-10-25, tail shortened
-    // 2026-10-26): hold right-click for 6 pulse beats — three slow (18 ticks
-    // apart), then three rapid (4 apart) — then the warden pre-fire sound, then
-    // the beam ~32 ticks later, right as the charge sound ends — ~90 ticks total.
-    private static final int PRE_FIRE_TICK = 58;
-    private static final int FIRE_TICK = 90;
+    // 2026-10-26, trimmed again 2026-10-26): hold right-click for 6 pulse beats
+    // — three slow (18 ticks apart), then three rapid (4 apart) — then the
+    // warden pre-fire sound, then the beam ~30 ticks later, right as the
+    // charge sound ends — ~80 ticks total.
+    private static final int PRE_FIRE_TICK = 50;
+    private static final int FIRE_TICK = 80;
     private static final int RING_POINTS = 96;
     private static final int RING_LAYERS = 2;
     private static final int SHIELD_DURABILITY_DAMAGE = 180;
@@ -305,7 +306,7 @@ public class RedlineSpear implements Listener, CustomItem {
 
                     cooldownManager.setCooldown(player, COOLDOWN_TYPE, cdSeconds);
 
-                    // The beam fires ~32 ticks after the pre-fire sound, right as
+                    // The beam fires ~30 ticks after the pre-fire sound, right as
                     // the charge sound ends, and the fire sound (sonic_boom)
                     // plays inside fireRedlineBlast
                     fireRedlineBlast(player, item, tier);

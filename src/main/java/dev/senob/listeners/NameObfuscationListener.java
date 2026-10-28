@@ -4,6 +4,7 @@ import dev.senob.GravenCore;
 import dev.senob.commands.VanishCommand;
 import dev.senob.core.GravenConfig;
 import dev.senob.core.GravenTheme;
+import dev.senob.items.DraculaPlate;
 import io.papermc.paper.chat.ChatRenderer;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
@@ -55,7 +56,11 @@ public class NameObfuscationListener implements Listener {
 
     /** Recompute one player's TAB name and TAB visibility from the current rules. */
     public static void refresh(Player target) {
-        boolean isInvis = target.hasPotionEffect(PotionEffectType.INVISIBILITY);
+        // Dracula bat form runs on an invisibility potion, but it is not
+        // a vanish: exempt it, or every bat-form player trips the whole
+        // invisible-player suite (scrambled TAB/chat, hidden from TAB).
+        boolean isInvis = target.hasPotionEffect(PotionEffectType.INVISIBILITY)
+                && !DraculaPlate.isVampireActive(target.getUniqueId());
         if (isInvis) invisible.add(target.getUniqueId());
         else invisible.remove(target.getUniqueId());
         boolean vanished = VanishCommand.isVanishedId(target.getUniqueId());
@@ -155,7 +160,8 @@ public class NameObfuscationListener implements Listener {
     private static boolean scrambleInChat(Player player) {
         if (VanishCommand.isVanishedId(player.getUniqueId())) return true;
         return GravenConfig.NAME_OBFUSCATION_ENABLED
-                && player.hasPotionEffect(PotionEffectType.INVISIBILITY);
+                && player.hasPotionEffect(PotionEffectType.INVISIBILITY)
+                && !DraculaPlate.isVampireActive(player.getUniqueId());
     }
 
     private static Component scramble(Component message, Player player) {
@@ -165,9 +171,19 @@ public class NameObfuscationListener implements Listener {
                 .build());
         // A vanished player's name carries the vanish team suffix in
         // broadcasts — strip it, or the tag gives them away anyway.
+        // The suffix used to parse as two nodes (a bare " " plus the green
+        // tag), so the exact " [👻] Vanished" match never lined up — that is
+        // why the tag survived in kill-feed. The suffix now keeps its space
+        // inside the color tag (one node), and this fallback drops the tag
+        // text on its own so older suffix structures still lose the tag
+        // (leaving only a stray space) instead of leaking it.
         if (VanishCommand.isVanishedId(player.getUniqueId())) {
             out = out.replaceText(TextReplacementConfig.builder()
                     .matchLiteral(" [👻] Vanished")
+                    .replacement(Component.empty())
+                    .build());
+            out = out.replaceText(TextReplacementConfig.builder()
+                    .matchLiteral("[👻] Vanished")
                     .replacement(Component.empty())
                     .build());
         }

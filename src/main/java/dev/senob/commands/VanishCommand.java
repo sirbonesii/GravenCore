@@ -228,7 +228,7 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
         Team team = scoreboard.getTeam(TEAM_NAME);
         if (team == null) {
             team = scoreboard.registerNewTeam(TEAM_NAME);
-            team.suffix(GravenTheme.parse(" <green>" + TAG + "</green>"));
+            team.suffix(GravenTheme.parse("<green> " + TAG + "</green>"));
         }
         return team;
     }

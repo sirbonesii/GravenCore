@@ -55,6 +55,16 @@ public class DraculaPlate implements Listener, CustomItem {
     private static final Set<UUID> activeVampires = new HashSet<>();
 
     /**
+     * True while this player is in Vampire's Flight (bat form). The
+     * name-obfuscation rules exempt bat-form players: the ability hides
+     * its own way (invisibility potion + stripped armor + bat swarm) and
+     * must not trip the invisible-player vanish suite.
+     */
+    public static boolean isVampireActive(UUID uuid) {
+        return activeVampires.contains(uuid);
+    }
+
+    /**
      * Hardcoded lore templates — lore text lives here, not in the config, by design.
      * Placeholders (&lt;duration&gt;, &lt;cooldown&gt;, &lt;creator&gt;, &lt;lifesteal&gt;)
      * are replaced with live values at sync time.

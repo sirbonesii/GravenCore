@@ -351,6 +351,24 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   renders them in their textures' true colors instead of tinting them (a
   lore line with no explicit color was picking up a tint on the server, and
   the divider was showing purple).
+- **Redline spear charge trimmed (2026-10-26):** pre-fire 58 → 50,
+  beam 90 → 80, so the full charge is 4.0s instead of 4.5s. The 6 pulse beats
+  (0/18/36/41/45/49) are untouched; the pre-fire sound still lands right after
+  the last pulse, and the pre-fire → beam gap stays ~30 ticks.
+- **Vanish tag stripped from kill-feed (2026-10-27):** the
+  `[👻] Vanished` suffix was surviving in death messages even though the
+  strip code was there — the team suffix parsed as two nodes (a bare space
+  plus the green tag), so the exact-match strip never lined up. The suffix
+  now keeps its space inside the color tag (visually identical), and the
+  strip has a fallback that drops the tag text on its own, so the tag can
+  no longer leak through kill-feed either way.
+- **Dracula bat form exempt from name obfuscation (2026-10-27):**
+  Vampire's Flight runs on an invisibility potion, and the obfuscation
+  listener treated that like any invisible player — scrambled TAB/chat
+  names and hidden from TAB, i.e. the vanish suite. Bat-form players now
+  keep their normal name in TAB, chat and kill-feed; the ability still
+  hides its own way (potion + stripped armor + bat swarm). A player who is
+  also vanished still gets the full vanish treatment.
 - **Redline spear charge sequence (2026-10-25, re-measured; tail shortened 2026-10-26):** from Aaron's video —
   the charge is now 6 pulse beats (ticks 0/18/36/41/45/49 — three slow, then three rapid,
   charge chime + expanding flame ring each), then the warden pre-fire sound once at

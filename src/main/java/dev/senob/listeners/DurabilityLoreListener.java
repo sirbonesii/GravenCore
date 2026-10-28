@@ -6,6 +6,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerItemDamageEvent;
+import org.bukkit.event.player.PlayerItemMendEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -53,7 +54,31 @@ public class DurabilityLoreListener implements Listener {
         // The event fires before damage is applied, so account for it now.
         int max = damageable.getMaxDamage();
         int remaining = Math.max(0, max - damageable.getDamage() - event.getDamage());
+        updateLoreLine(item, meta, remaining, max);
+    }
 
+    /**
+     * Mending repairs never refreshed the lore line — it only moved on
+     * damage events — so a Mended item looked stuck at its last damaged
+     * value (e.g. 577/2096) even while its real durability climbed. The
+     * repair itself always worked; only the display was stale.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onItemMend(PlayerItemMendEvent event) {
+        ItemStack item = event.getItem();
+        if (item == null || !item.hasItemMeta()) return;
+        ItemMeta meta = item.getItemMeta();
+        if (!(meta instanceof Damageable damageable)) return;
+        if (!isTracked(meta.getPersistentDataContainer())) return;
+
+        // The event fires before the repair is applied, so account for
+        // it now, capped at full.
+        int max = damageable.getMaxDamage();
+        int remaining = Math.min(max, max - damageable.getDamage() + event.getRepairAmount());
+        updateLoreLine(item, meta, remaining, max);
+    }
+
+    private void updateLoreLine(ItemStack item, ItemMeta meta, int remaining, int max) {
         List<Component> lore = meta.lore();
         if (lore == null) return;
         for (int i = 0; i < lore.size(); i++) {

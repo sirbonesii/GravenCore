@@ -188,6 +188,21 @@ public class RedlineSpear implements Listener, CustomItem {
         for (String line : LORE) {
             if (lungeEnchant != null && line.contains("Lunge IV")) continue;
 
+            // Glyph chrome, like the other tooltips: dash dividers become
+            // the divider glyph, and the ABILITY header becomes the
+            // ABILITIES banner with the ability name kept as its own line
+            // (the old dash-embedded header line goes away with this,
+            // including its unclosed-bold quirk).
+            if (line.equals("<gray>—————————————————</gray>")) {
+                finalLore.add(TooltipBuilder.divider());
+                continue;
+            }
+            if (line.contains("CRIMSON PIERCER")) {
+                finalLore.add(TooltipBuilder.section("ABILITY"));
+                finalLore.add(GravenTheme.parse("<gold><bold>CRIMSON PIERCER</bold></gold>"));
+                continue;
+            }
+
             String parsed = line
                     .replace("<ability_damage>", String.valueOf(abilityDamage))
                     .replace("<range>", String.valueOf(abilityRange))

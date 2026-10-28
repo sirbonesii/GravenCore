@@ -369,6 +369,20 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   keep their normal name in TAB, chat and kill-feed; the ability still
   hides its own way (potion + stripped armor + bat swarm). A player who is
   also vanished still gets the full vanish treatment.
+- **Durability lore refreshes on Mending (2026-10-28):** the
+  "Durability: actual/max" line only moved on damage events, so a Mended
+  item looked stuck at its last damaged value while its real durability
+  climbed — the repair itself always worked, only the display was stale.
+  `DurabilityLoreListener` now handles `PlayerItemMendEvent` too (repair
+  accounted for before it applies, capped at full), sharing the update
+  with the damage handler.
+- **Redline tooltip glyph chrome (2026-10-28):** the spear's
+  lore now uses the same `dividers.json` chrome as the other tooltips:
+  dash dividers become the divider glyph and the ABILITY header becomes
+  the ABILITIES banner with "CRIMSON PIERCER" kept as its own gold bold
+  line underneath. Enchants stay vanilla (no header), and the old
+  dash-embedded header line — including its unclosed-bold quirk — goes
+  away with this.
 - **Redline spear charge sequence (2026-10-25, re-measured; tail shortened 2026-10-26):** from Aaron's video —
   the charge is now 6 pulse beats (ticks 0/18/36/41/45/49 — three slow, then three rapid,
   charge chime + expanding flame ring each), then the warden pre-fire sound once at

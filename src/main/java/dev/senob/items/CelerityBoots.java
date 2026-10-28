@@ -24,7 +24,6 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
@@ -79,10 +78,7 @@ public class CelerityBoots implements Listener, CustomItem {
         plugin.getLogger().info("Celerity Boots module initialized!");
     }
 
-    /**
-     * The PDC key marking the boots. Registered with DurabilityLoreListener
-     * so the durability lore line stays live as the boots take damage.
-     */
+    /** The PDC key marking the boots. */
     public NamespacedKey idKey() {
         return bootsKey;
     }
@@ -171,15 +167,10 @@ public class CelerityBoots implements Listener, CustomItem {
 
         meta.displayName(GravenTheme.parse("<color:#F8F8BC><italic>Celerity Boots</italic></color>"));
         meta.itemName(GravenTheme.parse("<color:#F8F8BC>Celerity Boots</color>"));
-        meta.setUnbreakable(false);
+        // Unknown tier is Unbreakable, like the spear and the plate —
+        // the boots no longer take durability damage at all.
+        meta.setUnbreakable(true);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-
-        int maxDurability = GravenConfig.MYTHICAL_BOOTS_DURABILITY;
-        int remainingDurability = maxDurability;
-        if (meta instanceof Damageable damageable) {
-            damageable.setMaxDamage(maxDurability);
-            remainingDurability = Math.max(0, maxDurability - damageable.getDamage());
-        }
 
         meta.removeAttributeModifier(Attribute.ARMOR);
         meta.removeAttributeModifier(Attribute.ARMOR_TOUGHNESS);
@@ -198,7 +189,7 @@ public class CelerityBoots implements Listener, CustomItem {
 
         List<Component> lore = new ArrayList<>();
         lore.add(TooltipBuilder.tierLine(tier));
-        lore.add(TooltipBuilder.durabilityLine("<green>" + remainingDurability + "/" + maxDurability + "</green>"));
+        lore.add(TooltipBuilder.durabilityLine("<blue>Unbreakable</blue>"));
         List<Component> enchants = TooltipBuilder.enchantLines(meta);
         if (!enchants.isEmpty()) {
             lore.add(TooltipBuilder.section("Enchantments"));

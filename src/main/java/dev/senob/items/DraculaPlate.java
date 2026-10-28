@@ -171,8 +171,16 @@ public class DraculaPlate implements Listener, CustomItem {
         lore.add(TooltipBuilder.attribute("🛡", "Defense", "#ADD8E6", formatStat(GravenConfig.DRACULA_ARMOR)));
         lore.add(TooltipBuilder.attribute("✦", "Block Rate", "#5EEAD4", formatStat(blockRate) + "%", false));
         lore.add(TooltipBuilder.attribute("🔥", "Block Power", "#FCD34D", formatStat(blockPower)));
-        lore.add(TooltipBuilder.divider());
+        // No divider above the ABILITY section — the banner glyph is its
+        // own separator (same treatment as the spear).
         for (String line : LORE) {
+            // Glyph chrome: the text header becomes the ABILITIES banner
+            // with the ability name kept as its own line.
+            if (line.contains("VAMPIRE'S FLIGHT")) {
+                lore.add(TooltipBuilder.section("ABILITY"));
+                lore.add(GravenTheme.parse("<dark_red><bold>VAMPIRE'S FLIGHT</bold></dark_red>"));
+                continue;
+            }
             String parsed = line
                     .replace("<duration>", String.valueOf(durationSec))
                     .replace("<cooldown>", String.valueOf(cooldownSec))

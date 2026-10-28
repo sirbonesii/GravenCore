@@ -391,6 +391,22 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   A pre-existing Slow Falling is left alone (the plugin only tracks and
   removes an effect it applied itself). The tier ≥2 launch keeps its
   separate 3s fall immunity for the landing.
+- **Redline top divider removed (2026-10-28):** the divider
+  glyph between the Tier line and the ABILITIES banner is gone — the
+  banner is its own separator, so it was redundant. The dividers after
+  CRIMSON PIERCER and after the stats stay.
+- **Unknown tier is Unbreakable (2026-10-28):** the spear and
+  Dracula's Plate already were; the Celerity Boots were the odd one out
+  (2096 durability + live durability line). The boots are now
+  `setUnbreakable(true)` with the plate-style "Durability: Unbreakable"
+  lore line, and the durability/max-damage block is gone from their
+  sync. Note: the `mythical-boots` durability config key no longer
+  does anything — left in place, not removed.
+- **Dracula's Plate ability divider fixed (2026-10-28):** the
+  ability part now matches the spear's glyph chrome — the divider above
+  it is gone and the text "ABILITY: VAMPIRE'S FLIGHT" header becomes the
+  ABILITIES banner with "VAMPIRE'S FLIGHT" kept as its own dark red
+  bold line underneath. The divider before the creator footer stays.
 - **Redline spear charge sequence (2026-10-25, re-measured; tail shortened 2026-10-26):** from Aaron's video —
   the charge is now 6 pulse beats (ticks 0/18/36/41/45/49 — three slow, then three rapid,
   charge chime + expanding flame ring each), then the warden pre-fire sound once at

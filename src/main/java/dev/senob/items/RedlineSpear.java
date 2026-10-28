@@ -59,7 +59,8 @@ public class RedlineSpear implements Listener, CustomItem {
      */
     private static final List<String> LORE = List.of(
             "<gray>Lunge IV</gray>",
-            "<gray>—————————————————</gray>",
+            // No divider above the ABILITY section — the banner glyph is
+            // its own separator (the top divider was dropped 2026-10-28).
             "<gold><bold>ABILITY</gold><gray>:</gray> <gold><bold>CRIMSON PIERCER</bold></gold>",
             "<gray>—————————————————</gray>",
             "<dark_gray>• <green>Ability Damage</green><gray>:</gray> <red><ability_damage> ❤</red>",

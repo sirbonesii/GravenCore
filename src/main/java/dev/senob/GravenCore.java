@@ -3,6 +3,7 @@ package dev.senob;
 import dev.senob.commands.BountyCommand;
 import dev.senob.commands.GravenCoreCommand;
 import dev.senob.commands.InvSeeCommand;
+import dev.senob.commands.TrustCommand;
 import dev.senob.commands.VanishCommand;
 import dev.senob.core.CooldownManager;
 import dev.senob.core.GravenConfig;
@@ -96,6 +97,11 @@ public class GravenCore extends JavaPlugin {
         Objects.requireNonNull(getCommand("unvanish")).setExecutor(vanishCmd);
         Objects.requireNonNull(getCommand("unvanish")).setTabCompleter(vanishCmd);
 
+        TrustCommand trustCmd = new TrustCommand(this);
+        Bukkit.getPluginManager().registerEvents(trustCmd, this);
+        Objects.requireNonNull(getCommand("trust")).setExecutor(trustCmd);
+        Objects.requireNonNull(getCommand("trust")).setTabCompleter(trustCmd);
+
         Bukkit.getPluginManager().registerEvents(new dev.senob.listeners.NameObfuscationListener(this), this);
 
         // PlaceholderAPI hook (%gravencore_vanish%) — only when installed
@@ -114,8 +120,6 @@ public class GravenCore extends JavaPlugin {
     public void onDisable() {
         // Never leave the server stuck at a slowed tick rate after a reload/stop mid-slow
         CelerityBoots.cancelActiveSlow();
-        // Never leave a stale vanish boss bar on clients after a reload/stop
-        VanishCommand.clearBossBars();
         getLogger().info("GravenCore disabled!");
     }
 }

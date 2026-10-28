@@ -59,6 +59,10 @@ public class CombatLogger implements Listener {
 
     @EventHandler
     public void onCombat(EntityDamageByEntityEvent event) {
+        // Hits cancelled by the trust guard must not tag combat — trusted
+        // players sparring would otherwise be combat-tagged with no damage
+        // ever landing.
+        if (event.isCancelled()) return;
         Player victim = null;
         Player attacker = null;
 

@@ -57,7 +57,7 @@ public class CelerityBoots implements Listener, CustomItem {
             new CooldownManager.CooldownType("mythical-boots-timeslow", "⏳", TextColor.color(0x5EEAD4));
     /** Display-only countdown for the active freeze duration on the action bar. */
     public static final CooldownManager.CooldownType ACTIVE_TYPE =
-            new CooldownManager.CooldownType("mythical-boots-timeslow-active", "❄", TextColor.color(0x5EEAD4));
+            new CooldownManager.CooldownType("mythical-boots-timeslow-active", "❄", TextColor.color(0x5EEAD4), true);
 
     private final NamespacedKey bootsKey;
 

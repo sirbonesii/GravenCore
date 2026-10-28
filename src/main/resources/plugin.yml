@@ -51,3 +51,6 @@ commands:
     usage: /unvanish [player]
     permission: gravencore.admin
     aliases: [uv]
+  trust:
+    description: Team up with another player — trusted players can't hurt each other
+    usage: /trust <add|remove> <player>

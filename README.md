@@ -407,6 +407,36 @@ Going forward, every change is logged under one of: **Added**, **Removed**, **Ch
   it is gone and the text "ABILITY: VAMPIRE'S FLIGHT" header becomes the
   ABILITIES banner with "VAMPIRE'S FLIGHT" kept as its own dark red
   bold line underneath. The divider before the creator footer stays.
+- **Trust System (2026-10-28):** `/trust add <player>` teams
+  two players — neither can hurt the other (melee, projectiles, and the
+  Redline beam, which skips trusted players outright since its fire and
+  knockback bypass the damage event) — and both sides see
+  "[Gravenmoor] <PlayerName> is now trusted." in chat. `/trust remove
+  <player>` dissolves the team (message: "...is no longer trusted."),
+  and remove works while the target is offline. Trust lives in
+  `trusts.yml` (UUID pairs, saved on every change), so it survives
+  restarts; one add writes both directions, one remove clears both.
+  CombatLogger ignores trust-cancelled hits, so sparring with a trusted
+  player no longer combat-tags either of you. No permission gate — any
+  player can use it. Not covered: TNT ignited by a player, lingering
+  potion clouds, end crystals (damage cannot be attributed to a player),
+  and Time Freeze (deals no damage).
+- **Vanish indicator moved to the action bar (2026-10-28):**
+  the "You are [👻]" boss bar is gone. A vanished player now sees just
+  a green `[👻]` in their action bar, in the middle of the timers —
+  durations left, cooldowns right, with the dark-gray ` | ` pieces as
+  the small dividers between sections. Cooldowns only show once no
+  duration is running: during a freeze it reads `❄ 6s | [👻]`, and
+  after it `[👻] | ⏳ 39s` (the cooldown keeps counting underneath, so
+  it surfaces at 39s, not 45s) — the two timer sections never show
+  together. Timer types gained an `isDuration` flag to drive the split
+  (only the boots' freeze countdown is a duration so far; the other
+  four types default to cooldowns). The CooldownManager
+  task re-sends every 5 ticks, so the indicator stays up while vanished
+  and fades on its own shortly after unvanish. This supersedes the
+  earlier boss-bar-only options (progress 0, pack sprites). The
+  `vanished-name` config key is now unused (left in place); TAB `[👻]`
+  tags and chat messages are untouched.
 - **Redline spear charge sequence (2026-10-25, re-measured; tail shortened 2026-10-26):** from Aaron's video —
   the charge is now 6 pulse beats (ticks 0/18/36/41/45/49 — three slow, then three rapid,
   charge chime + expanding flame ring each), then the warden pre-fire sound once at

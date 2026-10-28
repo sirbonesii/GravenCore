@@ -4,6 +4,7 @@ import dev.senob.listeners.AttributeHider;
 import dev.senob.listeners.EnderChestEx;
 import dev.senob.GravenCore;
 import dev.senob.particle_engine.ParticleEngineUtil;
+import dev.senob.commands.TrustCommand;
 import dev.senob.core.CooldownManager;
 import dev.senob.core.GravenConfig;
 import dev.senob.core.GravenTheme;
@@ -413,6 +414,11 @@ public class RedlineSpear implements Listener, CustomItem {
 
             for (Entity entity : world.getNearbyEntities(point, 2.2, 2.2, 2.2)) {
                 if (entity instanceof LivingEntity target && !target.equals(player) && hitTargets.add(target.getUniqueId())) {
+                    // Trusted players are immune to the beam entirely — no
+                    // damage, fire, knockback or shield-break. (The damage
+                    // alone would already be cancelled by the trust guard,
+                    // but fire and knockback bypass the damage event.)
+                    if (target instanceof Player victimPlayer && TrustCommand.isTrusted(player, victimPlayer)) continue;
                     if (target instanceof Player victim && victim.isBlocking()) {
                         victim.setCooldown(Material.SHIELD, 120);
                         damageShield(victim);

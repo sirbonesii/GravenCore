@@ -10,6 +10,7 @@ import dev.senob.core.GravenConfig;
 import dev.senob.guis.GUIManager;
 import dev.senob.home_system.HomeSystem;
 import dev.senob.items.AlterOfDespair;
+import dev.senob.items.AdminBook;
 import dev.senob.items.DraculaPlate;
 import dev.senob.items.ItemManager;
 import dev.senob.items.TieredArmorSet;
@@ -57,11 +58,13 @@ public class GravenCore extends JavaPlugin {
         TieredArmorSet tieredArmorSet = new TieredArmorSet(this);
         CelerityBoots celerityBoots = new CelerityBoots(this, cooldownManager);
         AlterOfDespair alterOfDespair = new AlterOfDespair(this);
+        AdminBook adminBook = new AdminBook(this);
 
         itemManager.registerItem(redlineSpear);
         itemManager.registerItem(draculaPlate);
         itemManager.registerItem(tieredArmorSet);
         itemManager.registerItem(celerityBoots);
+        itemManager.registerItem(adminBook);
 
         DurabilityLoreListener durabilityLore = new DurabilityLoreListener(this);
         for (TieredArmorSet.Tier tier : TieredArmorSet.Tier.values()) {
@@ -81,7 +84,7 @@ public class GravenCore extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(alterOfDespair, this);
 
         // 4. Register Command Router
-        GravenCoreCommand gravencoreCmd = new GravenCoreCommand(this, redlineSpear, draculaPlate, celerityBoots, alterOfDespair, tieredArmorSet);
+        GravenCoreCommand gravencoreCmd = new GravenCoreCommand(this, redlineSpear, draculaPlate, celerityBoots, alterOfDespair, tieredArmorSet, adminBook);
         Objects.requireNonNull(getCommand("gravencore")).setExecutor(gravencoreCmd);
         Objects.requireNonNull(getCommand("gravencore")).setTabCompleter(gravencoreCmd);
 

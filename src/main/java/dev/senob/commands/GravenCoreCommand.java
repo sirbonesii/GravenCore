@@ -3,12 +3,21 @@ package dev.senob.commands;
 import dev.senob.GravenCore;
 import dev.senob.core.GravenConfig;
 import dev.senob.core.GravenTheme;
+import dev.senob.items.AdminBook;
 import dev.senob.items.AlterOfDespair;
 import dev.senob.items.DraculaPlate;
 import dev.senob.items.ItemTier;
 import dev.senob.items.TieredArmorSet;
 import dev.senob.items.CelerityBoots;
 import dev.senob.items.RedlineSpear;
+import io.papermc.paper.dialog.ActionButton;
+import io.papermc.paper.dialog.ClickCallback;
+import io.papermc.paper.dialog.Dialog;
+import io.papermc.paper.dialog.DialogAction;
+import io.papermc.paper.dialog.DialogBase;
+import io.papermc.paper.dialog.DialogBody;
+import io.papermc.paper.dialog.DialogInput;
+import io.papermc.paper.dialog.DialogType;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -44,14 +53,16 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
     private final CelerityBoots celerityBoots;
     private final AlterOfDespair alterOfDespair;
     private final TieredArmorSet tieredArmorSet;
+    private final AdminBook adminBook;
 
-    public GravenCoreCommand(GravenCore plugin, RedlineSpear redlineSpear, DraculaPlate draculaPlate, CelerityBoots celerityBoots, AlterOfDespair alterOfDespair, TieredArmorSet tieredArmorSet) {
+    public GravenCoreCommand(GravenCore plugin, RedlineSpear redlineSpear, DraculaPlate draculaPlate, CelerityBoots celerityBoots, AlterOfDespair alterOfDespair, TieredArmorSet tieredArmorSet, AdminBook adminBook) {
         this.plugin = plugin;
         this.redlineSpear = redlineSpear;
         this.draculaPlate = draculaPlate;
         this.celerityBoots = celerityBoots;
         this.alterOfDespair = alterOfDespair;
         this.tieredArmorSet = tieredArmorSet;
+        this.adminBook = adminBook;
     }
 
     @Override
@@ -62,7 +73,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 0) {
-            sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore <armor|weapon|config|reload|packreload|pack|alter></red>"));
+            sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore <armor|weapon|config|reload|packreload|pack|alter|book></red>"));
             return true;
         }
 
@@ -96,6 +107,57 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(GravenTheme.parse("<green>You have given <white>" + target.getName()
                     + "</white> a <color:#F8F854>Alter of Despair</color> x" + count + ".</green>"));
             target.sendMessage(GravenTheme.parse("<green>You have received a <color:#F8F854>Alter of Despair</color> x" + count + ".</green>"));
+            return true;
+        }
+
+        // --- BOOK LOGIC ---
+        // /gravencore book [player] — give the Admin Book (the book menu).
+        // Player arg optional for players (defaults to self); console must
+        // name a player. Right-clicking the book opens the menu.
+        if (args[0].equalsIgnoreCase("book")) {
+            Player target;
+            if (args.length >= 2) {
+                target = Bukkit.getPlayer(args[1]);
+                if (target == null) {
+                    sender.sendMessage(GravenTheme.parse("<red>Player '" + args[1] + "' is not online.</red>"));
+                    return true;
+                }
+            } else if (sender instanceof Player player) {
+                target = player;
+            } else {
+                sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore book <username></red>"));
+                return true;
+            }
+            Map<Integer, ItemStack> leftover =
+                    target.getInventory().addItem(adminBook.createAdminBookItem());
+            for (ItemStack drop : leftover.values()) {
+                target.getWorld().dropItemNaturally(target.getLocation(), drop);
+            }
+            sender.sendMessage(GravenTheme.parse("<green>You have given <white>" + target.getName()
+                    + "</white> an <gold>Admin Book</gold>.</green>"));
+            target.sendMessage(GravenTheme.parse("<green>You have received an <gold>Admin Book</gold>.</green>"));
+            return true;
+        }
+
+        // --- BOOKDIALOG LOGIC (hidden) ---
+        // Called by book menu clicks: /gravencore bookdialog <entry-id>.
+        // Opens the give dialogue for that menu entry. Not in usage/tab
+        // completion — players reach it by clicking a line in the book.
+        if (args[0].equalsIgnoreCase("bookdialog")) {
+            if (!(sender instanceof Player viewer)) {
+                sender.sendMessage(GravenTheme.parse("<red>Only players can use the book menu.</red>"));
+                return true;
+            }
+            if (args.length < 2) {
+                sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore bookdialog <entry-id></red>"));
+                return true;
+            }
+            AdminBook.Entry entry = AdminBook.ENTRY_BY_ID.get(args[1].toLowerCase(Locale.ROOT));
+            if (entry == null) {
+                sender.sendMessage(GravenTheme.parse("<red>Unknown menu item.</red>"));
+                return true;
+            }
+            openGiveDialog(viewer, entry);
             return true;
         }
 
@@ -411,6 +473,126 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    // Gives one Admin Book menu entry to a player, reusing the existing
+    // give paths (same items, same inventory handling, overflow at feet)
+    // and mirroring each handler's message style (weapons italicized).
+    private void giveEntry(Player giver, Player target, AdminBook.Entry entry) {
+        ItemStack item = null;
+        String messageColor = null;
+        boolean italic = false;
+        switch (entry.category) {
+            case "armor" -> {
+                ItemTier tier = ItemTier.fromId(entry.tierId);
+                if (tier == null) return;
+                item = tieredArmorSet.createPiece(entry.tierId, entry.pieceId);
+                messageColor = "#" + String.format("%06X", tier.getColor().value());
+            }
+            case "weapon" -> {
+                switch (entry.weaponId) {
+                    case "redline_base" -> {
+                        item = redlineSpear.createRedlineSpear(1);
+                        messageColor = "#FF4B2B";
+                    }
+                    case "redline_upgraded" -> {
+                        item = redlineSpear.createRedlineSpear(2);
+                        messageColor = "#FF4B2B";
+                    }
+                    case "dracula" -> {
+                        item = draculaPlate.createDraculaPlate();
+                        messageColor = "#AA0000";
+                    }
+                    case "celerity" -> {
+                        item = celerityBoots.createMythicalBoots();
+                        messageColor = "#F8F8BC";
+                    }
+                    default -> {
+                        return;
+                    }
+                }
+                italic = true;
+            }
+            default -> { // special: Alter of Despair
+                item = alterOfDespair.createAlterItem(1);
+                messageColor = "#F8F854";
+            }
+        }
+        if (item == null || messageColor == null) return;
+        Map<Integer, ItemStack> leftover = target.getInventory().addItem(item);
+        for (ItemStack drop : leftover.values()) {
+            target.getWorld().dropItemNaturally(target.getLocation(), drop);
+        }
+        String label = italic ? "<italic>" + entry.label + "</italic>" : entry.label;
+        giver.sendMessage(GravenTheme.parse("<green>You have given <white>" + target.getName()
+                + "</white> a <color:" + messageColor + ">" + label + "</color>.</green>"));
+        target.sendMessage(GravenTheme.parse("<green>You have received a <color:" + messageColor + ">"
+                + label + "</color>.</green>"));
+    }
+
+    // The give dialogue for one menu entry: title "Give <item>", body
+    // "Who should receive this item?", a "Player name" text bar, and three
+    // buttons — Give to me (ignores the bar), Give to player (uses the
+    // typed name), Cancel (closes, gives nothing). Button actions are
+    // callbacks (no event handler, no pending map — the entry rides the
+    // closure). Gives run on the main thread via the scheduler, since a
+    // dialog callback's thread is not something to assume.
+    private void openGiveDialog(Player viewer, AdminBook.Entry entry) {
+        Dialog dialog = Dialog.create(builder -> builder.empty()
+                .base(DialogBase.builder(Component.text("Give " + entry.label))
+                        .body(List.of(DialogBody.plainMessage(
+                                Component.text("Who should receive this item?"))))
+                        .inputs(List.of(DialogInput.text("player_name", Component.text("Player name"))
+                                .width(200)
+                                .maxLength(16)
+                                .build()))
+                        .build())
+                .type(DialogType.multiAction(List.of(
+                        ActionButton.create(
+                                Component.text("Give to me"),
+                                Component.text("Give this item to yourself."),
+                                150,
+                                DialogAction.customClick((view, audience) -> {
+                                    if (audience instanceof Player giver) {
+                                        Bukkit.getScheduler().runTask(plugin,
+                                                () -> giveEntry(giver, giver, entry));
+                                    }
+                                }, ClickCallback.Options.builder()
+                                        .uses(1)
+                                        .lifetime(ClickCallback.DEFAULT_LIFETIME)
+                                        .build())),
+                        ActionButton.create(
+                                Component.text("Give to player"),
+                                Component.text("Give this item to the player named above."),
+                                150,
+                                DialogAction.customClick((view, audience) -> {
+                                    if (!(audience instanceof Player giver)) return;
+                                    String name = view.getString("player_name");
+                                    Bukkit.getScheduler().runTask(plugin, () -> {
+                                        if (name == null || name.isBlank()) {
+                                            giver.sendMessage(GravenTheme.parse(
+                                                    "<red>Type a player name first, then click Give to player.</red>"));
+                                            return;
+                                        }
+                                        Player target = Bukkit.getPlayer(name);
+                                        if (target == null) {
+                                            giver.sendMessage(GravenTheme.parse(
+                                                    "<red>Player '" + name + "' is not online.</red>"));
+                                            return;
+                                        }
+                                        giveEntry(giver, target, entry);
+                                    });
+                                }, ClickCallback.Options.builder()
+                                        .uses(1)
+                                        .lifetime(ClickCallback.DEFAULT_LIFETIME)
+                                        .build())),
+                        ActionButton.create(
+                                Component.text("Cancel"),
+                                Component.text("Close without giving."),
+                                150,
+                                null)
+                ))));
+        viewer.showDialog(dialog);
+    }
+
     // Pushes the currently configured pack (url + sha1 + prompt + required)
     // to every online player. Callers validate the config first.
     private void pushResourcePack(CommandSender sender) {
@@ -476,10 +658,10 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String @NotNull [] args) {
-        if (args.length == 1) return List.of("armor", "weapon", "config", "reload", "packreload", "pack", "alter");
+        if (args.length == 1) return List.of("armor", "weapon", "config", "reload", "packreload", "pack", "alter", "book");
 
         if (args.length == 2) {
-            if (args[0].equalsIgnoreCase("armor") || args[0].equalsIgnoreCase("weapon") || args[0].equalsIgnoreCase("alter")) {
+            if (args[0].equalsIgnoreCase("armor") || args[0].equalsIgnoreCase("weapon") || args[0].equalsIgnoreCase("alter") || args[0].equalsIgnoreCase("book")) {
                 List<String> names = new ArrayList<>();
                 for (Player online : Bukkit.getOnlinePlayers()) names.add(online.getName());
                 return names;

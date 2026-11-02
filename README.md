@@ -42,6 +42,7 @@ and a live action-bar timer display.
 | `/gravencore armor <username> <tier>` | `gravencore.admin` | Give a full armor set (`mythical`, `legendary`, `epic`, `rare`, `uncommon`, `common`) |
 | `/gravencore weapon <username> <item> [base\|upgraded]` | `gravencore.admin` | Give a signature item (`redline`, `dracula`, `celerity`) |
 | `/gravencore alter <username> [count]` | `gravencore.admin` | Give Alter of Despair items (1–64) |
+| `/gravencore book [player]` | `gravencore.admin` | Give the Admin Book (book menu for giving items) |
 | `/gravencore config <item> <setting> <value>` | `gravencore.admin` | Tune per-item stats on the held piece |
 | `/gravencore reload` | `gravencore.admin` | Reload config and re-sync items |
 | `/gravencore pack <sha1>` | `gravencore.admin` | Update the pack SHA1 and push to online players |
@@ -49,7 +50,7 @@ and a live action-bar timer display.
 | `/vanish [player]` (`/v`) | `gravencore.admin` | Vanish a player |
 | `/unvanish [player]` (`/uv`) | `gravencore.admin` | Unvanish a player |
 | `/invsee <player>` | `gravencore.admin` | Live editable view of a player's inventory |
-| `/trust add <player>` / `/trust remove <player>` | — (any player) | Team / unteam with another player |
+| `/trust add <player>` / `/trust remove <player>` (alias `/gtrust`) | — (any player) | Team / unteam with another player |
 | `/homes` (`/h`) | `gravehomes.member` | Homes GUI |
 | `/home <name>` | `gravehomes.member` | Teleport to a home |
 | `/sethome <name>` (`/sh`) | `gravehomes.member` | Set a home |
@@ -91,6 +92,15 @@ newest first within each section.
 ### [Unreleased]
 
 #### Added
+- **Admin Book (2026-11-02):** `/gravencore book [player]` gives the
+  Admin Book; right-clicking it opens the item menu as a real 6-page
+  book (contents, armor at two tiers per page, weapons, special), each
+  line a glyph icon from the `gravenmoor:icons` font plus the piece
+  name. Clicking a piece opens a give dialogue — Give to me, Give to
+  player (with a Player name bar), or Cancel — and giving reuses the
+  existing armor/weapon/alter paths. Requires the Paper API bump to
+  1.21.7 (first version with the server-side dialog API) and the
+  `gravenmoor:icons` font in the resource pack.
 - **Trust System (2026-10-28):** `/trust add <player>` teams
   two players — neither can hurt the other (melee, projectiles, and the
   Redline beam, which skips trusted players outright since its fire and
@@ -104,7 +114,9 @@ newest first within each section.
   player no longer combat-tags either of you. No permission gate — any
   player can use it. Not covered: TNT ignited by a player, lingering
   potion clouds, end crystals (damage cannot be attributed to a player),
-  and Time Freeze (deals no damage).
+  and Time Freeze (deals no damage). Since a claim plugin already owns
+  bare `/trust` on the server, the command also answers to `/gtrust`
+  (and to `/gravencore:trust`).
 - **Name obfuscation for invisible players (2026-10-25):** while a player
   has the Invisibility effect, their name renders scrambled in kill-feed
   death messages (killer and victim), in regular chat, and in TAB; `name-obfuscation`

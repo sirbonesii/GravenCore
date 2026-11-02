@@ -192,7 +192,7 @@ public class TrustCommand implements CommandExecutor, TabCompleter, Listener {
             return true;
         }
         if (args.length != 2 || (!args[0].equalsIgnoreCase("add") && !args[0].equalsIgnoreCase("remove"))) {
-            player.sendMessage(GravenTheme.parse("<red>Usage: /trust add <player> or /trust remove <player></red>"));
+            player.sendMessage(GravenTheme.parse("<red>Usage: /" + label + " add <player> or /" + label + " remove <player></red>"));
             return true;
         }
         boolean add = args[0].equalsIgnoreCase("add");

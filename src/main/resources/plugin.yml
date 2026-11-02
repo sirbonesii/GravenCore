@@ -54,3 +54,4 @@ commands:
   trust:
     description: Team up with another player — trusted players can't hurt each other
     usage: /trust <add|remove> <player>
+    aliases: [gtrust]

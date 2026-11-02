@@ -29,7 +29,10 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.21.4-R0.1-SNAPSHOT</version>
+            <!-- 1.21.7: first Paper API with the server-side dialog API
+                 (io.papermc.paper.dialog), used by the Admin Book's give
+                 dialogue. The plugin still runs on newer servers (26.3). -->
+            <version>1.21.7-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>

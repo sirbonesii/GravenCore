@@ -28,9 +28,16 @@ public class GravenTheme {
     }
 
     /**
-     * A standard prefix for your plugin's chat messages.
+     * A standard prefix for your plugin's chat messages. The name
+     * comes from settings.prefix in the main config (default
+     * GravenCore); brackets and the gradient are added here, and the
+     * name is treated as plain text so MiniMessage tags in it render
+     * literally instead of restyling the prefix.
      */
     public static Component prefix() {
-        return parse("<dark_gray>[</dark_gray><gradient:#FF3B1F:#FF9E2C><bold>GravenCore</bold></gradient><dark_gray>]</dark_gray> ");
+        String name = GravenConfig.SETTINGS_PREFIX;
+        if (name == null || name.isBlank()) name = "GravenCore";
+        String safe = name.replace("<", "\\<");
+        return parse("<dark_gray>[</dark_gray><gradient:#FF3B1F:#FF9E2C><bold>" + safe + "</bold></gradient><dark_gray>]</dark_gray> ");
     }
 }

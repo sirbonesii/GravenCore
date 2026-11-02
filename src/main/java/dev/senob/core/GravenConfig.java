@@ -16,6 +16,8 @@ public class GravenConfig {
 
     // --- GLOBAL SETTINGS ---
     public static String CREATOR;
+    /** Name inside the [GravenCore] chat prefix (settings.prefix; brackets + gradient added by GravenTheme). */
+    public static String SETTINGS_PREFIX;
 
     // --- REDLINE SPEAR ---
     public static double REDLINE_MELEE_BASE, REDLINE_MELEE_UPGRADED;
@@ -150,6 +152,15 @@ public class GravenConfig {
 
         // 1. GLOBAL
         CREATOR = config.getString("settings.creator", "Senob");
+        SETTINGS_PREFIX = config.getString("settings.prefix", "GravenCore");
+        if (SETTINGS_PREFIX == null) SETTINGS_PREFIX = "GravenCore";
+        SETTINGS_PREFIX = SETTINGS_PREFIX.trim();
+        // Forgiving: "[My Name]" works too — the brackets are added
+        // by the theme, so a pair wrapped around the value is stripped.
+        if (SETTINGS_PREFIX.startsWith("[") && SETTINGS_PREFIX.endsWith("]") && SETTINGS_PREFIX.length() > 2) {
+            SETTINGS_PREFIX = SETTINGS_PREFIX.substring(1, SETTINGS_PREFIX.length() - 1).trim();
+        }
+        if (SETTINGS_PREFIX.isBlank()) SETTINGS_PREFIX = "GravenCore";
 
         // 2. WEAPONS — the Redline Spear lives in its own file
         // (special/weapons.yml, top-level weapon ids).

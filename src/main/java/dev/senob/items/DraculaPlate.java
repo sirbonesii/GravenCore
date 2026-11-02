@@ -4,6 +4,7 @@ import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import dev.senob.listeners.AttributeHider;
 import dev.senob.listeners.EnderChestEx;
 import dev.senob.GravenCore;
+import dev.senob.commands.VanishCommand;
 import dev.senob.core.CooldownManager;
 import dev.senob.core.GravenConfig;
 import dev.senob.core.GravenTheme;
@@ -44,6 +45,10 @@ public class DraculaPlate implements Listener, CustomItem {
 
     public static final CooldownManager.CooldownType COOLDOWN_TYPE =
             new CooldownManager.CooldownType("dracula", "🦇", TextColor.color(0xAA0000));
+
+    /** Bat form's active time (a duration, so it renders left of [👻] while flying). */
+    public static final CooldownManager.CooldownType DURATION_TYPE =
+            new CooldownManager.CooldownType("dracula-bat-form-active", "🦇", TextColor.color(0xAA0000), true);
 
     private final NamespacedKey draculaKey;
     private final NamespacedKey cooldownKey;
@@ -86,6 +91,7 @@ public class DraculaPlate implements Listener, CustomItem {
         this.plugin = plugin;
         this.cooldownManager = cooldownManager;
         this.cooldownManager.registerType(COOLDOWN_TYPE);
+        this.cooldownManager.registerType(DURATION_TYPE);
 
         this.draculaKey = new NamespacedKey(plugin, "dracula_plate");
         this.cooldownKey = new NamespacedKey(plugin, "dracula_cooldown");
@@ -286,6 +292,7 @@ public class DraculaPlate implements Listener, CustomItem {
         long durSec = pdc.getOrDefault(durationKey, PersistentDataType.LONG, GravenConfig.DRACULA_DURATION);
 
         activeVampires.add(uuid);
+        cooldownManager.setCooldown(player, DURATION_TYPE, durSec);
 
         hiddenArmor.put(uuid, player.getInventory().getArmorContents().clone());
         player.getInventory().setArmorContents(new ItemStack[4]);
@@ -369,6 +376,10 @@ public class DraculaPlate implements Listener, CustomItem {
                     }
                     player.removePotionEffect(PotionEffectType.INVISIBILITY);
                     player.removePotionEffect(PotionEffectType.REGENERATION);
+                    // Bat form's potion is gone — if the player is
+                    // vanished, the ghost flag must survive it, or bat
+                    // form ending would break the ghost.
+                    VanishCommand.restoreGhostIfVanished(player);
                     player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BAT_AMBIENT, 1.0f, 0.7f);
                 } else {
                     activeVampires.remove(uuid);

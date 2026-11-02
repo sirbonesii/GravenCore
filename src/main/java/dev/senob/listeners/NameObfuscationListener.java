@@ -77,7 +77,7 @@ public class NameObfuscationListener implements Listener {
 
         // TAB visibility: vanish takes precedence — a vanished player
         // is hidden from non-admins only, even while invisible (the
-        // ghost effect rides on Invisibility, and hiding them from
+        // ghost rides on the invisible flag, and hiding them from
         // admins too would erase the ghost). The invisibility
         // show-in-tab rule applies only to non-vanished players.
         for (Player viewer : Bukkit.getOnlinePlayers()) {

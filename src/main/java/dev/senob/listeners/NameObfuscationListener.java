@@ -33,12 +33,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * and victim), in regular chat messages, and in the TAB list; when
  * {@code show-in-tab} is off (default) they are hidden from TAB
  * entirely instead. Vanished players' names are always scrambled in
- * kill-feed and chat messages, and the vanish {@code [👻]} tag is
- * stripped from kill-feed messages so it cannot leak through the team
- * suffix. Vanish and invisibility compose: a player who is both keeps
- * a readable TAB name with the tag (vanish takes precedence over the
- * invisibility rules, so admins keep seeing a vanished ghost), and
- * stays hidden from non-admins.</p>
+ * kill-feed and chat messages. Vanish and invisibility compose: a player
+ * who is both keeps a readable TAB name with the tag (vanish takes
+ * precedence over the invisibility rules, so admins keep seeing a
+ * vanished ghost), and stays hidden from non-admins.</p>
  */
 public class NameObfuscationListener implements Listener {
 
@@ -174,24 +172,6 @@ public class NameObfuscationListener implements Listener {
                 .matchLiteral(player.getName())
                 .replacement(Component.text(player.getName()).decorate(TextDecoration.OBFUSCATED))
                 .build());
-        // A vanished player's name carries the vanish team suffix in
-        // broadcasts — strip it, or the tag gives them away anyway.
-        // The suffix used to parse as two nodes (a bare " " plus the green
-        // tag), so the exact " [👻] Vanished" match never lined up — that is
-        // why the tag survived in kill-feed. The suffix now keeps its space
-        // inside the color tag (one node), and this fallback drops the tag
-        // text on its own so older suffix structures still lose the tag
-        // (leaving only a stray space) instead of leaking it.
-        if (VanishCommand.isVanishedId(player.getUniqueId())) {
-            out = out.replaceText(TextReplacementConfig.builder()
-                    .matchLiteral(" [👻] Vanished")
-                    .replacement(Component.empty())
-                    .build());
-            out = out.replaceText(TextReplacementConfig.builder()
-                    .matchLiteral("[👻] Vanished")
-                    .replacement(Component.empty())
-                    .build());
-        }
         return out;
     }
 }

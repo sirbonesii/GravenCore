@@ -61,7 +61,7 @@ and a live action-bar timer display.
 
 ```
 plugins/GravenCore/
-├── config.yml                 # settings, name-obfuscation, vanished-name, resource-pack
+├── config.yml                 # settings, name-obfuscation, resource-pack
 ├── tiers/armor_tiers.yml      # the six armor tiers
 ├── special/weapons.yml        # Redline Spear
 ├── special/armor.yml          # Dracula's Plate, Celerity Boots

@@ -115,7 +115,6 @@ public class GravenConfig {
 
     // --- MYTHICAL BOOTS (standalone item, not part of the set) ---
     public static String MYTHICAL_BOOTS_TIER;
-    public static int MYTHICAL_BOOTS_DURABILITY;
     /** Time Slow: shift + left-click freezes the world; the wearer is exempt plus speed boost. */
     public static boolean MYTHICAL_BOOTS_TIMESLOW_ENABLED;
     public static double MYTHICAL_BOOTS_TIMESLOW_DURATION;
@@ -138,10 +137,6 @@ public class GravenConfig {
     public static boolean NAME_OBFUSCATION_ENABLED;
     /** False (default): invisible players are hidden from TAB entirely. */
     public static boolean NAME_OBFUSCATION_SHOW_IN_TAB;
-
-    // --- VANISHED NAME (boss-bar title) ---
-    /** Boss-bar title shown to a vanished player (config: vanished-name.display-name). */
-    public static String VANISHED_NAME = "You are [👻]";
 
     public static void init(JavaPlugin instance) {
         plugin = instance;
@@ -197,7 +192,6 @@ public class GravenConfig {
         loadRedlineAltar(alterCfg);
         loadResourcePack(config);
         loadNameObfuscation(config);
-        loadVanishedName(config);
         loadAlter(alterCfg);
 
         // 3. DRACULA PLATE
@@ -413,20 +407,6 @@ public class GravenConfig {
         NAME_OBFUSCATION_SHOW_IN_TAB = config.getBoolean("name-obfuscation.show-in-tab", false);
     }
 
-    private static void loadVanishedName(FileConfiguration config) {
-        // Accepts both vanished-name.display-name and the list form
-        // vanished-name: [{display-name: ...}] — anything else falls back.
-        String name = config.getString("vanished-name.display-name");
-        if (name == null) {
-            List<?> entries = config.getList("vanished-name");
-            if (entries != null && !entries.isEmpty() && entries.get(0) instanceof Map<?, ?> first) {
-                Object value = first.get("display-name");
-                if (value instanceof String s) name = s;
-            }
-        }
-        VANISHED_NAME = (name == null || name.isBlank()) ? "You are [👻]" : name;
-    }
-
     /**
      * Loads the Alter of Despair from
      * plugins/GravenCore/crafting_alter/alter.yml (copied from the
@@ -500,7 +480,6 @@ public class GravenConfig {
     private static void loadMythicalBoots(FileConfiguration config) {
         String base = "mythical-boots";
         MYTHICAL_BOOTS_TIER = config.getString(base + ".tier", "unknown");
-        MYTHICAL_BOOTS_DURABILITY = config.getInt(base + ".durability", 2096);
         MYTHICAL_BOOTS_TIMESLOW_ENABLED = config.getBoolean(base + ".time-slow.enabled", true);
         MYTHICAL_BOOTS_TIMESLOW_DURATION = config.getDouble(base + ".time-slow.duration", 6.0);
         MYTHICAL_BOOTS_TIMESLOW_COOLDOWN = config.getLong(base + ".time-slow.cooldown", 45L);

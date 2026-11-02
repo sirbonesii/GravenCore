@@ -1,7 +1,6 @@
 package dev.senob.commands;
 
 import dev.senob.GravenCore;
-import dev.senob.core.GravenConfig;
 import dev.senob.core.GravenTheme;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;

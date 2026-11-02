@@ -10,14 +10,14 @@ import dev.senob.items.ItemTier;
 import dev.senob.items.TieredArmorSet;
 import dev.senob.items.CelerityBoots;
 import dev.senob.items.RedlineSpear;
-import io.papermc.paper.dialog.ActionButton;
-import io.papermc.paper.dialog.ClickCallback;
 import io.papermc.paper.dialog.Dialog;
-import io.papermc.paper.dialog.DialogAction;
-import io.papermc.paper.dialog.DialogBase;
-import io.papermc.paper.dialog.DialogBody;
-import io.papermc.paper.dialog.DialogInput;
-import io.papermc.paper.dialog.DialogType;
+import io.papermc.paper.registry.data.dialog.ActionButton;
+import io.papermc.paper.registry.data.dialog.DialogBase;
+import io.papermc.paper.registry.data.dialog.action.DialogAction;
+import io.papermc.paper.registry.data.dialog.body.DialogBody;
+import io.papermc.paper.registry.data.dialog.input.DialogInput;
+import io.papermc.paper.registry.data.dialog.type.DialogType;
+import net.kyori.adventure.text.event.ClickCallback;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -565,7 +565,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                                 150,
                                 DialogAction.customClick((view, audience) -> {
                                     if (!(audience instanceof Player giver)) return;
-                                    String name = view.getString("player_name");
+                                    String name = view.getText("player_name");
                                     Bukkit.getScheduler().runTask(plugin, () -> {
                                         if (name == null || name.isBlank()) {
                                             giver.sendMessage(GravenTheme.parse(

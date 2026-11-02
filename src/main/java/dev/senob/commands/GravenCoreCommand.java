@@ -545,6 +545,8 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                                 .maxLength(16)
                                 .build()))
                         .build())
+                // 3-arg form: no separate exit button (Cancel is already
+                // an action), 1 column so the buttons stack vertically.
                 .type(DialogType.multiAction(List.of(
                         ActionButton.create(
                                 Component.text("Give to me"),
@@ -589,7 +591,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                                 Component.text("Close without giving."),
                                 150,
                                 null)
-                ))));
+                ), null, 1)));
         viewer.showDialog(dialog);
     }
 

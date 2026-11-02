@@ -1,6 +1,7 @@
 package dev.senob.items;
 
 import dev.senob.GravenCore;
+import dev.senob.core.AdminMode;
 import dev.senob.core.GravenTheme;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
@@ -157,7 +158,7 @@ public class AdminBook implements CustomItem {
         Action action = event.getAction();
         if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK) return;
         Player player = event.getPlayer();
-        if (!player.hasPermission("gravencore.admin")) {
+        if (!AdminMode.isAdmin(player)) {
             player.sendMessage(GravenTheme.parse("<red>You do not have permission to use the Admin Book.</red>"));
             return;
         }

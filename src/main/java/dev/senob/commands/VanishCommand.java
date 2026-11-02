@@ -1,6 +1,7 @@
 package dev.senob.commands;
 
 import dev.senob.GravenCore;
+import dev.senob.core.AdminMode;
 import dev.senob.core.GravenTheme;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -62,7 +63,7 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
-        if (!sender.hasPermission("gravencore.admin")) {
+        if (!AdminMode.isAdmin(sender)) {
             sender.sendMessage(GravenTheme.parse("<red>You do not have permission to use this command.</red>"));
             return true;
         }
@@ -139,8 +140,8 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
         if (joiner.getPersistentDataContainer().has(vanishedKey, PersistentDataType.BYTE)) {
             applyVanish(joiner);
         }
-        // Hide everyone else's vanish from the joiner (unless they're staff)
-        if (!joiner.hasPermission("gravencore.admin")) {
+        // Hide everyone else's vanish from the joiner (unless they're staff in admin mode)
+        if (!AdminMode.isAdmin(joiner)) {
             for (UUID id : vanished) {
                 Player hidden = Bukkit.getPlayer(id);
                 if (hidden != null && hidden != joiner) {

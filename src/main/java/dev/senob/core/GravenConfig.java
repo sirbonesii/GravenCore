@@ -140,6 +140,10 @@ public class GravenConfig {
     /** False (default): invisible players are hidden from TAB entirely. */
     public static boolean NAME_OBFUSCATION_SHOW_IN_TAB;
 
+    // --- ADMIN MODE (/admin toggle) ---
+    /** Command labels blocked server-wide while an admin has mode OFF (lowercase, no namespace). */
+    public static final java.util.Set<String> ADMIN_MODE_BLOCKED_COMMANDS = new java.util.HashSet<>();
+
     public static void init(JavaPlugin instance) {
         plugin = instance;
         plugin.saveDefaultConfig();
@@ -203,6 +207,7 @@ public class GravenConfig {
         loadRedlineAltar(alterCfg);
         loadResourcePack(config);
         loadNameObfuscation(config);
+        loadAdminMode(config);
         loadAlter(alterCfg);
 
         // 3. DRACULA PLATE
@@ -416,6 +421,27 @@ public class GravenConfig {
     private static void loadNameObfuscation(FileConfiguration config) {
         NAME_OBFUSCATION_ENABLED = config.getBoolean("name-obfuscation.obfuscated", true);
         NAME_OBFUSCATION_SHOW_IN_TAB = config.getBoolean("name-obfuscation.show-in-tab", false);
+    }
+
+    /**
+     * Admin mode blocklist (admin-mode.blocked-commands in the main
+     * config). Missing section = the code defaults below, so a live
+     * config that predates the section still works; /gravencore
+     * reload picks up edits.
+     */
+    private static void loadAdminMode(FileConfiguration config) {
+        ADMIN_MODE_BLOCKED_COMMANDS.clear();
+        java.util.List<String> configured = config.getStringList("admin-mode.blocked-commands");
+        if (configured == null || configured.isEmpty()) {
+            configured = java.util.List.of("gamemode", "give", "tp", "teleport", "summon",
+                    "setblock", "fill", "op", "deop", "ban", "pardon", "kick", "whitelist",
+                    "difficulty", "gamerule", "time", "weather", "effect", "enchant", "xp",
+                    "clear", "kill", "spawnpoint", "setworldspawn", "save-all", "stop",
+                    "reload", "lp", "luckperms");
+        }
+        for (String label : configured) {
+            if (label != null && !label.isBlank()) ADMIN_MODE_BLOCKED_COMMANDS.add(label.trim().toLowerCase());
+        }
     }
 
     /**

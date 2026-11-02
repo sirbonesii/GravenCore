@@ -1,5 +1,6 @@
 package dev.senob.home_system;
 
+import dev.senob.core.AdminMode;
 import dev.senob.core.GravenTheme;
 import dev.senob.guis.CustomGUI;
 import org.bukkit.Bukkit;
@@ -55,7 +56,7 @@ public class HomeSystem implements CommandExecutor, TabCompleter {
         String cmd = command.getName().toLowerCase();
 
         if (cmd.equals("checkhomes")) {
-            if (!sender.hasPermission("gravehomes.admin")) {
+            if (!AdminMode.isHomesAdmin(sender)) {
                 sender.sendMessage(GravenTheme.parse("<red>You do not have permission to inspect homes.</red>"));
                 return true;
             }
@@ -422,7 +423,7 @@ public class HomeSystem implements CommandExecutor, TabCompleter {
                 }
             }
         }
-        if (cmd.equals("checkhomes") && sender.hasPermission("gravehomes.admin")) {
+        if (cmd.equals("checkhomes") && AdminMode.isHomesAdmin(sender)) {
             if (args.length == 1) {
                 List<String> names = new ArrayList<>();
                 for (Player p : Bukkit.getOnlinePlayers()) {

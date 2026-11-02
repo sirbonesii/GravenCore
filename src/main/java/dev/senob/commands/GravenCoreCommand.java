@@ -1,6 +1,7 @@
 package dev.senob.commands;
 
 import dev.senob.GravenCore;
+import dev.senob.core.AdminMode;
 import dev.senob.core.GravenConfig;
 import dev.senob.core.GravenTheme;
 import dev.senob.items.AdminBook;
@@ -67,7 +68,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
-        if (!sender.hasPermission("gravencore.admin")) {
+        if (!AdminMode.isAdmin(sender)) {
             sender.sendMessage(GravenTheme.parse("<red>You do not have permission to use this command.</red>"));
             return true;
         }

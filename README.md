@@ -92,6 +92,18 @@ newest first within each section.
 ### [Unreleased]
 
 #### Added
+- **Admin mode (2026-11-02):** `/admin toggle` drops an admin to
+  playing as a regular player (and back). Mode persists across
+  relogs and defaults to ON, so nobody who never toggles changes
+  behavior. While OFF, GravenCore admin commands (`/gravencore`,
+  `/vanish`, `/unvanish`, `/invsee`, Admin Book, `/checkhomes`)
+  refuse, vanished players hide from the toggler, and a
+  configurable blocklist (`admin-mode.blocked-commands` in
+  config.yml; vanilla admin commands + `/lp` by default) is refused
+  server-wide. The blocklist only restricts admins in OFF mode —
+  Senior-Mods and players keep their own permissions untouched —
+  and `/admin` itself is never blocked. The toggle checks the raw
+  permission, so a toggled-off admin can always toggle back on.
 - **Admin Book (2026-11-02):** `/gravencore book [player]` gives the
   Admin Book; right-clicking it opens the item menu as a real 6-page
   book (contents, armor at two tiers per page, weapons, special), each

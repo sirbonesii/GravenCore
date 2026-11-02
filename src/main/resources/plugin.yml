@@ -55,3 +55,7 @@ commands:
     description: Team up with another player — trusted players can't hurt each other
     usage: /trust <add|remove> <player>
     aliases: [gtrust]
+  admin:
+    description: Toggle admin mode — play as a regular player, or as an admin
+    usage: /admin toggle
+    permission: gravencore.admin

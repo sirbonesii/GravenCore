@@ -37,6 +37,7 @@ public class GravenCore extends JavaPlugin {
         // 1. Initialize Universal Managers
         CooldownManager cooldownManager = new CooldownManager(this);
         GravenConfig.init(this);
+        dev.senob.core.AdminMode.init(this);
         ItemManager itemManager = new ItemManager();
         GUIManager guiManager = new GUIManager();
         Bukkit.getPluginManager().registerEvents(guiManager, this);
@@ -111,6 +112,12 @@ public class GravenCore extends JavaPlugin {
         Objects.requireNonNull(getCommand("trust")).setTabCompleter(trustCmd);
 
         Bukkit.getPluginManager().registerEvents(new dev.senob.listeners.NameObfuscationListener(this), this);
+
+        // Admin mode (/admin toggle) + its server-wide command blocklist
+        dev.senob.commands.AdminCommand adminCmd = new dev.senob.commands.AdminCommand();
+        Objects.requireNonNull(getCommand("admin")).setExecutor(adminCmd);
+        Objects.requireNonNull(getCommand("admin")).setTabCompleter(adminCmd);
+        Bukkit.getPluginManager().registerEvents(new dev.senob.listeners.AdminModeListener(), this);
 
         // PlaceholderAPI hook (%gravencore_vanish%) — only when installed
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {

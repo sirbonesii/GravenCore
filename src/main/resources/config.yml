@@ -22,6 +22,44 @@ name-obfuscation:
   obfuscated: true
   show-in-tab: false
 
+# Admin mode (/admin toggle): an admin with mode OFF plays as a
+# regular player — GravenCore admin commands refuse, vanished players
+# hide from them, and the commands below are blocked server-wide.
+# Labels match without namespace, so "give" also blocks "/minecraft:give".
+# "/admin" itself is never blocked (it is the way back on). Missing
+# section = the defaults below; /gravencore reload picks up edits.
+admin-mode:
+  blocked-commands:
+    - "gamemode"
+    - "give"
+    - "tp"
+    - "teleport"
+    - "summon"
+    - "setblock"
+    - "fill"
+    - "op"
+    - "deop"
+    - "ban"
+    - "pardon"
+    - "kick"
+    - "whitelist"
+    - "difficulty"
+    - "gamerule"
+    - "time"
+    - "weather"
+    - "effect"
+    - "enchant"
+    - "xp"
+    - "clear"
+    - "kill"
+    - "spawnpoint"
+    - "setworldspawn"
+    - "save-all"
+    - "stop"
+    - "reload"
+    - "lp"
+    - "luckperms"
+
 
 # ============================================================
 #   Server Resource Pack (MinePack)

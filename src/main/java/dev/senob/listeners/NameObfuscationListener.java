@@ -2,6 +2,7 @@ package dev.senob.listeners;
 
 import dev.senob.GravenCore;
 import dev.senob.commands.VanishCommand;
+import dev.senob.core.AdminMode;
 import dev.senob.core.GravenConfig;
 import dev.senob.core.GravenTheme;
 import dev.senob.items.DraculaPlate;
@@ -80,7 +81,7 @@ public class NameObfuscationListener implements Listener {
         // rule applies only to non-vanished players.
         for (Player viewer : Bukkit.getOnlinePlayers()) {
             if (viewer == target) continue;
-            boolean hide = (vanished && !viewer.hasPermission("gravencore.admin"))
+            boolean hide = (vanished && !AdminMode.isAdmin(viewer))
                     || (!vanished && isInvis && !GravenConfig.NAME_OBFUSCATION_SHOW_IN_TAB);
             if (hide) viewer.hidePlayer(plugin, target);
             else viewer.showPlayer(plugin, target);

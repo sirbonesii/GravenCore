@@ -36,8 +36,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * kill-feed and chat messages, and the vanish {@code [👻]} tag is
  * stripped from kill-feed messages so it cannot leak through the team
  * suffix. Vanish and invisibility compose: a player who is both keeps
- * the tag on their (possibly scrambled) TAB name, and stays hidden
- * from non-admins.</p>
+ * a readable TAB name with the tag (vanish takes precedence over the
+ * invisibility rules, so admins keep seeing a vanished ghost), and
+ * stays hidden from non-admins.</p>
  */
 public class NameObfuscationListener implements Listener {
 
@@ -65,22 +66,26 @@ public class NameObfuscationListener implements Listener {
         else invisible.remove(target.getUniqueId());
         boolean vanished = VanishCommand.isVanishedId(target.getUniqueId());
 
-        // TAB list name
-        if (GravenConfig.NAME_OBFUSCATION_ENABLED && isInvis) {
-            target.playerListName(GravenTheme.parse("<obfuscated>" + target.getName() + "</obfuscated>"
-                    + (vanished ? " <green>[👻]</green>" : "")));
-        } else if (vanished) {
+        // TAB list name: vanish wins over the invisibility scramble —
+        // admins need a readable name with the tag for a vanished ghost,
+        // and non-admins never see the entry at all (hidePlayer below).
+        if (vanished) {
             target.playerListName(GravenTheme.parse(target.getName() + " <green>[👻]</green>"));
+        } else if (GravenConfig.NAME_OBFUSCATION_ENABLED && isInvis) {
+            target.playerListName(GravenTheme.parse("<obfuscated>" + target.getName() + "</obfuscated>"));
         } else {
             target.playerListName(null);
         }
 
-        // TAB visibility: hidden from a viewer when vanished (non-admins
-        // only) or when invisible and show-in-tab is off.
+        // TAB visibility: vanish takes precedence — a vanished player
+        // is hidden from non-admins only, even while invisible (the
+        // ghost effect rides on Invisibility, and hiding them from
+        // admins too would erase the ghost). The invisibility
+        // show-in-tab rule applies only to non-vanished players.
         for (Player viewer : Bukkit.getOnlinePlayers()) {
             if (viewer == target) continue;
             boolean hide = (vanished && !viewer.hasPermission("gravencore.admin"))
-                    || (isInvis && !GravenConfig.NAME_OBFUSCATION_SHOW_IN_TAB);
+                    || (!vanished && isInvis && !GravenConfig.NAME_OBFUSCATION_SHOW_IN_TAB);
             if (hide) viewer.hidePlayer(plugin, target);
             else viewer.showPlayer(plugin, target);
         }

@@ -12,10 +12,14 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
@@ -34,17 +38,20 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>A vanished player is hidden from every online player who lacks
  * the admin permission (entity and player-list entry), and new joiners
- * get the same treatment. Admins keep seeing the vanished player,
- * whose nameplate gains a green {@code [👻] Vanished} tag and whose
- * player-list name gains a short green {@code [👻]} after the name.
- * The vanished player gets a green {@code [👻]} in their action bar,
- * alongside the cooldown timers, so they know they're hidden. The state
- * is stored in the player's own PDC, so it survives relogs.</p>
+ * get the same treatment. Admins keep seeing the vanished player —
+ * as a faint transparent ghost (the vanilla invisible-teammate look:
+ * the vanished player carries Invisibility, and every admin shares a
+ * team with see-friendly-invisibles on, so admins — and the vanished
+ * player themself in third person — see the translucent figure while
+ * regular players see nothing). The vanished player's player-list
+ * name gains a short green {@code [👻]} after the name, and they get
+ * a green {@code [👻]} in their action bar, alongside the cooldown
+ * timers, so they know they're hidden. The state is stored in the
+ * player's own PDC, so it survives relogs.</p>
  */
 public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
 
-    private static final String TAG = "[👻] Vanished";
-    private static final String TEAM_NAME = "gravencore_vanish";
+    private static final String TEAM_NAME = "gravencore_admin";
 
     private final GravenCore plugin;
     private final NamespacedKey vanishedKey;
@@ -133,15 +140,40 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
     @EventHandler
     public void onAdvancementDone(PlayerAdvancementDoneEvent event) {
         // A vanished player's advancements are not announced: the
-        // broadcast would give them away, and it renders their name
-        // with the vanish team's suffix — the [👻] Vanished tag —
-        // included. Setting the message to null suppresses it.
+        // broadcast would give them away.
         if (isVanished(event.getPlayer())) event.message(null);
+    }
+
+    @EventHandler
+    public void onPotionEffect(EntityPotionEffectEvent event) {
+        // The ghost look rides on Invisibility: if a vanished player
+        // loses it for any reason (milk, an expiring effect, another
+        // plugin), restore it. Unvanish removes the player from the
+        // vanished set before clearing the effect, so this never
+        // fights an intentional unvanish.
+        if (!(event.getEntity() instanceof Player player)) return;
+        boolean wasInvis = event.getOldEffect() != null && event.getOldEffect().getType() == PotionEffectType.INVISIBILITY;
+        boolean isInvis = event.getNewEffect() != null && event.getNewEffect().getType() == PotionEffectType.INVISIBILITY;
+        if (wasInvis && !isInvis && isVanished(player)) {
+            applyGhost(player);
+        }
+    }
+
+    @EventHandler
+    public void onRespawn(PlayerRespawnEvent event) {
+        // Death clears potion effects, so a respawned vanished player
+        // would come back solid — restore the ghost.
+        if (isVanished(event.getPlayer())) {
+            applyGhost(event.getPlayer());
+        }
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player joiner = event.getPlayer();
+        // Keep the admin team true: admins see vanished ghosts, and
+        // anyone who lost the permission stops seeing them.
+        syncAdminTeam();
         // Re-apply the joiner's own vanish if it persisted from last session
         if (joiner.getPersistentDataContainer().has(vanishedKey, PersistentDataType.BYTE)) {
             applyVanish(joiner);
@@ -165,7 +197,13 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
     public void unvanish(Player target) {
         target.getPersistentDataContainer().remove(vanishedKey);
         vanished.remove(target.getUniqueId());
-        vanishTeam().removeEntry(target.getName());
+        // Unvanish means visible again: drop the ghost effect outright
+        // (even mid Dracula bat-flight — the flight's other effects
+        // keep running, only its invisibility drops). The potion
+        // handler above sees the player is no longer vanished, so it
+        // does not restore the effect.
+        target.removePotionEffect(PotionEffectType.INVISIBILITY);
+        syncAdminTeam();
         // List name + visibility recompute (keeps an invisibility
         // scramble/hide in place if the player is invisible too)
         dev.senob.listeners.NameObfuscationListener.refresh(target);
@@ -181,7 +219,8 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
                 }
             }
         }
-        vanishTeam().addEntry(target.getName());
+        syncAdminTeam();
+        applyGhost(target);
         // List name + visibility recompute (an invisible target keeps
         // its scrambled name, with the tag appended for admins)
         // (The self-reminder is the green [👻] in the CooldownManager
@@ -189,12 +228,36 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
         dev.senob.listeners.NameObfuscationListener.refresh(target);
     }
 
-    private Team vanishTeam() {
+    /** The ghost effect itself: Invisibility with no potion particles. */
+    private void applyGhost(Player target) {
+        target.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,
+                Integer.MAX_VALUE, 0, false, false, true));
+    }
+
+    /**
+     * Every admin shares one team with see-friendly-invisibles on, so
+     * vanished admins render as translucent ghosts to other admins
+     * (and to themselves in third person). The team carries no prefix,
+     * suffix, or color, so non-vanished admins' nametags look normal.
+     * Non-admins are pruned from it whenever it syncs.
+     */
+    private void syncAdminTeam() {
+        Team team = adminTeam();
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (online.hasPermission("gravencore.admin")) {
+                team.addEntry(online.getName());
+            } else {
+                team.removeEntry(online.getName());
+            }
+        }
+    }
+
+    private Team adminTeam() {
         Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
         Team team = scoreboard.getTeam(TEAM_NAME);
         if (team == null) {
             team = scoreboard.registerNewTeam(TEAM_NAME);
-            team.suffix(GravenTheme.parse("<green> " + TAG + "</green>"));
+            team.setCanSeeFriendlyInvisibles(true);
         }
         return team;
     }

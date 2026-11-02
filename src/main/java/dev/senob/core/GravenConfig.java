@@ -214,7 +214,7 @@ public class GravenConfig {
         DRACULA_ATTACK_DAMAGE = armorCfg.getDouble("dracula.attack-damage", 2.0);
         DRACULA_LIFESTEAL_PERCENT = armorCfg.getDouble("dracula.lifesteal-percent", 20.0);
         DRACULA_LIFESTEAL_CHANCE = armorCfg.getDouble("dracula.lifesteal-chance", 85.0);
-        DRACULA_BLOCK_RATE = armorCfg.getDouble("dracula.block-rate", 25.0);
+        DRACULA_BLOCK_RATE = armorCfg.getDouble("dracula.block-rate", 45.0);
         DRACULA_BLOCK_POWER = armorCfg.getDouble("dracula.block-power", 4.0);
         loadDraculaBlockSound(armorCfg);
         DRACULA_TIER = armorCfg.getString("dracula.tier", "unknown");
@@ -228,19 +228,19 @@ public class GravenConfig {
         loadArmorTier(tiers, "mythical", 2096, 45.0, 4.0,
                 new double[]{3.0, 3.0, 0.1}, new double[]{8.0, 3.0, 0.1},
                 new double[]{6.0, 3.0, 0.1}, new double[]{3.0, 3.0, 0.1});
-        loadArmorTier(tiers, "legendary", 1024, 35.0, 3.0,
+        loadArmorTier(tiers, "legendary", 1024, 45.0, 3.0,
                 new double[]{3.0, 2.0, 0.0}, new double[]{8.0, 2.0, 0.0},
                 new double[]{6.0, 2.0, 0.0}, new double[]{3.0, 2.0, 0.0});
-        loadArmorTier(tiers, "epic", 512, 25.0, 2.0,
+        loadArmorTier(tiers, "epic", 512, 45.0, 2.0,
                 new double[]{2.0, 1.0, 0.0}, new double[]{6.0, 1.0, 0.0},
                 new double[]{5.0, 1.0, 0.0}, new double[]{2.0, 1.0, 0.0});
-        loadArmorTier(tiers, "rare", 256, 15.0, 1.5,
+        loadArmorTier(tiers, "rare", 256, 45.0, 1.5,
                 new double[]{2.0, 0.0, 0.0}, new double[]{5.0, 0.0, 0.0},
                 new double[]{4.0, 0.0, 0.0}, new double[]{1.0, 0.0, 0.0});
-        loadArmorTier(tiers, "uncommon", 128, 10.0, 1.0,
+        loadArmorTier(tiers, "uncommon", 128, 45.0, 1.0,
                 new double[]{2.0, 0.0, 0.0}, new double[]{5.0, 0.0, 0.0},
                 new double[]{3.0, 0.0, 0.0}, new double[]{1.0, 0.0, 0.0});
-        loadArmorTier(tiers, "common", 64, 5.0, 0.5,
+        loadArmorTier(tiers, "common", 64, 45.0, 0.5,
                 new double[]{1.0, 0.0, 0.0}, new double[]{3.0, 0.0, 0.0},
                 new double[]{2.0, 0.0, 0.0}, new double[]{1.0, 0.0, 0.0});
     }
@@ -501,7 +501,7 @@ public class GravenConfig {
         MYTHICAL_BOOTS_TIMESLOW_SOUND = s[0];
         MYTHICAL_BOOTS_TIMESLOW_VOLUME = Float.parseFloat(s[1]);
         MYTHICAL_BOOTS_TIMESLOW_PITCH = Float.parseFloat(s[2]);
-        MYTHICAL_BOOTS_BLOCK_RATE = config.getDouble(base + ".block-rate", 25.0);
+        MYTHICAL_BOOTS_BLOCK_RATE = config.getDouble(base + ".block-rate", 45.0);
         MYTHICAL_BOOTS_BLOCK_POWER = config.getDouble(base + ".block-power", 4.0);
         String[] b = readSoundList(config, base + ".sound-effects.block");
         MYTHICAL_BOOTS_BLOCK_SOUND = b[0];

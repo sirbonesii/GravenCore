@@ -444,6 +444,17 @@ newest first within each section.
   `ItemTier.fromId`, ready for the full tier system later).
 
 #### Changed
+- **Shared block rate (2026-11-02):** all tiered armor, Dracula's
+  Plate, and the Celerity Boots now share one block rate — Mythical's
+  45% — so every tier blocks equally often (fairness). Powers are
+  unchanged (tiers 4.0 down to 0.5, Dracula and Celerity 4.0), so
+  higher tiers still block more damage per proc. Mixed sets now use
+  the highest block power on a rate tie instead of the first piece
+  found. Existing pieces migrate on sync: a stored rate still at its
+  tier's old default (Common 5, Uncommon 10, Rare 15, Epic 25,
+  Legendary 35, Dracula 25) is bumped to 45% with its lore refreshed;
+  a deliberately tuned rate is left alone. Celerity Boots already
+  follow the config, so they need no migration.
 - **Durability lore refreshes on Mending (2026-10-28):** the
   "Durability: actual/max" line only moved on damage events, so a Mended
   item looked stuck at its last damaged value while its real durability

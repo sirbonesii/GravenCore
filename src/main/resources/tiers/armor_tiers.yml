@@ -43,7 +43,7 @@ legendary:
   tier: "legendary"
 
   durability: 1024
-  block-rate: 35.0
+  block-rate: 45.0
   block-power: 3.0
 
   sound-effects:
@@ -74,7 +74,7 @@ epic:
   tier: "epic"
 
   durability: 512
-  block-rate: 25.0
+  block-rate: 45.0
   block-power: 2.0
 
   sound-effects:
@@ -105,7 +105,7 @@ rare:
   tier: "rare"
 
   durability: 256
-  block-rate: 15.0
+  block-rate: 45.0
   block-power: 1.5
 
   sound-effects:
@@ -136,7 +136,7 @@ uncommon:
   tier: "uncommon"
 
   durability: 128
-  block-rate: 10.0
+  block-rate: 45.0
   block-power: 1.0
 
   sound-effects:
@@ -167,7 +167,7 @@ common:
   tier: "common"
 
   durability: 64
-  block-rate: 5.0
+  block-rate: 45.0
   block-power: 0.5
 
   sound-effects:

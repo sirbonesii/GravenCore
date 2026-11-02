@@ -16,7 +16,7 @@ dracula:
   attack-damage: 2.0
   lifesteal-percent: 20.0
   lifesteal-chance: 85.0
-  block-rate: 25.0
+  block-rate: 45.0
   block-power: 4.0
 
   sound-effects:
@@ -41,7 +41,7 @@ mythical-boots:
     freeze-players: true
     weakness-level: 5
 
-  block-rate: 25.0
+  block-rate: 45.0
   block-power: 4.0
 
   sound-effects:

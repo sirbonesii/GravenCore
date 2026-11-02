@@ -227,6 +227,19 @@ public class TieredArmorSet implements CustomItem, Listener {
         if (tierId != null && pieceId != null) syncPieceStatsAndLore(item, tierId, pieceId);
     }
 
+    /** Pre-shared-rate block-rate defaults, for the 2026-11-02 migration only. */
+    private static double legacyBlockRate(String tierId) {
+        return switch (tierId) {
+            case "common" -> 5.0;
+            case "uncommon" -> 10.0;
+            case "rare" -> 15.0;
+            case "epic" -> 25.0;
+            case "legendary" -> 35.0;
+            case "mythical" -> 45.0;
+            default -> -1.0;
+        };
+    }
+
     public void syncPieceStatsAndLore(ItemStack item, String tierId, String pieceId) {
         Tier tier = Tier.fromId(tierId);
         GravenConfig.ArmorTierStats stats = GravenConfig.ARMOR_TIERS.get(tierId);
@@ -266,6 +279,23 @@ public class TieredArmorSet implements CustomItem, Listener {
         double kbResist = pdc.getOrDefault(kbResistKey, PersistentDataType.DOUBLE, defaults[2]);
 
         if (!pdc.has(blockRateKey, PersistentDataType.DOUBLE)) pdc.set(blockRateKey, PersistentDataType.DOUBLE, stats.blockRate);
+        // Shared-rate migration (2026-11-02): a stored rate that still
+        // equals its tier's pre-change default is bumped to the shared
+        // rate. Anything else is a deliberate per-piece tweak (via
+        // /gravencore config) and is left alone. Idempotent: once a
+        // piece is at the shared rate it no longer matches an old
+        // default, so this stops applying — safe to leave in the sync
+        // path, where it also catches pieces synced later (from
+        // chests, ender chests, or offline players' inventories on
+        // their next reload).
+        if (pdc.has(blockRateKey, PersistentDataType.DOUBLE)) {
+            double storedRate = pdc.getOrDefault(blockRateKey, PersistentDataType.DOUBLE, stats.blockRate);
+            double legacyRate = legacyBlockRate(tierId);
+            if (legacyRate >= 0.0 && Math.abs(storedRate - legacyRate) < 0.001
+                    && Math.abs(legacyRate - stats.blockRate) >= 0.001) {
+                pdc.set(blockRateKey, PersistentDataType.DOUBLE, stats.blockRate);
+            }
+        }
         if (!pdc.has(blockPowerKey, PersistentDataType.DOUBLE)) pdc.set(blockPowerKey, PersistentDataType.DOUBLE, stats.blockPower);
         double blockRate = pdc.getOrDefault(blockRateKey, PersistentDataType.DOUBLE, stats.blockRate);
         double blockPower = pdc.getOrDefault(blockPowerKey, PersistentDataType.DOUBLE, stats.blockPower);
@@ -328,9 +358,11 @@ public class TieredArmorSet implements CustomItem, Listener {
      * Block system: while wearing pieces of these sets, incoming attacks
      * have a chance to be partially blocked. Each worn piece carries its
      * own block rate/power (tunable per piece via /gravencore config);
-     * the piece with the highest block rate does the blocking, with its
-     * tier's block sound and impact particles on trigger. Pieces from
-     * different tiers can be mixed — the best piece wins.
+     * the piece with the highest block rate does the blocking (on a
+     * tie — all tiers share one rate now — the highest block power
+     * wins), with its tier's block sound and impact particles on
+     * trigger. Pieces from different tiers can be mixed — the best
+     * piece wins.
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     public void onAttackBlocked(EntityDamageByEntityEvent event) {
@@ -346,9 +378,10 @@ public class TieredArmorSet implements CustomItem, Listener {
             if (stats == null) continue;
             PersistentDataContainer pdc = armor.getItemMeta().getPersistentDataContainer();
             double rate = pdc.getOrDefault(statKey(tierId, "blockrate"), PersistentDataType.DOUBLE, stats.blockRate);
-            if (rate > bestRate) {
+            double power = pdc.getOrDefault(statKey(tierId, "blockpower"), PersistentDataType.DOUBLE, stats.blockPower);
+            if (rate > bestRate || (rate == bestRate && power > bestPower)) {
                 bestRate = rate;
-                bestPower = pdc.getOrDefault(statKey(tierId, "blockpower"), PersistentDataType.DOUBLE, stats.blockPower);
+                bestPower = power;
                 bestStats = stats;
             }
         }

@@ -150,6 +150,15 @@ public class DraculaPlate implements Listener, CustomItem {
         double attackDamage = pdc.getOrDefault(attackKey, PersistentDataType.DOUBLE, GravenConfig.DRACULA_ATTACK_DAMAGE);
 
         if (!pdc.has(blockRateKey, PersistentDataType.DOUBLE)) pdc.set(blockRateKey, PersistentDataType.DOUBLE, GravenConfig.DRACULA_BLOCK_RATE);
+        // Shared-rate migration (2026-11-02): a plate still at the
+        // pre-change default (25.0) is bumped to the shared rate; a
+        // deliberate per-plate tweak is left alone. Idempotent.
+        if (pdc.has(blockRateKey, PersistentDataType.DOUBLE)) {
+            double storedRate = pdc.getOrDefault(blockRateKey, PersistentDataType.DOUBLE, GravenConfig.DRACULA_BLOCK_RATE);
+            if (Math.abs(storedRate - 25.0) < 0.001 && Math.abs(25.0 - GravenConfig.DRACULA_BLOCK_RATE) >= 0.001) {
+                pdc.set(blockRateKey, PersistentDataType.DOUBLE, GravenConfig.DRACULA_BLOCK_RATE);
+            }
+        }
         if (!pdc.has(blockPowerKey, PersistentDataType.DOUBLE)) pdc.set(blockPowerKey, PersistentDataType.DOUBLE, GravenConfig.DRACULA_BLOCK_POWER);
         double blockRate = pdc.getOrDefault(blockRateKey, PersistentDataType.DOUBLE, GravenConfig.DRACULA_BLOCK_RATE);
         double blockPower = pdc.getOrDefault(blockPowerKey, PersistentDataType.DOUBLE, GravenConfig.DRACULA_BLOCK_POWER);

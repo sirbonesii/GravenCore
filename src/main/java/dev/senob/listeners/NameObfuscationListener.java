@@ -35,8 +35,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * entirely instead. Vanished players' names are always scrambled in
  * kill-feed and chat messages. Vanish and invisibility compose: a player
  * who is both keeps a readable TAB name with the tag (vanish takes
- * precedence over the invisibility rules, so admins keep seeing a
- * vanished ghost), and stays hidden from non-admins.</p>
+ * precedence over the invisibility rules), and stays hidden from
+ * non-admins.</p>
  */
 public class NameObfuscationListener implements Listener {
 
@@ -76,10 +76,8 @@ public class NameObfuscationListener implements Listener {
         }
 
         // TAB visibility: vanish takes precedence — a vanished player
-        // is hidden from non-admins only, even while invisible (the
-        // ghost rides on the invisible flag, and hiding them from
-        // admins too would erase the ghost). The invisibility
-        // show-in-tab rule applies only to non-vanished players.
+        // is hidden from non-admins only. The invisibility show-in-tab
+        // rule applies only to non-vanished players.
         for (Player viewer : Bukkit.getOnlinePlayers()) {
             if (viewer == target) continue;
             boolean hide = (vanished && !viewer.hasPermission("gravencore.admin"))

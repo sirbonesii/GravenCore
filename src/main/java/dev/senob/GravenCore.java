@@ -100,6 +100,11 @@ public class GravenCore extends JavaPlugin {
         Objects.requireNonNull(getCommand("unvanish")).setExecutor(vanishCmd);
         Objects.requireNonNull(getCommand("unvanish")).setTabCompleter(vanishCmd);
 
+        // Ghost mode was reverted: drop the admin team it created, so
+        // it doesn't linger in the scoreboard (harmless if absent).
+        org.bukkit.scoreboard.Team ghostTeam = Bukkit.getScoreboardManager().getMainScoreboard().getTeam("gravencore_admin");
+        if (ghostTeam != null) ghostTeam.unregister();
+
         TrustCommand trustCmd = new TrustCommand(this);
         Bukkit.getPluginManager().registerEvents(trustCmd, this);
         Objects.requireNonNull(getCommand("trust")).setExecutor(trustCmd);

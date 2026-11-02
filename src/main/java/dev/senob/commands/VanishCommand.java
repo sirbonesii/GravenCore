@@ -14,10 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,23 +29,17 @@ import java.util.concurrent.ConcurrentHashMap;
  * /vanish and /unvanish (permission: gravencore.admin), each with an
  * optional player argument: {@code /vanish [player]}.
  *
- * <p>Ghost mode: a vanished player is hidden from every online player
- * who lacks the admin permission (entity and player-list entry), and
- * new joiners get the same treatment. Other admins — and the vanished
- * player themself in third person — see the player as a translucent
- * ghost. That is a custom effect, not Minecraft's Invisibility potion:
- * the vanished player carries the invisible entity flag directly, and
- * every admin shares a team with see-friendly-invisibles on, so the
- * ghost renders for anyone who can see them while regular players see
- * nothing. The vanished player's player-list name gains a short green
- * {@code [👻]} after the name, and they get a green {@code [👻]} in
- * their action bar, alongside the cooldown timers, so they know
- * they're hidden. The state is stored in the player's own PDC, so it
- * survives relogs.</p>
+ * <p>A vanished player is hidden from every online player who lacks
+ * the admin permission (entity and player-list entry), and new
+ * joiners get the same treatment. Admins — and the vanished player
+ * themself — keep seeing the player normally, fully visible. The
+ * vanished player's player-list name gains a short green {@code [👻]}
+ * after the name, and they get a green {@code [👻]} in their action
+ * bar, alongside the cooldown timers, so they know they're hidden.
+ * The state is stored in the player's own PDC, so it survives
+ * relogs.</p>
  */
 public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
-
-    private static final String TEAM_NAME = "gravencore_admin";
 
     private final GravenCore plugin;
     private final NamespacedKey vanishedKey;
@@ -142,19 +133,8 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
     }
 
     @EventHandler
-    public void onRespawn(PlayerRespawnEvent event) {
-        // Respawn normalizes the ghost flag to the vanish state: a
-        // vanished player comes back a ghost, a non-vanished player
-        // never comes back stuck invisible.
-        event.getPlayer().setInvisible(isVanished(event.getPlayer()));
-    }
-
-    @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player joiner = event.getPlayer();
-        // Keep the admin team true: admins see vanished ghosts, and
-        // anyone who lost the permission stops seeing them.
-        syncAdminTeam();
         // Re-apply the joiner's own vanish if it persisted from last session
         if (joiner.getPersistentDataContainer().has(vanishedKey, PersistentDataType.BYTE)) {
             applyVanish(joiner);
@@ -178,12 +158,6 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
     public void unvanish(Player target) {
         target.getPersistentDataContainer().remove(vanishedKey);
         vanished.remove(target.getUniqueId());
-        // Clear the ghost flag — unless bat form is active (bat form
-        // owns the invisibility then; when it ends, its potion removal
-        // clears the flag anyway, so nobody gets stuck invisible).
-        if (!dev.senob.items.DraculaPlate.isVampireActive(target.getUniqueId())) {
-            target.setInvisible(false);
-        }
         // List name + visibility recompute.
         dev.senob.listeners.NameObfuscationListener.refresh(target);
     }
@@ -198,57 +172,10 @@ public class VanishCommand implements CommandExecutor, TabCompleter, Listener {
                 }
             }
         }
-        syncAdminTeam();
-        applyGhost(target);
-        // List name + visibility recompute (an invisible target keeps
-        // its scrambled name, with the tag appended for admins)
-        // (The self-reminder is the green [👻] in the CooldownManager
-        // action bar now — no boss bar anymore.)
+        // List name + visibility recompute (hidePlayer from
+        // non-admins, [👻] tag for admins). The self-reminder is the
+        // green [👻] in the CooldownManager action bar now — no boss
+        // bar anymore.
         dev.senob.listeners.NameObfuscationListener.refresh(target);
-    }
-
-    /** The ghost itself: the invisible entity flag, not a potion effect — no icon, no particles, nothing to milk off or expire. */
-    private void applyGhost(Player target) {
-        target.setInvisible(true);
-    }
-
-    /**
-     * Re-applies the ghost flag if the player is vanished. For other
-     * features that clear invisibility (Dracula bat form ending drops
-     * its invisibility potion, which can take the flag with it): call
-     * this after clearing, so bat form never breaks the ghost.
-     */
-    public static void restoreGhostIfVanished(Player player) {
-        if (isVanishedId(player.getUniqueId())) {
-            player.setInvisible(true);
-        }
-    }
-
-    /**
-     * Every admin shares one team with see-friendly-invisibles on, so
-     * vanished admins render as translucent ghosts to other admins
-     * (and to themselves in third person). The team carries no prefix,
-     * suffix, or color, so non-vanished admins' nametags look normal.
-     * Non-admins are pruned from it whenever it syncs.
-     */
-    private void syncAdminTeam() {
-        Team team = adminTeam();
-        for (Player online : Bukkit.getOnlinePlayers()) {
-            if (online.hasPermission("gravencore.admin")) {
-                team.addEntry(online.getName());
-            } else {
-                team.removeEntry(online.getName());
-            }
-        }
-    }
-
-    private Team adminTeam() {
-        Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-        Team team = scoreboard.getTeam(TEAM_NAME);
-        if (team == null) {
-            team = scoreboard.registerNewTeam(TEAM_NAME);
-            team.setCanSeeFriendlyInvisibles(true);
-        }
-        return team;
     }
 }

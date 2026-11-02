@@ -4,7 +4,6 @@ import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import dev.senob.listeners.AttributeHider;
 import dev.senob.listeners.EnderChestEx;
 import dev.senob.GravenCore;
-import dev.senob.commands.VanishCommand;
 import dev.senob.core.CooldownManager;
 import dev.senob.core.GravenConfig;
 import dev.senob.core.GravenTheme;
@@ -376,10 +375,6 @@ public class DraculaPlate implements Listener, CustomItem {
                     }
                     player.removePotionEffect(PotionEffectType.INVISIBILITY);
                     player.removePotionEffect(PotionEffectType.REGENERATION);
-                    // Bat form's potion is gone — if the player is
-                    // vanished, the ghost flag must survive it, or bat
-                    // form ending would break the ghost.
-                    VanishCommand.restoreGhostIfVanished(player);
                     player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BAT_AMBIENT, 1.0f, 0.7f);
                 } else {
                     activeVampires.remove(uuid);

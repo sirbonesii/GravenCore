@@ -175,13 +175,17 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
             }
             String tierArg = args[2].toLowerCase(Locale.ROOT);
             if (TieredArmorSet.Tier.fromId(tierArg) == null) {
-                sender.sendMessage(GravenTheme.parse("<red>Unknown armor tier. Available: mythical, legendary, epic, rare, uncommon, common</red>"));
+                sender.sendMessage(GravenTheme.parse("<red>Unknown armor tier. Available: mythical, legendary, epic, rare, superior, uncommon, common</red>"));
                 return true;
             }
 
             List<ItemStack> pieces = new ArrayList<>();
             for (String pieceId : TieredArmorSet.PIECE_IDS) {
                 pieces.add(tieredArmorSet.createPiece(tierArg, pieceId));
+            }
+            if (pieces.contains(null)) {
+                sender.sendMessage(GravenTheme.parse("<red>Superior armor requires copper armor, which this server doesn't have (needs 1.21.9+).</red>"));
+                return true;
             }
             Map<Integer, ItemStack> leftover =
                     target.getInventory().addItem(pieces.toArray(new ItemStack[0]));
@@ -466,7 +470,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                     }
                 }
             }
-            sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore config <dracula|mythical|legendary|epic|rare|uncommon|common|redline|time_boots> <setting> <value></red>"));
+            sender.sendMessage(GravenTheme.parse("<red>Usage: /gravencore config <dracula|mythical|legendary|epic|rare|superior|uncommon|common|redline|time_boots> <setting> <value></red>"));
             return true;
         }
 
@@ -670,7 +674,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                 return names;
             }
             if (args[0].equalsIgnoreCase("config")) {
-                return List.of("redline", "dracula", "mythical", "legendary", "epic", "rare", "uncommon", "common", "time_boots");
+                return List.of("redline", "dracula", "mythical", "legendary", "epic", "rare", "superior", "uncommon", "common", "time_boots");
             }
         }
 
@@ -679,7 +683,7 @@ public class GravenCoreCommand implements CommandExecutor, TabCompleter {
                 return List.of("1", "2", "4", "8", "16", "32", "64");
             }
             if (args[0].equalsIgnoreCase("armor")) {
-                return List.of("mythical", "legendary", "epic", "rare", "uncommon", "common");
+                return List.of("mythical", "legendary", "epic", "rare", "superior", "uncommon", "common");
             }
             if (args[0].equalsIgnoreCase("weapon")) {
                 return List.of("redline", "dracula", "celerity");

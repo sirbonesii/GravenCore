@@ -1,7 +1,7 @@
 # ==================================================================
 #  GravenCore — Armor Tiers
 #  One section per armor set: mythical, legendary, epic, rare,
-#  uncommon, common. Each set's stats, block tuning and piece
+#  superior, uncommon, common. Each set's stats, block tuning and piece
 #  defenses live here. (The standalone Celerity Boots are NOT
 #  here — they stay under armor.mythical-boots in config.yml.)
 #  Changes need a server restart to take effect.
@@ -125,6 +125,37 @@ rare:
       knockback-resistance: 0.0
     leggings:
       defense: 4.0
+      toughness: 0.0
+      knockback-resistance: 0.0
+    boots:
+      defense: 1.0
+      toughness: 0.0
+      knockback-resistance: 0.0
+
+superior:
+  tier: "superior"
+
+  durability: 192
+  block-rate: 45.0
+  block-power: 1.2
+
+  sound-effects:
+    block:
+      sound: "minecraft:block.anvil.land"
+      volume: 100
+      pitch: 1.9
+
+  pieces:
+    helmet:
+      defense: 2.0
+      toughness: 0.0
+      knockback-resistance: 0.0
+    chestplate:
+      defense: 4.0
+      toughness: 0.0
+      knockback-resistance: 0.0
+    leggings:
+      defense: 3.0
       toughness: 0.0
       knockback-resistance: 0.0
     boots:

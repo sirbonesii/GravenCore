@@ -37,8 +37,8 @@ import java.util.concurrent.ThreadLocalRandom;
  * overrides, and the block system (best worn piece procs) — and differs
  * only in its tier data: materials, stats and block tuning, all loaded
  * from armor_tiers.yml &lt;tier&gt;.* (see GravenConfig). The block
- * ladder: Mythical 45%, Legendary 35%, Epic 25%, Rare 15%, Uncommon 10%,
- * Common 5%.
+ * rate is shared: every tier blocks at Mythical's 45% (powers stay
+ * tiered; on a rate tie the highest power wins).
  *
  * Mythical pieces made by the old standalone MythicalArmorSet keep
  * working unchanged: this module uses the same PDC keys
@@ -48,14 +48,26 @@ import java.util.concurrent.ThreadLocalRandom;
 @SuppressWarnings({"UnstableApiUsage", "unused"})
 public class TieredArmorSet implements CustomItem, Listener {
 
-    /** The six tiers this module owns, best to lowest. */
+    /** The seven tiers this module owns, best to lowest. */
     public enum Tier {
         MYTHICAL("mythical", Material.NETHERITE_HELMET, Material.NETHERITE_CHESTPLATE, Material.NETHERITE_LEGGINGS, Material.NETHERITE_BOOTS),
         LEGENDARY("legendary", Material.DIAMOND_HELMET, Material.DIAMOND_CHESTPLATE, Material.DIAMOND_LEGGINGS, Material.DIAMOND_BOOTS),
         EPIC("epic", Material.IRON_HELMET, Material.IRON_CHESTPLATE, Material.IRON_LEGGINGS, Material.IRON_BOOTS),
         RARE("rare", Material.CHAINMAIL_HELMET, Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_LEGGINGS, Material.CHAINMAIL_BOOTS),
+        SUPERIOR("superior", copper("HELMET"), copper("CHESTPLATE"), copper("LEGGINGS"), copper("BOOTS")),
         UNCOMMON("uncommon", Material.GOLDEN_HELMET, Material.GOLDEN_CHESTPLATE, Material.GOLDEN_LEGGINGS, Material.GOLDEN_BOOTS),
         COMMON("common", Material.LEATHER_HELMET, Material.LEATHER_CHESTPLATE, Material.LEATHER_LEGGINGS, Material.LEATHER_BOOTS);
+
+        /**
+         * Copper armor (1.21.9+) is resolved by name at runtime,
+         * because the Paper 1.21.7 API predates it — a direct
+         * Material.COPPER_* reference would not compile. Null on
+         * runtimes without copper armor; createPiece returns null
+         * for those pieces then.
+         */
+        private static Material copper(String piece) {
+            return Material.getMaterial("COPPER_" + piece);
+        }
 
         private final String id;
         private final Material[] materials; // helmet, chestplate, leggings, boots
@@ -141,7 +153,9 @@ public class TieredArmorSet implements CustomItem, Listener {
     public ItemStack createPiece(String tierId, String pieceId) {
         Tier tier = Tier.fromId(tierId);
         if (tier == null || !PIECE_IDS.contains(pieceId)) return null;
-        ItemStack item = new ItemStack(tier.material(pieceId));
+        Material material = tier.material(pieceId);
+        if (material == null) return null; // runtime without copper armor (Superior)
+        ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.getPersistentDataContainer().set(pieceKey(tier.id), PersistentDataType.STRING, pieceId);

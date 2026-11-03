@@ -10,14 +10,15 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.Locale;
 import java.util.Map;
 
 /**
  * Crafting a vanilla armor piece of a tiered material produces the
  * tiered set's piece instead: diamond -> Legendary, iron -> Epic,
- * chainmail -> Rare, gold -> Uncommon, leather -> Common. (Chainmail
- * has no vanilla crafting recipe, so the Rare entries only matter if
- * a recipe is ever added for it.)
+ * chainmail -> Rare, copper -> Superior, gold -> Uncommon,
+ * leather -> Common. (Chainmail has no vanilla crafting recipe, so
+ * the Rare entries only matter if a recipe is ever added for it.)
  *
  * Whatever the crafted result already carries transfers to the
  * converted piece: its enchantments (which the tiered tooltip then
@@ -52,6 +53,19 @@ public class ArmorCraftListener implements Listener {
             Map.entry(Material.LEATHER_LEGGINGS, new Mapping("common", "leggings")),
             Map.entry(Material.LEATHER_BOOTS, new Mapping("common", "boots")));
 
+    /**
+     * Copper armor (1.21.9+) maps to Superior. Resolved by material
+     * name, not a Material constant, because the Paper 1.21.7 API
+     * predates copper armor — a direct reference would not compile.
+     */
+    private static Mapping copperMapping(Material material) {
+        String name = material.name();
+        if (!name.startsWith("COPPER_")) return null;
+        String piece = name.substring("COPPER_".length()).toLowerCase(Locale.ROOT);
+        if (!TieredArmorSet.PIECE_IDS.contains(piece)) return null;
+        return new Mapping("superior", piece);
+    }
+
     private final TieredArmorSet tieredArmorSet;
 
     public ArmorCraftListener(TieredArmorSet tieredArmorSet) {
@@ -64,6 +78,7 @@ public class ArmorCraftListener implements Listener {
         ItemStack result = inventory.getResult();
         if (result == null) return;
         Mapping mapping = MAPPINGS.get(result.getType());
+        if (mapping == null) mapping = copperMapping(result.getType());
         if (mapping == null) return;
         if (tieredArmorSet.isItem(result)) return; // already a tiered piece
 

@@ -92,6 +92,18 @@ newest first within each section.
 ### [Unreleased]
 
 #### Added
+- **Superior tier (2026-11-02):** a seventh armor tier between
+  Uncommon and Rare, on vanilla copper armor (copper ingots craft
+  Superior pieces, like the other tiers). Tier line "Tier: Superior"
+  in `#F8F868` (pulse cyan); 45% block rate (shared), 1.2 block
+  power, 192 durability, vanilla copper defense 2 / 4 / 3 / 1, no
+  toughness or knockback resist. Give key + config section
+  `superior` (`/gravencore armor <player> superior`,
+  `/gravencore config superior blockrate|blockpower`). Copper
+  resolves by runtime name lookup, since the Paper 1.21.7 API
+  predates copper armor (1.21.9+) — no API bump needed. The Admin
+  Book grows to 7 pages automatically (Superior in copper
+  `#B87333` on parchment).
 - **Admin mode (2026-11-02):** `/admin toggle` drops an admin to
   playing as a regular player (and back). Mode persists across
   relogs and defaults to ON, so nobody who never toggles changes

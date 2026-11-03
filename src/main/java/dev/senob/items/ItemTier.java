@@ -4,10 +4,10 @@ import net.kyori.adventure.text.format.TextColor;
 
 /**
  * Item rarity tiers shown on the tooltip's tier line, best to lowest:
- * MYTHICAL, LEGENDARY, EPIC, RARE, UNCOMMON, COMMON. The hex colors are
- * Aaron's client text-effect triggers (aurora, lava, iterating jump,
- * blinking, green-yellow gradient, sequential spin), so each tier's
- * line animates differently in game.
+ * MYTHICAL, LEGENDARY, EPIC, RARE, SUPERIOR, UNCOMMON, COMMON. The hex
+ * colors are Aaron's client text-effect triggers (aurora, lava,
+ * iterating jump, blinking, pulse, green-yellow gradient, sequential
+ * spin), so each tier's line animates differently in game.
  */
 public enum ItemTier {
 
@@ -17,6 +17,7 @@ public enum ItemTier {
     LEGENDARY("legendary", "Legendary", TextColor.color(0xF8F894)),
     EPIC("epic", "Epic", TextColor.color(0xF8F878)),
     RARE("rare", "Rare", TextColor.color(0xF8F864)),
+    SUPERIOR("superior", "Superior", TextColor.color(0xF8F868)),
     UNCOMMON("uncommon", "Uncommon", TextColor.color(0xF8F888)),
     COMMON("common", "Common", TextColor.color(0xF8F870));
 

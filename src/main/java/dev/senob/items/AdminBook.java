@@ -25,11 +25,11 @@ import java.util.Map;
  * The Admin Book: a plain BOOK item that, on right-click, opens the item
  * menu as a real book UI (Adventure Book), not an inventory grid.
  *
- * Menu layout (6 pages, computed below so the contents links stay right):
+ * Menu layout (page numbers computed below so the contents links stay right):
  *   page 1: contents — Armor / Weapons / Special (change_page jumps)
- *   pages 2-4: armor, two tiers per page (tier header + 4 pieces)
- *   page 5: weapons (redline base + upgraded, dracula, celerity)
- *   page 6: special (Alter of Despair)
+ *   armor pages: two tiers per page (tier header + 4 pieces)
+ *   weapons page: redline base + upgraded, dracula, celerity
+ *   special page: Alter of Despair
  * Every piece line is clickable: it runs /gravencore bookdialog <id>,
  * which opens the give dialogue (give to me / give to player + name bar).
  *
@@ -40,7 +40,7 @@ import java.util.Map;
  *
  * Colors: the tier text-effect colors (#F8F8xx) are near-white and
  * unreadable on parchment, so book lines use darker material colors
- * instead (netherite/diamond/iron/chainmail/gold/leather). Chat messages
+ * instead (netherite/diamond/iron/chainmail/copper/gold/leather). Chat messages
  * still use the canonical tier/weapon colors (see GravenCoreCommand).
  */
 public class AdminBook implements CustomItem {
@@ -81,12 +81,13 @@ public class AdminBook implements CustomItem {
 
     // Parchment-readable material colors, one per tier (see class javadoc).
     private static final List<String> TIER_ORDER =
-            List.of("mythical", "legendary", "epic", "rare", "uncommon", "common");
+            List.of("mythical", "legendary", "epic", "rare", "superior", "uncommon", "common");
     private static final Map<String, String> TIER_BOOK_COLORS = Map.of(
             "mythical", "#3A3A42",
             "legendary", "#2A8A7A",
             "epic", "#6A6A6A",
             "rare", "#4A4A4A",
+            "superior", "#B87333",
             "uncommon", "#8A6A00",
             "common", "#7A4A1A");
     private static final Map<String, Character> PIECE_GLYPHS = Map.of(
@@ -168,7 +169,7 @@ public class AdminBook implements CustomItem {
         player.openBook(buildMenuBook());
     }
 
-    /** Builds the 6-page menu book: contents + armor (2 tiers/page) + weapons + special. */
+    /** Builds the menu book: contents + armor (2 tiers/page) + weapons + special. */
     public static Book buildMenuBook() {
         int tiersPerPage = 2;
         int armorPageCount = (TIER_ORDER.size() + tiersPerPage - 1) / tiersPerPage;

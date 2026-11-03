@@ -224,7 +224,7 @@ public class GravenConfig {
         loadDraculaBlockSound(armorCfg);
         DRACULA_TIER = armorCfg.getString("dracula.tier", "unknown");
 
-        // 4. ARMOR SETS — all six tiers, best to lowest.
+        // 4. ARMOR SETS — all seven tiers, best to lowest.
         // Piece defaults are [defense (per piece), toughness, kb-resist].
         // The tiers live in their own file (tiers/armor_tiers.yml, top-level
         // tier ids); the Celerity Boots live in special/armor.yml.
@@ -242,6 +242,9 @@ public class GravenConfig {
         loadArmorTier(tiers, "rare", 256, 45.0, 1.5,
                 new double[]{2.0, 0.0, 0.0}, new double[]{5.0, 0.0, 0.0},
                 new double[]{4.0, 0.0, 0.0}, new double[]{1.0, 0.0, 0.0});
+        loadArmorTier(tiers, "superior", 192, 45.0, 1.2,
+                new double[]{2.0, 0.0, 0.0}, new double[]{4.0, 0.0, 0.0},
+                new double[]{3.0, 0.0, 0.0}, new double[]{1.0, 0.0, 0.0});
         loadArmorTier(tiers, "uncommon", 128, 45.0, 1.0,
                 new double[]{2.0, 0.0, 0.0}, new double[]{5.0, 0.0, 0.0},
                 new double[]{3.0, 0.0, 0.0}, new double[]{1.0, 0.0, 0.0});
